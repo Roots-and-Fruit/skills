@@ -1,0 +1,290 @@
+{
+  "handoff_version": "1.0",
+  "mode": "keyword_only",
+  "generated_at": "2026-06-24T12:30:00.000Z",
+  "inputs": {
+    "primary_keyword": "wordpress plugin marketing",
+    "domain": null,
+    "anchor_url": null,
+    "location_name": "United States",
+    "language_code": "en"
+  },
+  "serp_context": {
+    "ai_overview_present": false,
+    "people_also_ask": [
+      "How to promote a WordPress plugin?",
+      "Can I earn money by making a WordPress plugin?",
+      "Is WordPress outdated in 2026?",
+      "Why are people moving away from WordPress?"
+    ],
+    "related_searches": [
+      "wordpress plugin marketing strategy",
+      "free wordpress plugin marketing",
+      "best wordpress plugin marketing",
+      "best newsletter plugin for wordpress",
+      "WordPress Newsletter plugin"
+    ],
+    "top_organic_domains": [
+      "reddit.com",
+      "freemius.com",
+      "wordpress.org",
+      "cminds.com",
+      "wpbeginner.com",
+      "customers.ai",
+      "blog.hubspot.com"
+    ]
+  },
+  "sub_queries": [
+    {
+      "keyword": "mailpoet",
+      "search_volume": 1000,
+      "dimension": "adjacent_topic",
+      "search_intent": "navigational",
+      "priority": "medium",
+      "source": ["related"]
+    },
+    {
+      "keyword": "wordpress affiliate marketing plugin",
+      "search_volume": 320,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "wordpress email marketing plugin",
+      "search_volume": 210,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "wordpress plugin for affiliate marketing",
+      "search_volume": 70,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "medium",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "best affiliate marketing wordpress plugin",
+      "search_volume": 50,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "medium",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "wordpress plugin marketing",
+      "search_volume": 30,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["seed"]
+    },
+    {
+      "keyword": "marketing wordpress plugin",
+      "search_volume": 30,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "wordpress marketing plugin",
+      "search_volume": 30,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "referral marketing wordpress plugin",
+      "search_volume": 30,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "medium",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "wordpress plugin marketing strategy",
+      "search_volume": null,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["related", "serp_related"]
+    },
+    {
+      "keyword": "how to promote a wordpress plugin",
+      "search_volume": null,
+      "dimension": "question",
+      "search_intent": "informational",
+      "priority": "high",
+      "source": ["serp_paa"]
+    },
+    {
+      "keyword": "best newsletter plugin for wordpress",
+      "search_volume": null,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["related", "serp_related"]
+    },
+    {
+      "keyword": "best newsletter plugin for wordpress free",
+      "search_volume": 20,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "medium",
+      "source": ["related"]
+    },
+    {
+      "keyword": "wordpress email list plugin free",
+      "search_volume": 20,
+      "dimension": "detail_drill",
+      "search_intent": "navigational",
+      "priority": "medium",
+      "source": ["related"]
+    },
+    {
+      "keyword": "wordpress newsletter plugin",
+      "search_volume": null,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["related", "serp_related"]
+    },
+    {
+      "keyword": "best email marketing plugin for wordpress",
+      "search_volume": null,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["related"]
+    },
+    {
+      "keyword": "free wordpress plugin marketing",
+      "search_volume": null,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["related", "serp_related"]
+    },
+    {
+      "keyword": "best wordpress plugin marketing",
+      "search_volume": null,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["related", "serp_related"]
+    },
+    {
+      "keyword": "wordpress email marketing plugin free",
+      "search_volume": 10,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "medium",
+      "source": ["related"]
+    },
+    {
+      "keyword": "best free email plugin for wordpress",
+      "search_volume": 10,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "priority": "medium",
+      "source": ["related"]
+    },
+    {
+      "keyword": "can i earn money by making a wordpress plugin",
+      "search_volume": null,
+      "dimension": "question",
+      "search_intent": "commercial",
+      "priority": "high",
+      "source": ["serp_paa"]
+    },
+    {
+      "keyword": "mailpoet vs mailchimp",
+      "search_volume": null,
+      "dimension": "adjacent_topic",
+      "search_intent": "commercial",
+      "priority": "low",
+      "source": ["related"]
+    },
+    {
+      "keyword": "mailpoet pricing",
+      "search_volume": null,
+      "dimension": "adjacent_topic",
+      "search_intent": "commercial",
+      "priority": "low",
+      "source": ["related"]
+    },
+    {
+      "keyword": "is wordpress outdated in 2026",
+      "search_volume": null,
+      "dimension": "adjacent_topic",
+      "search_intent": "informational",
+      "priority": "low",
+      "source": ["serp_paa"]
+    },
+    {
+      "keyword": "why are people moving away from wordpress",
+      "search_volume": null,
+      "dimension": "adjacent_topic",
+      "search_intent": "commercial",
+      "priority": "low",
+      "source": ["serp_paa"]
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "how to promote a wordpress plugin",
+      "search_volume": null,
+      "priority": "high",
+      "rationale": "PAA on seed SERP; core informational intent for plugin developer GTM"
+    },
+    {
+      "keyword": "wordpress plugin marketing strategy",
+      "search_volume": null,
+      "priority": "high",
+      "rationale": "Related search on seed SERP; strategy/commercial intent"
+    },
+    {
+      "keyword": "free wordpress plugin marketing",
+      "search_volume": null,
+      "priority": "high",
+      "rationale": "Related search; freemium distribution angle"
+    },
+    {
+      "keyword": "best wordpress plugin marketing",
+      "search_volume": null,
+      "priority": "high",
+      "rationale": "Related search; channel/tool evaluation"
+    },
+    {
+      "keyword": "can i earn money by making a wordpress plugin",
+      "search_volume": null,
+      "priority": "high",
+      "rationale": "PAA on seed SERP; monetization overlaps marketing/distribution"
+    },
+    {
+      "keyword": "wordpress affiliate marketing plugin",
+      "search_volume": 320,
+      "priority": "high",
+      "rationale": "Highest Labs volume; commercial intent — note facet drift from developer GTM"
+    },
+    {
+      "keyword": "wordpress email marketing plugin",
+      "search_volume": 210,
+      "priority": "medium",
+      "rationale": "High volume but martech-plugin intent, not plugin developer marketing"
+    }
+  ],
+  "limitations": [
+    "Keyword-only mode — no domain coverage checked",
+    "Seed SERP mixes plugin-developer GTM and martech-plugin listicle intent",
+    "Labs expansion drifts toward email/affiliate plugin terms",
+    "Low seed volume (~30/mo) with high YoY decline",
+    "Live API run via DataForSEO MCP — illustrative sample for public repo"
+  ]
+}

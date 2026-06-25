@@ -1,0 +1,146 @@
+{
+  "handoff_version": "1.1",
+  "mode": "keyword_only",
+  "generated_at": "2026-06-24T18:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "wordpress plugin marketing",
+    "domain": null,
+    "anchor_url": null,
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "primary_topic"
+  },
+  "serp_context": {
+    "ai_overview_present": false,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": [
+      "How to promote a WordPress plugin?",
+      "Can I earn money by making a WordPress plugin?"
+    ],
+    "related_searches": [
+      "wordpress plugin marketing strategy",
+      "free wordpress plugin marketing",
+      "best wordpress plugin marketing",
+      "best newsletter plugin for wordpress"
+    ],
+    "top_organic_domains": [
+      "reddit.com",
+      "freemius.com",
+      "wordpress.org",
+      "cminds.com",
+      "wpbeginner.com",
+      "blog.hubspot.com"
+    ],
+    "intent_lanes_detected": ["primary_topic", "tool_discovery"],
+    "intent_split": "mixed",
+    "lane_counts": { "primary_topic": 4, "tool_discovery": 4, "community": 1 },
+    "seed_volume": 30,
+    "serp_result_count": 123
+  },
+  "sub_queries": [
+    {
+      "keyword": "how to promote a wordpress plugin",
+      "search_volume": null,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"]
+    },
+    {
+      "keyword": "wordpress plugin marketing strategy",
+      "search_volume": null,
+      "dimension": "detail_drill",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "wordpress email marketing plugin",
+      "search_volume": 210,
+      "dimension": "facet_drift",
+      "search_intent": "commercial",
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": false,
+      "priority": "medium",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "mailpoet",
+      "search_volume": null,
+      "dimension": "adjacent_topic",
+      "search_intent": "navigational",
+      "relevance_tier": "adjacent",
+      "intent_lane": null,
+      "on_seed_serp": false,
+      "priority": "low",
+      "source": ["related"],
+      "notes": "Rejected from active map in v2.2 — zero seed token overlap; shown for illustration only"
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "how to promote a wordpress plugin",
+      "search_volume": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP; matches intent_lane primary_topic"
+    },
+    {
+      "keyword": "wordpress plugin marketing strategy",
+      "search_volume": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    },
+    {
+      "keyword": "free wordpress plugin marketing",
+      "search_volume": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    },
+    {
+      "keyword": "best wordpress plugin marketing",
+      "search_volume": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    },
+    {
+      "keyword": "can i earn money by making a wordpress plugin",
+      "search_volume": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP; monetization / GTM overlap"
+    }
+  ],
+  "facet_drift_sub_queries": [
+    {
+      "keyword": "wordpress email marketing plugin",
+      "search_volume": 210,
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "notes": "High Labs volume; tool_discovery lane — not primary_topic GTM"
+    },
+    {
+      "keyword": "wordpress affiliate marketing plugin",
+      "search_volume": 320,
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery"
+    }
+  ],
+  "limitations": [
+    "Keyword-only mode — no domain coverage checked",
+    "v2.2 illustration sample — not a live re-run",
+    "Low seed volume (~30/mo) and thin SERP (~123 results) — prioritize SERP-native over Labs volume",
+    "intent_split mixed; priorities filtered to intent_lane primary_topic",
+    "mailpoet excluded from sub_queries by unified relevance gate (zero token overlap)"
+  ]
+}
