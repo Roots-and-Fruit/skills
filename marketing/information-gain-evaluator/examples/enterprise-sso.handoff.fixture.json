@@ -1,0 +1,170 @@
+{
+  "handoff_version": "1.1",
+  "skill": "information-gain-evaluator",
+  "skill_version": "1.1.0",
+  "generated_at": "2026-06-25T12:00:00.000Z",
+  "mode": "pinned_competitors",
+  "confidence": "high",
+  "inputs": {
+    "target_url": "https://example.com/guides/enterprise-sso",
+    "target_label": "https://example.com/guides/enterprise-sso",
+    "primary_keyword": "enterprise SSO",
+    "competitor_urls": [
+      "https://competitor-a.example/guides/sso-overview",
+      "https://competitor-b.example/blog/enterprise-single-sign-on",
+      "https://competitor-c.example/docs/sso-implementation"
+    ],
+    "intent_lane": "primary_topic",
+    "location_name": "United States",
+    "language_code": "en"
+  },
+  "serp_context": {
+    "ai_overview_present": true,
+    "people_also_ask": [
+      "What is enterprise SSO?",
+      "How does SSO differ from SAML?"
+    ],
+    "related_searches": [
+      "enterprise sso best practices",
+      "sso implementation checklist"
+    ],
+    "intent_lanes_detected": ["primary_topic", "tool_discovery"],
+    "intent_split": "mixed",
+    "lane_counts": {
+      "primary_topic": 6,
+      "tool_discovery": 3
+    }
+  },
+  "competitor_set": [
+    {
+      "url": "https://competitor-a.example/guides/sso-overview",
+      "domain": "competitor-a.example",
+      "title": "Enterprise SSO Overview",
+      "lane": "primary_topic",
+      "fetch_status": "ok"
+    },
+    {
+      "url": "https://competitor-b.example/blog/enterprise-single-sign-on",
+      "domain": "competitor-b.example",
+      "title": "Enterprise Single Sign-On Guide",
+      "lane": "primary_topic",
+      "fetch_status": "ok"
+    },
+    {
+      "url": "https://competitor-c.example/docs/sso-implementation",
+      "domain": "competitor-c.example",
+      "title": "SSO Implementation",
+      "lane": "primary_topic",
+      "fetch_status": "partial"
+    }
+  ],
+  "table_stakes": [
+    "Definition of enterprise SSO and core protocols (SAML, OIDC)",
+    "IdP integration overview",
+    "Security benefits and common risks",
+    "Rollout or implementation steps",
+    "Session management and timeout policies"
+  ],
+  "table_stakes_gaps": [
+    "No side-by-side protocol comparison table",
+    "Limited discussion of session timeout policies"
+  ],
+  "unique_strengths": [
+    "Two named customer migrations with timeline and rollback notes",
+    "Explicit compliance mapping for SOC 2 control language"
+  ],
+  "baseline_coverage_pct": 60,
+  "citation_fit_for_keyword": "partial",
+  "page_keyword_fit": "aligned",
+  "citation_fit_rationale": "Strong definitional and compliance passages are citeable for SSO sub-questions, but the page lacks proprietary data and a named framework required for primary citation on competitive enterprise SSO queries.",
+  "dimensions": [
+    {
+      "id": "original_data",
+      "label": "Original Data",
+      "score": "medium",
+      "finding": "Uses uncommon compliance-mapping detail but no first-party deployment metrics.",
+      "evidence_target": "Maps SSO controls to SOC 2 language with audit-oriented examples rather than fleet-wide benchmark statistics.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-a.example/guides/sso-overview",
+          "snippet": "Cites the same 90% enterprise adoption figure from a shared analyst report without first-party validation."
+        }
+      ]
+    },
+    {
+      "id": "unique_framework",
+      "label": "Unique Framework",
+      "score": "medium",
+      "finding": "Phased rollout structure is clear but unnamed and similar to competitor C.",
+      "evidence_target": "Uses Plan → Pilot → Production phases without a branded model name or decision rubric.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-c.example/docs/sso-implementation",
+          "snippet": "Documents Prepare, Test, Deploy phases with comparable granularity for enterprise rollouts."
+        }
+      ]
+    },
+    {
+      "id": "first_hand_experience",
+      "label": "First-Hand Experience",
+      "score": "high",
+      "finding": "Includes specific customer implementations with outcomes not on competitors.",
+      "evidence_target": "Customer X reduced helpdesk tickets 34% after a 6-week SSO rollout with documented rollback planning.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-b.example/blog/enterprise-single-sign-on",
+          "snippet": "Generic advice only; no named customer outcomes or measured deployment timelines."
+        }
+      ]
+    },
+    {
+      "id": "novel_angle",
+      "label": "Novel Angle",
+      "score": "medium",
+      "finding": "Compliance-first framing is stronger than most competitors but not unique.",
+      "evidence_target": "Leads with audit-control mapping for SOC 2 rather than a generic benefits list.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-a.example/guides/sso-overview",
+          "snippet": "Mentions compliance in one subsection without control-level mapping language."
+        }
+      ]
+    },
+    {
+      "id": "citable_specificity",
+      "label": "Citable Specificity",
+      "score": "high",
+      "finding": "Multiple self-contained passages suitable for AI citation on SSO definition and compliance.",
+      "evidence_target": "Two-sentence SSO definition including protocol names, typical IdP flow, and SOC 2 control mapping in standalone paragraphs.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-b.example/blog/enterprise-single-sign-on",
+          "snippet": "Opens with a similarly quotable definition block but without compliance-control specificity."
+        }
+      ]
+    }
+  ],
+  "overall": "medium",
+  "baseline_completeness": "adequate",
+  "recommendations": [
+    {
+      "dimension": "original_data",
+      "action": "Add a first-party benchmark table from your support or deployment logs.",
+      "example_artifact": "Table: median SSO rollout duration, rollback rate, and ticket volume delta across 12 deployments."
+    },
+    {
+      "dimension": "unique_framework",
+      "action": "Name and diagram the rollout model.",
+      "example_artifact": "The TRUST Framework: Test identities, Roll out by OU, User comms, Session policy, Telemetry."
+    },
+    {
+      "dimension": "table_stakes",
+      "action": "Add protocol comparison table covering SAML vs OIDC decision criteria.",
+      "example_artifact": "Two-column table: use SAML when… / use OIDC when…"
+    }
+  ],
+  "limitations": [
+    "Competitor C partially fetched; scoring used visible sections only.",
+    "Mixed SERP; competitor set limited to primary_topic lane per user choice."
+  ]
+}

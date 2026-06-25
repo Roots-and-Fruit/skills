@@ -3,3 +3,6 @@
 *.log
 .DS_Store
 Thumbs.db
+
+# Agent live-test handoffs (promote to fixtures manually after review)
+marketing/information-gain-evaluator/examples/live-run-*.handoff.json

@@ -86,5 +86,6 @@ Fixture + regression: `examples/merged-keywords.fixture.json` · `node scripts/v
 | Draft copy for gaps | domain | Writer + `gaps[]` (lane-filtered) + `serp_context` |
 | Content plan, no site | keyword_only | Brief workflow + `priority_sub_queries[]` |
 | Product page audit | domain | LP audit + `hub_spoke_map` |
+| Differentiation on anchor or spoke | domain | [Information Gain Evaluator](../information-gain-evaluator/) + `intent_lane`, target URL |
 
 The skill packages facts only — it does not choose the downstream path.

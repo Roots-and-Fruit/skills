@@ -22,6 +22,7 @@ Skills are built for **Cursor** (or any agent runtime that supports the [Agent S
 | Skill | Description |
 |-------|-------------|
 | [Fan-Out Coverage Analysis](marketing/fan-out-coverage-analysis/) | Map how a search query fans out into sub-questions (PAA, related, Labs expansion); optional domain coverage check |
+| [Information Gain Evaluator](marketing/information-gain-evaluator/) | Rigorous SERP-comparative citation gain scoring (handoff v1.1, citation fit + page–keyword fit) |
 
 See [`marketing/README.md`](marketing/README.md) for skill-specific setup and data requirements.
 
@@ -124,7 +125,14 @@ skills/
 ├── README.md                 # This file — Roots & Fruit skills index
 ├── marketing/
 │   ├── README.md
-│   └── fan-out-coverage-analysis/
+│   ├── fan-out-coverage-analysis/
+│   │   ├── SKILL.md
+│   │   ├── REQUIREMENTS.md
+│   │   ├── REFERENCE.md
+│   │   ├── EXAMPLES.md
+│   │   ├── examples/
+│   │   └── scripts/
+│   └── information-gain-evaluator/
 │       ├── SKILL.md
 │       ├── REQUIREMENTS.md
 │       ├── REFERENCE.md

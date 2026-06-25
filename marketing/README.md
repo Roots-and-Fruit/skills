@@ -40,6 +40,42 @@ Or in Cursor: **Customize → Rules → Add Rule → Remote Rule (Github)** → 
 
 ---
 
+### Information Gain Evaluator
+
+**Path:** [`information-gain-evaluator/`](information-gain-evaluator/)  
+**Version:** 1.1.0 — rigorous citation-fit scoring, handoff JSON v1.1 (G1–G14 + R1–R18)
+
+Compare a **target page** (or draft) to SERP competitors. Scores **cite-worthy information gain** for the primary keyword — not just buyer positioning. Includes `citation_fit_for_keyword`, `page_keyword_fit`, and anti-inflation rules.
+
+| Mode | You provide | You get |
+|------|-------------|---------|
+| **Live URL** | Keyword + target URL | Citation fit, dimension scores, table-stakes gaps, handoff JSON |
+| **Pinned competitors** | Keyword + target + 3–5 competitor URLs | Same — stable set for regression testing |
+| **Draft content** | Keyword + pasted draft + competitors or SERP | Pre-publish differentiation check |
+
+**Data required:** DataForSEO MCP (one SERP call) + WebFetch, or pinned URLs only — see [`information-gain-evaluator/REQUIREMENTS.md`](information-gain-evaluator/REQUIREMENTS.md).
+
+**Regression:**
+
+```bash
+node information-gain-evaluator/scripts/verify-handoff.mjs information-gain-evaluator/examples/enterprise-sso.handoff.fixture.json
+node information-gain-evaluator/scripts/verify-handoff.mjs information-gain-evaluator/examples/commercial-service-vs-diy.handoff.fixture.json --gold commercial-vs-diy
+node information-gain-evaluator/scripts/verify-handoff.mjs information-gain-evaluator/examples/plugin-readme-practitioner.handoff.fixture.json --gold plugin-readme-practitioner
+```
+
+See [`information-gain-evaluator/examples/SCORECARD-enterprise-sso.md`](information-gain-evaluator/examples/SCORECARD-enterprise-sso.md) and [`SCORECARD-commercial-vs-diy.md`](information-gain-evaluator/examples/SCORECARD-commercial-vs-diy.md).
+
+**Live sample run:** [`information-gain-evaluator/examples/plugin-readme-practitioner.handoff.fixture.json`](information-gain-evaluator/examples/plugin-readme-practitioner.handoff.fixture.json) — aligned how-to on a mixed SERP (`high` overall, `partial` citation fit).
+
+**Example prompts:**
+
+- *"Evaluate information gain for **https://example.com/guides/enterprise-sso** on keyword **enterprise SSO**"*
+- *"Pinned competitors mode — target [url], keyword [kw], competitors [url1], [url2], [url3]"*
+
+**Pairs with:** Fan-Out Coverage Analysis (upstream gaps + `intent_lane`).
+
+---
+
 ## DataForSEO MCP (common setup)
 
 Many marketing skills use DataForSEO. Minimal Cursor MCP config:

@@ -1,0 +1,168 @@
+{
+  "handoff_version": "1.1",
+  "skill": "information-gain-evaluator",
+  "skill_version": "1.1.0",
+  "generated_at": "2026-06-25T20:00:00.000Z",
+  "mode": "live_url",
+  "confidence": "high",
+  "inputs": {
+    "target_url": "https://example-vendor.com/services/managed-performance/",
+    "target_label": "Example Vendor — Managed performance service page",
+    "primary_keyword": "wordpress performance",
+    "competitor_urls": [],
+    "intent_lane": "primary_topic",
+    "location_name": "United States",
+    "language_code": "en"
+  },
+  "serp_context": {
+    "ai_overview_present": true,
+    "people_also_ask": [
+      "How to improve WordPress performance?",
+      "Why is WordPress slow?"
+    ],
+    "related_searches": [
+      "wordpress performance optimization",
+      "wordpress speed optimization plugin"
+    ],
+    "intent_lanes_detected": ["primary_topic", "tool_discovery", "community"],
+    "intent_split": "mixed",
+    "lane_counts": {
+      "primary_topic": 6,
+      "tool_discovery": 2,
+      "community": 1
+    }
+  },
+  "competitor_set": [
+    {
+      "url": "https://competitor-a.example/guides/wordpress-performance-tips/",
+      "domain": "competitor-a.example",
+      "title": "15 WordPress Performance Tips",
+      "lane": "primary_topic",
+      "fetch_status": "ok"
+    },
+    {
+      "url": "https://competitor-b.example/blog/speed-up-wordpress/",
+      "domain": "competitor-b.example",
+      "title": "How to Speed Up WordPress",
+      "lane": "primary_topic",
+      "fetch_status": "ok"
+    },
+    {
+      "url": "https://competitor-c.example/docs/optimization-handbook/",
+      "domain": "competitor-c.example",
+      "title": "WordPress Optimization Handbook",
+      "lane": "primary_topic",
+      "fetch_status": "ok"
+    }
+  ],
+  "table_stakes": [
+    "Use page caching and object caching",
+    "Optimize images and enable lazy loading",
+    "Audit plugins and use a lightweight theme",
+    "Measure with PageSpeed Insights or GTmetrix",
+    "Address Core Web Vitals and TTFB"
+  ],
+  "table_stakes_gaps": [
+    "No DIY performance testing walkthrough",
+    "No image optimization tactics or plugin names",
+    "No numbered self-serve optimization checklist"
+  ],
+  "unique_strengths": [
+    "Managed ongoing monitoring and regression alerts instead of one-time tips",
+    "Surgical partial cache invalidation on content updates"
+  ],
+  "baseline_coverage_pct": 40,
+  "citation_fit_for_keyword": "poor",
+  "page_keyword_fit": "mismatched",
+  "citation_fit_rationale": "Commercial managed-service page on an informational DIY SERP; AI answers to the head keyword will cite how-to guides, not this sales page, as primary sources.",
+  "dimensions": [
+    {
+      "id": "original_data",
+      "label": "Original Data",
+      "score": "low",
+      "finding": "No first-party benchmarks or quantified client outcomes; qualitative testimonial only.",
+      "evidence_target": "Customer quote claims the site is faster after onboarding but cites no LCP, TTFB, or traffic metrics.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-a.example/guides/wordpress-performance-tips/",
+          "snippet": "References Bing and Google delay studies and Core Web Vitals thresholds as measurable anchors."
+        }
+      ]
+    },
+    {
+      "id": "unique_framework",
+      "label": "Unique Framework",
+      "score": "medium",
+      "finding": "Clear service layers described but no named methodology or decision rubric.",
+      "evidence_target": "Maps on-page tuning, CDN rules, and server cache layers without a branded framework name.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-b.example/blog/speed-up-wordpress/",
+          "snippet": "Uses a numbered seven-step DIY optimization sequence from hosting through database cleanup."
+        }
+      ]
+    },
+    {
+      "id": "first_hand_experience",
+      "label": "First-Hand Experience",
+      "score": "medium",
+      "finding": "Operator voice present but no named case study with measured before/after results.",
+      "evidence_target": "States the team reviews sites personally and tunes cache rules but gives no deployment metrics.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-c.example/docs/optimization-handbook/",
+          "snippet": "Third-person handbook guidance with no operator or customer implementation narratives."
+        }
+      ]
+    },
+    {
+      "id": "novel_angle",
+      "label": "Novel Angle",
+      "score": "medium",
+      "finding": "Managed-ops positioning differs from DIY listicles but does not add informational novelty for the keyword.",
+      "evidence_target": "Frames performance as ongoing managed operations rather than a one-time checklist for site owners.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-a.example/guides/wordpress-performance-tips/",
+          "snippet": "Classic DIY listicle assuming the reader will self-optimize hosting, plugins, and caching."
+        }
+      ]
+    },
+    {
+      "id": "citable_specificity",
+      "label": "Citable Specificity",
+      "score": "medium",
+      "finding": "Some quotable stack and cache-policy lines; less step-level density than handbook competitors.",
+      "evidence_target": "FAQ names caching tools and edge rules with exclusions for logged-in and cart flows in standalone sentences.",
+      "evidence_competitors": [
+        {
+          "url": "https://competitor-c.example/docs/optimization-handbook/",
+          "snippet": "Includes copy-paste configuration snippets and autoloaded option cleanup commands."
+        }
+      ]
+    }
+  ],
+  "overall": "low",
+  "baseline_completeness": "weak",
+  "recommendations": [
+    {
+      "dimension": "original_data",
+      "action": "Publish anonymized fleet performance outcomes after onboarding.",
+      "example_artifact": "Table: median LCP before vs 30 days after across 20 sites with sample size noted."
+    },
+    {
+      "dimension": "unique_framework",
+      "action": "Name and diagram the managed caching workflow.",
+      "example_artifact": "The LAYER model: Load tuning, Application cache, Edge rules, Regression watch."
+    },
+    {
+      "dimension": "table_stakes",
+      "action": "Link to a short DIY explainer for testing and image optimization without diluting the sales page.",
+      "example_artifact": "Internal link: how we run PageSpeed checks on client sites (informational post)."
+    }
+  ],
+  "limitations": [
+    "Target is a commercial service page evaluated against informational how-to guides.",
+    "Mixed SERP; competitor set limited to primary_topic lane."
+  ]
+}
