@@ -22,11 +22,14 @@ Teach your agent to **map how a search query fans out** into related sub-questio
 
 **Data required:** DataForSEO MCP, Ahrefs MCP, or local CSV/JSON exports — see [`fan-out-coverage-analysis/REQUIREMENTS.md`](fan-out-coverage-analysis/REQUIREMENTS.md).
 
-**Install:**
+**Install** (see root [`README.md`](../README.md) for full options):
 
 ```bash
-cp -r marketing/fan-out-coverage-analysis ~/.cursor/skills/fan-out-coverage-analysis
+# Recommended — global install via Skills CLI
+npx skills add Roots-and-Fruit/skills -g -y
 ```
+
+Or in Cursor: **Customize → Rules → Add Rule → Remote Rule (Github)** → `https://github.com/Roots-and-Fruit/skills`
 
 **Example prompts:**
 
