@@ -1,0 +1,29 @@
+{
+  "description": "Illustrative Yoast-style sitemap index child URLs — example.com only",
+  "child_sitemaps": [
+    "https://example.com/post-sitemap.xml",
+    "https://example.com/post-sitemap2.xml",
+    "https://example.com/page-sitemap.xml",
+    "https://example.com/tips-sitemap.xml",
+    "https://example.com/newsletterglue-sitemap.xml",
+    "https://example.com/category-sitemap.xml",
+    "https://example.com/post_tag-sitemap.xml",
+    "https://example.com/attachment-sitemap.xml",
+    "https://example.com/author-sitemap.xml",
+    "https://example.com/newsletterglue_cat-sitemap.xml",
+    "https://example.com/ngl_template_category-sitemap.xml",
+    "https://example.com/ngl_pattern_category-sitemap.xml",
+    "https://example.com/wp-sitemap-posts-post-1.xml",
+    "https://example.com/wp-sitemap-posts-page-1.xml"
+  ],
+  "expected_included_post_types": ["post", "page", "tips", "newsletterglue"],
+  "expected_excluded_post_types": [
+    "category",
+    "post_tag",
+    "attachment",
+    "author",
+    "newsletterglue_cat",
+    "ngl_template_category",
+    "ngl_pattern_category"
+  ]
+}

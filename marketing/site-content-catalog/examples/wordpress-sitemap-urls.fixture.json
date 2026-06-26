@@ -1,0 +1,40 @@
+{
+  "description": "Flat-permalink WordPress URLs with sitemap_post_type hints",
+  "items": [
+    {
+      "url": "https://example.com/not-intuitive-and-time-to-value",
+      "title": "Not Intuitive",
+      "sitemap_post_type": "post",
+      "expected": "blog_post"
+    },
+    {
+      "url": "https://example.com/about",
+      "title": "About",
+      "sitemap_post_type": "page",
+      "expected": "landing_page"
+    },
+    {
+      "url": "https://example.com/legacy-flat-slug",
+      "title": "Legacy",
+      "expected": "landing_page"
+    },
+    {
+      "url": "https://example.com/tips/what-is-gutenberg",
+      "title": "Gutenberg tip",
+      "sitemap_post_type": "tips",
+      "expected": "other"
+    },
+    {
+      "url": "https://example.com/pricing",
+      "title": "Pricing",
+      "sitemap_post_type": "page",
+      "expected": "product_page"
+    },
+    {
+      "url": "https://example.com/podcasts/glam-that-plugin",
+      "title": "Glam That Plugin",
+      "sitemap_post_type": "page",
+      "expected": "landing_page"
+    }
+  ]
+}

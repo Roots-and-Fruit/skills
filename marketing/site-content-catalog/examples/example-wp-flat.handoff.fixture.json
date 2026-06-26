@@ -1,0 +1,113 @@
+{
+  "handoff_version": "1.0",
+  "skill": "site-content-catalog",
+  "skill_version": "1.2.1",
+  "generated_at": "2026-06-26T12:00:00.000Z",
+  "mode": "sitemap_enriched",
+  "inputs": {
+    "domain": "example.com",
+    "sitemap_url": "https://example.com/sitemap_index.xml",
+    "scope_prefix": null,
+    "location_name": "United States",
+    "language_code": "en"
+  },
+  "discovery_summary": {
+    "total_discovered": 5,
+    "enriched_count": 2,
+    "discovery_source": "sitemap_index",
+    "scope_applied": null,
+    "content_sitemaps": [
+      {
+        "sitemap_url": "https://example.com/post-sitemap.xml",
+        "post_type": "post",
+        "url_count": 3
+      },
+      {
+        "sitemap_url": "https://example.com/page-sitemap.xml",
+        "post_type": "page",
+        "url_count": 2
+      }
+    ]
+  },
+  "type_summary": {
+    "blog_post": 3,
+    "landing_page": 2,
+    "product_page": 0,
+    "feature_page": 0,
+    "integration_page": 0,
+    "comparison_page": 0,
+    "documentation": 0,
+    "other": 0
+  },
+  "pages": [
+    {
+      "url": "https://example.com/",
+      "title": "Home",
+      "page_type": "landing_page",
+      "sitemap_post_type": "page",
+      "top_keyword": "example personal site",
+      "etv": 12,
+      "backlinks_referring_domains": 5,
+      "word_count": 280,
+      "heading_count": 3,
+      "last_modified": "2026-05-01",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/about",
+      "title": "About",
+      "page_type": "landing_page",
+      "sitemap_post_type": "page",
+      "top_keyword": null,
+      "etv": null,
+      "backlinks_referring_domains": null,
+      "word_count": null,
+      "heading_count": null,
+      "last_modified": "2026-04-01",
+      "enrichment_status": "discovered_only"
+    },
+    {
+      "url": "https://example.com/not-intuitive-and-time-to-value",
+      "title": "Not Intuitive",
+      "page_type": "blog_post",
+      "sitemap_post_type": "post",
+      "top_keyword": "not intuitive",
+      "etv": 9.6,
+      "backlinks_referring_domains": 1,
+      "word_count": 1100,
+      "heading_count": 8,
+      "last_modified": "2025-11-10",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/how-to-use-jquery-in-wordpress",
+      "title": "jQuery in WordPress",
+      "page_type": "blog_post",
+      "sitemap_post_type": "post",
+      "top_keyword": null,
+      "etv": null,
+      "backlinks_referring_domains": null,
+      "word_count": null,
+      "heading_count": null,
+      "last_modified": "2019-03-01",
+      "enrichment_status": "discovered_only"
+    },
+    {
+      "url": "https://example.com/smart-excerpts-in-wordpress",
+      "title": "Smart Excerpts",
+      "page_type": "blog_post",
+      "sitemap_post_type": "post",
+      "top_keyword": null,
+      "etv": null,
+      "backlinks_referring_domains": null,
+      "word_count": null,
+      "heading_count": null,
+      "last_modified": "2018-06-01",
+      "enrichment_status": "discovered_only"
+    }
+  ],
+  "limitations": [
+    "Inbound internal link counts not included in handoff v1.0 — cornerstone playbook must not assume this field.",
+    "101–200 URL band: enriched top 2 by Labs ETV plus homepage; remaining rows discovered_only."
+  ]
+}

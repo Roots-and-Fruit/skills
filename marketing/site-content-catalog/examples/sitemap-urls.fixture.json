@@ -1,0 +1,45 @@
+{
+  "description": "Illustrative URLs for classify-page-type regression — example.com only",
+  "items": [
+    {
+      "url": "https://example.com/blog/2024/product-launch",
+      "title": "Product Launch",
+      "expected": "blog_post"
+    },
+    {
+      "url": "https://example.com/pricing",
+      "title": "Pricing",
+      "expected": "product_page"
+    },
+    {
+      "url": "https://example.com/integrations/stripe",
+      "title": "Stripe Integration",
+      "expected": "integration_page"
+    },
+    {
+      "url": "https://example.com/docs/api",
+      "title": "API Docs",
+      "expected": "documentation"
+    },
+    {
+      "url": "https://example.com/vs/competitor-a",
+      "title": "Example vs Competitor A",
+      "expected": "comparison_page"
+    },
+    {
+      "url": "https://example.com/features/analytics",
+      "title": "Analytics",
+      "expected": "feature_page"
+    },
+    {
+      "url": "https://example.com/",
+      "title": "Home",
+      "expected": "landing_page"
+    },
+    {
+      "url": "https://example.com/articles/guides",
+      "title": "Guides",
+      "expected": "blog_post"
+    }
+  ]
+}

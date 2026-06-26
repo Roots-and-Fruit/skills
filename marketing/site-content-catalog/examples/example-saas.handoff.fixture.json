@@ -1,0 +1,131 @@
+{
+  "handoff_version": "1.0",
+  "skill": "site-content-catalog",
+  "skill_version": "1.1.0",
+  "generated_at": "2026-06-25T12:00:00.000Z",
+  "mode": "sitemap_enriched",
+  "inputs": {
+    "domain": "example.com",
+    "sitemap_url": "https://example.com/sitemap.xml",
+    "scope_prefix": null,
+    "location_name": "United States",
+    "language_code": "en"
+  },
+  "discovery_summary": {
+    "total_discovered": 8,
+    "enriched_count": 8,
+    "discovery_source": "sitemap",
+    "scope_applied": null
+  },
+  "type_summary": {
+    "blog_post": 2,
+    "landing_page": 1,
+    "product_page": 1,
+    "feature_page": 1,
+    "integration_page": 1,
+    "comparison_page": 1,
+    "documentation": 1,
+    "other": 0
+  },
+  "pages": [
+    {
+      "url": "https://example.com/",
+      "title": "Example SaaS — Home",
+      "page_type": "landing_page",
+      "top_keyword": "example saas platform",
+      "etv": 420,
+      "backlinks_referring_domains": 38,
+      "word_count": 850,
+      "heading_count": 12,
+      "last_modified": "2026-03-01",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/pricing",
+      "title": "Pricing",
+      "page_type": "product_page",
+      "top_keyword": "example saas pricing",
+      "etv": 310,
+      "backlinks_referring_domains": 22,
+      "word_count": 620,
+      "heading_count": 8,
+      "last_modified": "2026-02-15",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/features/analytics",
+      "title": "Analytics",
+      "page_type": "feature_page",
+      "top_keyword": "saas analytics dashboard",
+      "etv": 180,
+      "backlinks_referring_domains": 11,
+      "word_count": 1100,
+      "heading_count": 14,
+      "last_modified": "2026-01-20",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/integrations/stripe",
+      "title": "Stripe Integration",
+      "page_type": "integration_page",
+      "top_keyword": "stripe saas integration",
+      "etv": 95,
+      "backlinks_referring_domains": 4,
+      "word_count": 540,
+      "heading_count": 7,
+      "last_modified": "2025-11-10",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/vs/competitor-a",
+      "title": "Example vs Competitor A",
+      "page_type": "comparison_page",
+      "top_keyword": "example vs competitor a",
+      "etv": 140,
+      "backlinks_referring_domains": 9,
+      "word_count": 980,
+      "heading_count": 10,
+      "last_modified": "2026-04-01",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/docs/getting-started",
+      "title": "Getting Started",
+      "page_type": "documentation",
+      "top_keyword": "example saas setup",
+      "etv": 75,
+      "backlinks_referring_domains": 6,
+      "word_count": 1500,
+      "heading_count": 18,
+      "last_modified": "2026-05-01",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/blog/2026/06/launch-update",
+      "title": "Launch Update",
+      "page_type": "blog_post",
+      "top_keyword": "saas product update",
+      "etv": 45,
+      "backlinks_referring_domains": 2,
+      "word_count": 1200,
+      "heading_count": 9,
+      "last_modified": "2026-06-01",
+      "enrichment_status": "enriched"
+    },
+    {
+      "url": "https://example.com/articles/guides",
+      "title": "Guides",
+      "page_type": "blog_post",
+      "top_keyword": "saas implementation guide",
+      "etv": 60,
+      "backlinks_referring_domains": 3,
+      "word_count": 900,
+      "heading_count": 11,
+      "last_modified": "2026-02-28",
+      "enrichment_status": "enriched"
+    }
+  ],
+  "limitations": [
+    "Inbound internal link counts not included in handoff v1.0 — cornerstone playbook must not assume this field."
+  ]
+}
