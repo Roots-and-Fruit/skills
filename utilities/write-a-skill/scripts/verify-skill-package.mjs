@@ -3,7 +3,7 @@
  * Verify a skill folder matches the declared package tier (write-a-skill standard).
  *
  * Usage (from write-a-skill/):
- *   node scripts/verify-skill-package.mjs --path ../../marketing/site-content-catalog --tier C --public
+ *   node scripts/verify-skill-package.mjs --path ../../marketing/skills/site-content-catalog --tier C --public
  *   node scripts/verify-skill-package.mjs --fixture examples/skill-packages.fixture.json
  *
  * Options:

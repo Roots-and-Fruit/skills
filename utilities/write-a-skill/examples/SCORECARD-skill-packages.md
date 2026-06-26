@@ -39,7 +39,7 @@ Applied per package by `verify-skill-package.mjs`:
 
 | ID | Package | Tier | Pass when |
 |----|---------|------|-----------|
-| M1 | `marketing/site-content-catalog` | C | P1–P14 + P12 (handoff + scorecard scripts) |
+| M1 | `marketing/skills/site-content-catalog` | C | P1–P14 + P12 (handoff + scorecard scripts) |
 | M2 | `utilities/write-a-skill` | B | P1–P3, P6–P7, P13–P14 (no Tier C artifacts on meta skill) |
 
 ---

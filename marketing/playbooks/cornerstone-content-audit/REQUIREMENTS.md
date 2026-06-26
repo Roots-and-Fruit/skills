@@ -1,6 +1,6 @@
 # Requirements
 
-This playbook is a **workflow for an AI agent**. It orchestrates other marketing skills under `marketing/`.
+This playbook is a **workflow for an AI agent**. It orchestrates marketing skills under `marketing/skills/`.
 
 **Not published in the root install index yet** — work in progress under `marketing/playbooks/`.
 
@@ -34,11 +34,11 @@ This playbook is a **workflow for an AI agent**. It orchestrates other marketing
 
 | Phase | Skill | Path |
 |-------|-------|------|
-| 1 | Site Content Catalog | `../../site-content-catalog/SKILL.md` |
-| 3b | Fan-Out Coverage Analysis | `../../fan-out-coverage-analysis/SKILL.md` |
-| 3c | Information Gain Evaluator | `../../information-gain-evaluator/SKILL.md` |
-| 4a | SEO Cannibalization Audit | `../../seo-cannibalization-audit/SKILL.md` |
-| 5h | robots.txt Audit | `../../robots-txt-audit/SKILL.md` |
+| 1 | Site Content Catalog | `../../skills/site-content-catalog/SKILL.md` |
+| 3b | Fan-Out Coverage Analysis | `../../skills/fan-out-coverage-analysis/SKILL.md` |
+| 3c | Information Gain Evaluator | `../../skills/information-gain-evaluator/SKILL.md` |
+| 4a | SEO Cannibalization Audit | `../../skills/seo-cannibalization-audit/SKILL.md` |
+| 5h | robots.txt Audit | `../../skills/robots-txt-audit/SKILL.md` |
 
 ---
 

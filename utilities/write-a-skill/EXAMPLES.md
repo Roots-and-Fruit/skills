@@ -1,6 +1,6 @@
 # write-a-skill — Examples
 
-Illustrative only. Live references: `marketing/site-content-catalog/`, `marketing/fan-out-coverage-analysis/`, `marketing/information-gain-evaluator/`.
+Illustrative only. Live references: `marketing/skills/site-content-catalog/`, `marketing/skills/fan-out-coverage-analysis/`, `marketing/skills/information-gain-evaluator/`.
 
 ---
 
@@ -9,7 +9,7 @@ Illustrative only. Live references: `marketing/site-content-catalog/`, `marketin
 **Job:** one-page campaign brief for humans. **Consumer:** none. **Fragile logic:** none.
 
 ```text
-marketing/campaign-brief-generator/
+marketing/skills/campaign-brief-generator/
 ├── SKILL.md
 └── REQUIREMENTS.md
 ```
@@ -32,7 +32,7 @@ marketing/campaign-brief-generator/
 **Job:** page inventory + handoff for cornerstone playbook. **Tier:** C (package verifier golden case M1).
 
 ```text
-marketing/site-content-catalog/
+marketing/skills/site-content-catalog/
 ├── SKILL.md
 ├── REQUIREMENTS.md
 ├── REFERENCE.md
@@ -48,7 +48,7 @@ marketing/site-content-catalog/
 
 ```bash
 node utilities/write-a-skill/scripts/verify-skill-package.mjs \
-  --path marketing/site-content-catalog --tier C --public --run-verifiers
+  --path marketing/skills/site-content-catalog --tier C --public --run-verifiers
 ```
 
 ---
@@ -58,7 +58,7 @@ node utilities/write-a-skill/scripts/verify-skill-package.mjs \
 **Job:** SERP-comparative citation scoring. **Consumer:** briefs, playbooks. **Fragile logic:** score inflation (proven → R1–R18).
 
 ```text
-marketing/information-gain-evaluator/
+marketing/skills/information-gain-evaluator/
 ├── SKILL.md          # Ship bar: node scripts/verify-handoff.mjs
 ├── REFERENCE.md      # handoff v1.1, dimension rubric
 ├── examples/enterprise-sso.handoff.fixture.json
@@ -75,7 +75,7 @@ marketing/information-gain-evaluator/
 **Job:** fan-out tiering. **Fragile logic:** facet drift on mixed SERP (proven → S1–S8).
 
 ```text
-marketing/fan-out-coverage-analysis/
+marketing/skills/fan-out-coverage-analysis/
 ├── scripts/normalize-fanout.mjs
 ├── scripts/verify-scorecard.mjs
 ├── examples/merged-keywords.fixture.json
@@ -91,8 +91,8 @@ marketing/fan-out-coverage-analysis/
 **Job:** orchestrate children. **Tier:** A or B — not C unless report shape needs verifier.
 
 ```markdown
-| Phase 1 | Site Content Catalog | `../../site-content-catalog/SKILL.md` |
-| Phase 3b | Fan-Out Coverage Analysis | `../../fan-out-coverage-analysis/SKILL.md` |
+| Phase 1 | Site Content Catalog | `../../skills/site-content-catalog/SKILL.md` |
+| Phase 3b | Fan-Out Coverage Analysis | `../../skills/fan-out-coverage-analysis/SKILL.md` |
 ```
 
 **Human checkpoint completion criterion:**

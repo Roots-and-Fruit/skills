@@ -18,11 +18,11 @@ Audits a site's most important content — the 3–7 cornerstone pages that shou
 
 | Step | Skill | Location |
 |------|-------|----------|
-| Phase 1 | Site Content Catalog | `../../site-content-catalog/SKILL.md` |
-| Phase 3b | Fan-Out Coverage Analysis | `../../fan-out-coverage-analysis/SKILL.md` |
-| Phase 3c | Information Gain Evaluator | `../../information-gain-evaluator/SKILL.md` |
-| Phase 4a | SEO Cannibalization Audit | `../../seo-cannibalization-audit/SKILL.md` |
-| Phase 5h | robots.txt Audit | `../../robots-txt-audit/SKILL.md` |
+| Phase 1 | Site Content Catalog | `../../skills/site-content-catalog/SKILL.md` |
+| Phase 3b | Fan-Out Coverage Analysis | `../../skills/fan-out-coverage-analysis/SKILL.md` |
+| Phase 3c | Information Gain Evaluator | `../../skills/information-gain-evaluator/SKILL.md` |
+| Phase 4a | SEO Cannibalization Audit | `../../skills/seo-cannibalization-audit/SKILL.md` |
+| Phase 5h | robots.txt Audit | `../../skills/robots-txt-audit/SKILL.md` |
 
 Read each linked `SKILL.md` before calling it. Follow its workflow exactly.
 
@@ -53,7 +53,7 @@ Use `AskQuestion` for Phase 2 approval when available; otherwise wait for explic
 
 ## Phase 1: Discovery & catalog
 
-**Call:** [Site Content Catalog](../../site-content-catalog/SKILL.md)
+**Call:** [Site Content Catalog](../../skills/site-content-catalog/SKILL.md)
 
 Pass sitemap URL or domain. Receive **handoff JSON v1.0** (`REFERENCE.md` in catalog skill). Read `limitations[]` — v1.0 does not include inbound internal link counts.
 
@@ -116,13 +116,13 @@ Run for **each confirmed cornerstone** (parallel OK).
 
 ### 3b: Fan-out coverage
 
-**Call:** [Fan-Out Coverage Analysis](../../fan-out-coverage-analysis/SKILL.md)
+**Call:** [Fan-Out Coverage Analysis](../../skills/fan-out-coverage-analysis/SKILL.md)
 
 Pass: `keyword`, `domain`, `anchor_url` (cornerstone URL).
 
 ### 3c: Information gain
 
-**Call:** [Information Gain Evaluator](../../information-gain-evaluator/SKILL.md)
+**Call:** [Information Gain Evaluator](../../skills/information-gain-evaluator/SKILL.md)
 
 Pass: `target_url`, `primary_keyword`.
 
@@ -158,7 +158,7 @@ Pass: `target_url`, `primary_keyword`.
 
 ### 4a: Cannibalization check
 
-**Call:** [SEO Cannibalization Audit](../../seo-cannibalization-audit/SKILL.md)
+**Call:** [SEO Cannibalization Audit](../../skills/seo-cannibalization-audit/SKILL.md)
 
 Pass cornerstone URLs, primary keywords, domain, and optional protected pages from user context.
 
@@ -183,7 +183,7 @@ Synthesize Phases 3–4. Per cornerstone: content (from 3c), internal links (fro
 
 ### 5h: robots.txt and AI crawler policy
 
-**Call:** [robots.txt Audit](../../robots-txt-audit/SKILL.md)
+**Call:** [robots.txt Audit](../../skills/robots-txt-audit/SKILL.md)
 
 Pass:
 

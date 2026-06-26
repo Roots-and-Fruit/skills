@@ -14,13 +14,13 @@ A skill wrangles **predictability** out of a stochastic system: same *process* e
 
 **Vocabulary:** [`GLOSSARY.md`](GLOSSARY.md) · **Tiers & schemas:** [`REFERENCE.md`](REFERENCE.md) · **Patterns:** [`EXAMPLES.md`](EXAMPLES.md)
 
-**Reference implementations:** `marketing/fan-out-coverage-analysis/` (Tier C + normalize script) · `marketing/information-gain-evaluator/` (Tier C + rigorous rules) · `marketing/site-content-catalog/` (Tier C — first package-verifier golden case)
+**Reference implementations:** `marketing/skills/fan-out-coverage-analysis/` (Tier C + normalize script) · `marketing/skills/information-gain-evaluator/` (Tier C + rigorous rules) · `marketing/skills/site-content-catalog/` (Tier C — first package-verifier golden case)
 
 **Meta ship bar:** `node scripts/verify-skill-package.mjs --fixture examples/skill-packages.fixture.json` (M1–M2 in `examples/SCORECARD-skill-packages.md`)
 
 ## Default behavior
 
-- Public domain skills → `marketing/{name}/` or `marketing/playbooks/{name}/`
+- Public domain skills → `marketing/skills/{name}/` or `marketing/playbooks/{name}/`
 - Meta skills → `utilities/{name}/`
 - Project-local → `.cursor/skills/{name}/` when appropriate
 - Fictional examples only (`example.com`) — no secrets or client PII
@@ -51,12 +51,12 @@ Use [`REFERENCE.md`](REFERENCE.md) tier matrix. Summary:
 
 | Class | Typical path | Default tier |
 |-------|--------------|--------------|
-| capability | `marketing/{name}/` | A or B; C if emits handoff to playbook |
-| composite | `marketing/{name}/` | B or C |
+| capability | `marketing/skills/{name}/` | A or B; C if emits handoff to playbook |
+| composite | `marketing/skills/{name}/` | B or C |
 | playbook | `marketing/playbooks/{name}/` | A or B — link children, don't duplicate |
 | utility | `utilities/{name}/` | A or B |
 
-Playbooks **link** to `../../{child}/SKILL.md` — never re-implement child workflows inline.
+Playbooks **link** to `../../skills/{child}/SKILL.md` — never re-implement child workflows inline.
 
 ## Step 2 — Write for predictability (all tiers)
 

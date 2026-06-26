@@ -1,6 +1,6 @@
 # robots.txt Audit — Regression scorecard
 
-Fictional domain: `example.com`. Run verifiers from `marketing/robots-txt-audit/`.
+Fictional domain: `example.com`. Run verifiers from `marketing/skills/robots-txt-audit/`.
 
 ## S-layer (structure)
 
@@ -52,7 +52,7 @@ SSOT expectations: `scripts/max-discovery-expectations.mjs`
 ## Run
 
 ```bash
-cd marketing/robots-txt-audit
+cd marketing/skills/robots-txt-audit
 node scripts/verify-robots-structure.mjs
 node scripts/verify-max-discovery.mjs
 node scripts/verify-max-discovery-contract.mjs

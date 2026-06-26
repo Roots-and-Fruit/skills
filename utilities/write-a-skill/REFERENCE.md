@@ -53,7 +53,7 @@ skill-name/
 ### Tier C — Regression-gated
 
 ```text
-marketing/skill-name/
+marketing/skills/skill-name/
 ├── SKILL.md
 ├── REQUIREMENTS.md
 ├── REFERENCE.md
@@ -75,7 +75,7 @@ marketing/skill-name/
 
 **Ship bar:** `node scripts/verify-*.mjs` exits 0 on golden fixture; SCORECARD documents every automated ID.
 
-**Reference:** `marketing/information-gain-evaluator/`, `marketing/fan-out-coverage-analysis/`
+**Reference:** `marketing/skills/information-gain-evaluator/`, `marketing/skills/fan-out-coverage-analysis/`
 
 ### Tier escalation path
 
@@ -191,7 +191,7 @@ For each line:
 ### Playbook rules
 
 - `marketing/playbooks/{name}/SKILL.md` + `REQUIREMENTS.md`
-- Phase table links to `../../{child}/SKILL.md`
+- Phase table links to `../../skills/{child}/SKILL.md`
 - Human checkpoints with checkable criteria ("user approved cornerstone list")
 - Pruning/classification logic stays in child skills
 
@@ -280,7 +280,7 @@ Validate folder layout matches declared tier:
 
 ```bash
 # From utilities/write-a-skill/
-node scripts/verify-skill-package.mjs --path ../../marketing/site-content-catalog --tier C --public --run-verifiers
+node scripts/verify-skill-package.mjs --path ../../marketing/skills/site-content-catalog --tier C --public --run-verifiers
 node scripts/verify-skill-package.mjs --fixture examples/skill-packages.fixture.json
 ```
 

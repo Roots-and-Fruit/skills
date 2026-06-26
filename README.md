@@ -22,10 +22,10 @@ Skills are built for **Cursor** (or any agent runtime that supports the [Agent S
 
 | Skill | Description |
 |-------|-------------|
-| [Fan-Out Coverage Analysis](marketing/fan-out-coverage-analysis/) | Map how a search query fans out into sub-questions (PAA, related, Labs expansion); optional domain coverage check |
-| [Information Gain Evaluator](marketing/information-gain-evaluator/) | Rigorous SERP-comparative citation gain scoring (handoff v1.1, citation fit + page–keyword fit) |
-| [Site Content Catalog](marketing/site-content-catalog/) | Sitemap or domain page inventory with `page_type` labels and optional SEO signals (handoff v1.0, WordPress child sitemaps) |
-| [robots.txt Audit](marketing/robots-txt-audit/) | AI crawler permissions, cornerstone crawlability, and policy-aligned robots.txt (handoff v1.0) |
+| [Fan-Out Coverage Analysis](marketing/skills/fan-out-coverage-analysis/) | Map how a search query fans out into sub-questions (PAA, related, Labs expansion); optional domain coverage check |
+| [Information Gain Evaluator](marketing/skills/information-gain-evaluator/) | Rigorous SERP-comparative citation gain scoring (handoff v1.1, citation fit + page–keyword fit) |
+| [Site Content Catalog](marketing/skills/site-content-catalog/) | Sitemap or domain page inventory with `page_type` labels and optional SEO signals (handoff v1.0, WordPress child sitemaps) |
+| [robots.txt Audit](marketing/skills/robots-txt-audit/) | AI crawler permissions, cornerstone crawlability, and policy-aligned robots.txt (handoff v1.0) |
 
 See [`marketing/README.md`](marketing/README.md) for skill-specific setup and data requirements.
 
@@ -95,7 +95,7 @@ Commit skills into your repo so everyone gets them on clone:
 ```text
 your-repo/
 └── .cursor/skills/
-    └── fan-out-coverage-analysis/   # copy or symlink from marketing/fan-out-coverage-analysis/
+    └── fan-out-coverage-analysis/   # copy or symlink from marketing/skills/fan-out-coverage-analysis/
         └── SKILL.md
 ```
 
@@ -107,13 +107,13 @@ Cursor also discovers `.agents/skills/` and nested `.cursor/skills/` folders in 
 2. Copy the skill folder into your user skills directory:
 
 ```bash
-cp -r marketing/fan-out-coverage-analysis ~/.cursor/skills/fan-out-coverage-analysis
+cp -r marketing/skills/fan-out-coverage-analysis ~/.cursor/skills/fan-out-coverage-analysis
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-Copy-Item -Recurse marketing\fan-out-coverage-analysis "$env:USERPROFILE\.cursor\skills\fan-out-coverage-analysis"
+Copy-Item -Recurse marketing\skills\fan-out-coverage-analysis "$env:USERPROFILE\.cursor\skills\fan-out-coverage-analysis"
 ```
 
 ---
@@ -137,10 +137,15 @@ View installed skills: **Customize → Skills** (Agent Decides section).
 skills/
 ├── README.md
 ├── marketing/
-│   ├── fan-out-coverage-analysis/
-│   ├── information-gain-evaluator/
-│   ├── site-content-catalog/
-│   └── robots-txt-audit/
+│   ├── README.md
+│   ├── playbooks/
+│   │   └── cornerstone-content-audit/
+│   └── skills/
+│       ├── fan-out-coverage-analysis/
+│       ├── information-gain-evaluator/
+│       ├── site-content-catalog/
+│       ├── seo-cannibalization-audit/
+│       └── robots-txt-audit/
 ├── utilities/
 │   └── write-a-skill/
 └── product-dev/

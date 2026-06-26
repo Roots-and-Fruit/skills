@@ -200,7 +200,7 @@ That placeholder fails **G26** and breaks downstream playbooks. If the human tab
 **Ship bar (Tier C):**
 
 ```bash
-cd marketing/robots-txt-audit
+cd marketing/skills/robots-txt-audit
 node scripts/verify-robots-structure.mjs
 node scripts/verify-max-discovery.mjs
 node scripts/verify-max-discovery-contract.mjs

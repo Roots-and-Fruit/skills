@@ -3,7 +3,7 @@
   "packages": [
     {
       "id": "M1",
-      "path": "../../marketing/site-content-catalog",
+      "path": "../../marketing/skills/site-content-catalog",
       "tier": "C",
       "public": true,
       "run_verifiers": true
