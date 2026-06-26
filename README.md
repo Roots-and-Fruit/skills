@@ -25,6 +25,7 @@ Skills are built for **Cursor** (or any agent runtime that supports the [Agent S
 | [Fan-Out Coverage Analysis](marketing/skills/fan-out-coverage-analysis/) | Map how a search query fans out into sub-questions (PAA, related, Labs expansion); optional domain coverage check |
 | [Information Gain Evaluator](marketing/skills/information-gain-evaluator/) | Rigorous SERP-comparative citation gain scoring (handoff v1.1, citation fit + page–keyword fit) |
 | [Site Content Catalog](marketing/skills/site-content-catalog/) | Sitemap or domain page inventory with `page_type` labels and optional SEO signals (handoff v1.0, WordPress child sitemaps) |
+| [Analytics and Search Console Performance Audit](marketing/skills/analytics-and-searchconsole-performance-audit/) | GSC query-intent discovery + optional GA4 conversion quadrants (`discovery_only` / `discovery_plus_conversions`); handoff v1.0; Phase 1a for hub-and-spoke playbook |
 | [robots.txt Audit](marketing/skills/robots-txt-audit/) | AI crawler permissions, cornerstone crawlability, and policy-aligned robots.txt (handoff v1.0) |
 
 See [`marketing/README.md`](marketing/README.md) for skill-specific setup and data requirements.

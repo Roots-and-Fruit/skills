@@ -1,0 +1,19 @@
+Page,Query,Impressions,Clicks,Position
+https://example.com/blog/how-to-configure-sso,how to configure sso,42000,180,8.2
+https://example.com/blog/how-to-configure-sso,sso setup guide,12000,42,11.4
+https://example.com/blog/how-to-configure-sso,enterprise sso tutorial,8900,12,14.1
+https://example.com/blog/how-to-configure-sso,single sign on best practices,6100,8,18.6
+https://example.com/blog/how-to-configure-sso,example saas sso,2400,95,4.5
+https://example.com/features/analytics,saas analytics dashboard,15000,210,6.1
+https://example.com/features/analytics,product analytics tool,8200,45,9.8
+https://example.com/features/analytics,example saas analytics,3100,88,5.2
+https://example.com/pricing,example saas pricing,5400,62,7.4
+https://example.com/pricing,saas pricing plans,2200,18,12.3
+https://example.com/,example saas platform,9800,55,9.1
+https://example.com/,example saas,6200,28,11.8
+https://example.com/docs/api-reference,api reference,11000,22,22.4
+https://example.com/docs/api-reference,rest api docs,4800,6,28.7
+https://example.com/docs/api-reference,example api documentation,1900,4,31.2
+https://example.com/about/security,security whitepaper,3200,9,16.5
+https://example.com/blog/legacy-feature-announcement,old feature launch,900,1,42.0
+https://example.com/blog/legacy-feature-announcement,deprecated feature,400,0,55.2

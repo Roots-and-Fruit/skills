@@ -14,6 +14,13 @@
       "tier": "B",
       "public": false,
       "run_verifiers": false
+    },
+    {
+      "id": "M3",
+      "path": "../../marketing/skills/analytics-and-searchconsole-performance-audit",
+      "tier": "C",
+      "public": true,
+      "run_verifiers": true
     }
   ]
 }

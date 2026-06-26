@@ -41,6 +41,38 @@ node skills/site-content-catalog/scripts/verify-handoff.mjs
 
 ---
 
+### Analytics and Search Console Performance Audit
+
+**Path:** [`skills/analytics-and-searchconsole-performance-audit/`](skills/analytics-and-searchconsole-performance-audit/)  
+**Version:** 1.3.1 — report template hardening, intended-hub parity checks, intent classifier regression (I1–I7)
+
+Audits landing-page **Google Analytics (GA4)** vs **Google Search Console** exports. Surfaces accidental hubs, hidden gems, and prune review candidates. **Not** full hub discovery — Phase 1a input for hub-and-spoke recovery playbook.
+
+| Mode | You provide | You get |
+|------|-------------|---------|
+| **full** | GSC page+query CSV + GA4 landing-page CSV + conversion event names | Performance quadrant matrix + handoff v1.0 |
+| **gsc_only** | GSC export only | Visibility split + limitations |
+| **ga4_only** | GA4 export only | Value split + traffic/intended-hub report (no GSC chase) |
+
+**Data required:** user-supplied CSV exports — see [`skills/analytics-and-searchconsole-performance-audit/REQUIREMENTS.md`](skills/analytics-and-searchconsole-performance-audit/REQUIREMENTS.md).
+
+**Regression:**
+
+```bash
+node skills/analytics-and-searchconsole-performance-audit/scripts/refresh-handoff-fixtures.mjs
+node skills/analytics-and-searchconsole-performance-audit/scripts/verify-handoff.mjs
+node skills/analytics-and-searchconsole-performance-audit/scripts/verify-scorecard.mjs
+```
+
+**Example prompts (agent):**
+
+- *"Audit GA4 and Search Console exports for **example.com** — conversions: **demo_request**"*
+- *"Which landing pages are accidental hubs vs hidden gems on **example.com**?"*
+
+**Pairs with:** [Hub & Spoke Discovery & Recovery](playbooks/hub-spoke-discovery-recovery/) (Phase 1a, in progress).
+
+---
+
 ### SEO Cannibalization Audit
 
 **Path:** [`skills/seo-cannibalization-audit/`](skills/seo-cannibalization-audit/)  

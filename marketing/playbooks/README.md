@@ -7,3 +7,4 @@ Playbooks **call** capability and composite skills (catalog, fan-out, informatio
 | Playbook | Status |
 |----------|--------|
 | [Cornerstone Content Audit](cornerstone-content-audit/) | In progress — not yet in public install index |
+| [Hub & Spoke Discovery & Recovery](hub-spoke-discovery-recovery/) | In progress — roadmap only; Phase 1a: `analytics-and-searchconsole-performance-audit` |

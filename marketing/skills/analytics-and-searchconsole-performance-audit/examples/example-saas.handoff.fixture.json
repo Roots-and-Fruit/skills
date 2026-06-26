@@ -1,0 +1,460 @@
+{
+  "handoff_version": "1.0",
+  "skill": "analytics-and-searchconsole-performance-audit",
+  "skill_version": "1.3.1",
+  "generated_at": "2026-06-26T12:00:00.000Z",
+  "mode": "full",
+  "inputs": {
+    "domain": "example.com",
+    "date_range": "2025-12-01/2026-05-31",
+    "analysis_mode": "discovery_plus_conversions",
+    "conversion_events": [
+      "demo_request",
+      "newsletter_signup"
+    ],
+    "intended_hubs": [
+      "https://example.com/",
+      "https://example.com/features/analytics",
+      "https://example.com/pricing"
+    ],
+    "protected_pages": [
+      "https://example.com/about/security"
+    ],
+    "visibility_threshold": 0.5,
+    "value_threshold": 0.5
+  },
+  "summary": {
+    "total_pages": 8,
+    "gsc_pages": 7,
+    "ga4_pages": 8,
+    "quadrant_counts": {
+      "accidental_hub": 1,
+      "unicorn": 2,
+      "hidden_gem": 2,
+      "prune_candidate": 2,
+      "protected_review": 1
+    }
+  },
+  "top_by_quadrant": {
+    "accidental_hub": [
+      {
+        "url": "https://example.com/blog/how-to-configure-sso",
+        "visibility_score": 0.6071,
+        "value_score": 0.45,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      }
+    ],
+    "unicorn": [
+      {
+        "url": "https://example.com/features/analytics",
+        "visibility_score": 0.8357,
+        "value_score": 0.7125,
+        "flags": [
+          "intended_hub"
+        ]
+      },
+      {
+        "url": "https://example.com/",
+        "visibility_score": 0.55,
+        "value_score": 0.5875,
+        "flags": [
+          "intended_hub",
+          "low_ctr_high_impressions",
+          "intended_hub_brand_only",
+          "building_toward_intent"
+        ]
+      }
+    ],
+    "hidden_gem": [
+      {
+        "url": "https://example.com/pricing",
+        "visibility_score": 0.5357,
+        "value_score": 0.8562,
+        "flags": [
+          "intended_hub",
+          "building_toward_intent"
+        ]
+      },
+      {
+        "url": "https://example.com/contact",
+        "visibility_score": null,
+        "value_score": 0.4625,
+        "flags": []
+      }
+    ],
+    "prune_candidate": [
+      {
+        "url": "https://example.com/docs/api-reference",
+        "visibility_score": 0.2246,
+        "value_score": 0.2,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      },
+      {
+        "url": "https://example.com/blog/legacy-feature-announcement",
+        "visibility_score": 0,
+        "value_score": 0,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      }
+    ],
+    "protected_review": [
+      {
+        "url": "https://example.com/about/security",
+        "visibility_score": 0.2071,
+        "value_score": 0.2312,
+        "flags": [
+          "protected",
+          "low_ctr_high_impressions"
+        ]
+      }
+    ]
+  },
+  "pages": [
+    {
+      "url": "https://example.com/blog/how-to-configure-sso",
+      "gsc": {
+        "url": "https://example.com/blog/how-to-configure-sso",
+        "impressions": 71400,
+        "clicks": 337,
+        "ctr": 0.004719887955182073,
+        "avg_position": 10.237394957983193,
+        "query_breadth": 5
+      },
+      "ga4": {
+        "url": "https://example.com/blog/how-to-configure-sso",
+        "sessions": 4100,
+        "engagement_rate": 0.34,
+        "conversions": {
+          "demo_request": 3,
+          "newsletter_signup": 18
+        },
+        "conversion_total": 21
+      },
+      "visibility_score": 0.6071,
+      "value_score": 0.45,
+      "hub_type_hint": "technical",
+      "quadrant": "accidental_hub",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Review for spoke extraction, hub retrofit, or commercial routing."
+    },
+    {
+      "url": "https://example.com/features/analytics",
+      "gsc": {
+        "url": "https://example.com/features/analytics",
+        "impressions": 26300,
+        "clicks": 343,
+        "ctr": 0.013041825095057033,
+        "avg_position": 7.147528517110266,
+        "query_breadth": 3
+      },
+      "ga4": {
+        "url": "https://example.com/features/analytics",
+        "sessions": 890,
+        "engagement_rate": 0.61,
+        "conversions": {
+          "demo_request": 41,
+          "newsletter_signup": 28
+        },
+        "conversion_total": 69
+      },
+      "visibility_score": 0.8357,
+      "value_score": 0.7125,
+      "hub_type_hint": "commercial",
+      "quadrant": "unicorn",
+      "flags": [
+        "intended_hub"
+      ],
+      "confidence": "high",
+      "recommended_review": "Protect and replicate patterns on underperforming hubs."
+    },
+    {
+      "url": "https://example.com/pricing",
+      "gsc": {
+        "url": "https://example.com/pricing",
+        "impressions": 7600,
+        "clicks": 80,
+        "ctr": 0.010526315789473684,
+        "avg_position": 8.81842105263158,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example.com/pricing",
+        "sessions": 1240,
+        "engagement_rate": 0.68,
+        "conversions": {
+          "demo_request": 84,
+          "newsletter_signup": 12
+        },
+        "conversion_total": 96
+      },
+      "visibility_score": 0.5357,
+      "value_score": 0.8562,
+      "hub_type_hint": "commercial",
+      "quadrant": "hidden_gem",
+      "flags": [
+        "intended_hub",
+        "building_toward_intent"
+      ],
+      "confidence": "high",
+      "recommended_review": "Increase organic visibility with spokes and internal links from high-traffic pages."
+    },
+    {
+      "url": "https://example.com/",
+      "gsc": {
+        "url": "https://example.com/",
+        "impressions": 16000,
+        "clicks": 83,
+        "ctr": 0.0051875,
+        "avg_position": 10.14625,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example.com/",
+        "sessions": 720,
+        "engagement_rate": 0.52,
+        "conversions": {
+          "demo_request": 22,
+          "newsletter_signup": 45
+        },
+        "conversion_total": 67
+      },
+      "visibility_score": 0.55,
+      "value_score": 0.5875,
+      "hub_type_hint": "unknown",
+      "quadrant": "unicorn",
+      "flags": [
+        "intended_hub",
+        "low_ctr_high_impressions",
+        "intended_hub_brand_only",
+        "building_toward_intent"
+      ],
+      "confidence": "high",
+      "recommended_review": "Protect and replicate patterns on underperforming hubs."
+    },
+    {
+      "url": "https://example.com/docs/api-reference",
+      "gsc": {
+        "url": "https://example.com/docs/api-reference",
+        "impressions": 17700,
+        "clicks": 32,
+        "ctr": 0.001807909604519774,
+        "avg_position": 25.053107344632767,
+        "query_breadth": 3
+      },
+      "ga4": {
+        "url": "https://example.com/docs/api-reference",
+        "sessions": 980,
+        "engagement_rate": 0.29,
+        "conversions": {
+          "demo_request": 1,
+          "newsletter_signup": 4
+        },
+        "conversion_total": 5
+      },
+      "visibility_score": 0.2246,
+      "value_score": 0.2,
+      "hub_type_hint": "technical",
+      "quadrant": "prune_candidate",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Review for consolidate, redirect, or improve — not auto-delete."
+    },
+    {
+      "url": "https://example.com/about/security",
+      "gsc": {
+        "url": "https://example.com/about/security",
+        "impressions": 3200,
+        "clicks": 9,
+        "ctr": 0.0028125,
+        "avg_position": 16.5,
+        "query_breadth": 1
+      },
+      "ga4": {
+        "url": "https://example.com/about/security",
+        "sessions": 210,
+        "engagement_rate": 0.71,
+        "conversions": {
+          "demo_request": 8,
+          "newsletter_signup": 2
+        },
+        "conversion_total": 10
+      },
+      "visibility_score": 0.2071,
+      "value_score": 0.2312,
+      "hub_type_hint": "trust",
+      "quadrant": "protected_review",
+      "flags": [
+        "protected",
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Protected page — review manually; do not auto-prune."
+    },
+    {
+      "url": "https://example.com/blog/legacy-feature-announcement",
+      "gsc": {
+        "url": "https://example.com/blog/legacy-feature-announcement",
+        "impressions": 1300,
+        "clicks": 1,
+        "ctr": 0.0007692307692307692,
+        "avg_position": 46.06153846153846,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example.com/blog/legacy-feature-announcement",
+        "sessions": 45,
+        "engagement_rate": 0.12,
+        "conversions": {
+          "demo_request": 0,
+          "newsletter_signup": 0
+        },
+        "conversion_total": 0
+      },
+      "visibility_score": 0,
+      "value_score": 0,
+      "hub_type_hint": "technical",
+      "quadrant": "prune_candidate",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "medium",
+      "recommended_review": "Review for consolidate, redirect, or improve — not auto-delete."
+    },
+    {
+      "url": "https://example.com/contact",
+      "gsc": null,
+      "ga4": {
+        "url": "https://example.com/contact",
+        "sessions": 380,
+        "engagement_rate": 0.74,
+        "conversions": {
+          "demo_request": 52,
+          "newsletter_signup": 6
+        },
+        "conversion_total": 58
+      },
+      "visibility_score": null,
+      "value_score": 0.4625,
+      "hub_type_hint": "commercial",
+      "quadrant": "hidden_gem",
+      "flags": [],
+      "confidence": "high",
+      "recommended_review": "Increase organic visibility with spokes and internal links from high-traffic pages."
+    }
+  ],
+  "limitations": [],
+  "discovery": {
+    "intent_split": {
+      "brand": {
+        "clicks": 332,
+        "impressions": 28800,
+        "query_count": 6
+      },
+      "commercial": {
+        "clicks": 18,
+        "impressions": 2200,
+        "query_count": 1
+      },
+      "job": {
+        "clicks": 0,
+        "impressions": 0,
+        "query_count": 0
+      },
+      "product": {
+        "clicks": 45,
+        "impressions": 8200,
+        "query_count": 1
+      },
+      "diy": {
+        "clicks": 234,
+        "impressions": 62900,
+        "query_count": 3
+      },
+      "other": {
+        "clicks": 256,
+        "impressions": 41400,
+        "query_count": 7
+      }
+    },
+    "intended_hubs": [
+      {
+        "url": "https://example.com/",
+        "verdict": "brand_only",
+        "top_queries": [
+          {
+            "query": "example saas platform",
+            "clicks": 55,
+            "impressions": 9800,
+            "intent": "brand"
+          },
+          {
+            "query": "example saas",
+            "clicks": 28,
+            "impressions": 6200,
+            "intent": "brand"
+          }
+        ],
+        "gsc_clicks": 83,
+        "gsc_impressions": 16000
+      },
+      {
+        "url": "https://example.com/features/analytics",
+        "verdict": "discovering",
+        "top_queries": [
+          {
+            "query": "saas analytics dashboard",
+            "clicks": 210,
+            "impressions": 15000,
+            "intent": "other"
+          },
+          {
+            "query": "example saas analytics",
+            "clicks": 88,
+            "impressions": 3100,
+            "intent": "brand"
+          },
+          {
+            "query": "product analytics tool",
+            "clicks": 45,
+            "impressions": 8200,
+            "intent": "product"
+          }
+        ],
+        "gsc_clicks": 343,
+        "gsc_impressions": 26300
+      },
+      {
+        "url": "https://example.com/pricing",
+        "verdict": "discovering",
+        "top_queries": [
+          {
+            "query": "example saas pricing",
+            "clicks": 62,
+            "impressions": 5400,
+            "intent": "brand"
+          },
+          {
+            "query": "saas pricing plans",
+            "clicks": 18,
+            "impressions": 2200,
+            "intent": "commercial"
+          }
+        ],
+        "gsc_clicks": 80,
+        "gsc_impressions": 7600
+      }
+    ],
+    "misalignments": [],
+    "indexing_noise_urls": []
+  }
+}
