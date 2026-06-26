@@ -12,6 +12,7 @@ These are not one-line prompt snippets. Each skill is a **workflow package** —
 |------|------|--------|
 | **Marketing** | [`marketing/`](marketing/) | SEO, content strategy, AI-search (GEO), campaign and research workflows |
 | **Product development** | [`product-dev/`](product-dev/) | Product discovery, specs, launch — *skills coming soon* |
+| **Utilities** | [`utilities/`](utilities/) | Meta-skills for authoring and packaging skills in this repo |
 
 Skills are built for **Cursor** (or any agent runtime that supports the [Agent Skills](https://cursor.com/docs/skills) standard + optional MCP). Install once globally, per project, or reference from this repo.
 
@@ -25,6 +26,16 @@ Skills are built for **Cursor** (or any agent runtime that supports the [Agent S
 | [Information Gain Evaluator](marketing/information-gain-evaluator/) | Rigorous SERP-comparative citation gain scoring (handoff v1.1, citation fit + page–keyword fit) |
 
 See [`marketing/README.md`](marketing/README.md) for skill-specific setup and data requirements.
+
+---
+
+## Utilities
+
+| Utility | Description |
+|---------|-------------|
+| [write-a-skill](utilities/write-a-skill/) | Author skills — predictability + right-sized tiers; regression when earned |
+
+See [`utilities/README.md`](utilities/README.md).
 
 ---
 
@@ -122,24 +133,13 @@ View installed skills: **Customize → Skills** (Agent Decides section).
 
 ```text
 skills/
-├── README.md                 # This file — Roots & Fruit skills index
+├── README.md
 ├── marketing/
-│   ├── README.md
 │   ├── fan-out-coverage-analysis/
-│   │   ├── SKILL.md
-│   │   ├── REQUIREMENTS.md
-│   │   ├── REFERENCE.md
-│   │   ├── EXAMPLES.md
-│   │   ├── examples/
-│   │   └── scripts/
 │   └── information-gain-evaluator/
-│       ├── SKILL.md
-│       ├── REQUIREMENTS.md
-│       ├── REFERENCE.md
-│       ├── EXAMPLES.md
-│       ├── examples/
-│       └── scripts/
-└── product-dev/              # Reserved — empty for now
+├── utilities/
+│   └── write-a-skill/
+└── product-dev/
 ```
 
 ---
@@ -149,6 +149,17 @@ skills/
 - **Domain-agnostic by default** — skills ask for the site/domain; they do not guess from context.
 - **Structured handoffs** — reports plus JSON payloads for downstream briefs, audits, or writing.
 - **Data-source flexible** — MCP or CSV where documented; no skill runs on vibes alone.
+
+---
+
+## Influences
+
+Authoring conventions in this repo (especially [`utilities/write-a-skill/`](utilities/write-a-skill/)) combine:
+
+- **[Matt Pocock — writing-great-skills](https://github.com/mattpocock/skills/tree/main/skills/productivity/writing-great-skills)** — predictable process, completion criteria, progressive disclosure inside the skill body, pruning passes.
+- **[Chris Lema — skills that don't fire](https://chrislema.com/youve-installed-a-claude-skill-and-its-not-working-how-to-fix-it)** — frontmatter `description` as the routing trigger; widen user vocabulary on the opening line (`Use when …`).
+
+Roots & Fruit adds **right-sized package tiers** (A/B/C), **handoff JSON**, **SCORECARD** regression IDs, and **verify scripts** where drift would break downstream playbooks. Skill files stay operational; credits live here.
 
 ---
 
