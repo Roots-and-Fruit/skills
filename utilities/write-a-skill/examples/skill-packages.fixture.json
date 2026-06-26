@@ -1,0 +1,19 @@
+{
+  "description": "Golden package layouts for write-a-skill meta regression — paths relative to utilities/write-a-skill/",
+  "packages": [
+    {
+      "id": "M1",
+      "path": "../../marketing/site-content-catalog",
+      "tier": "C",
+      "public": true,
+      "run_verifiers": true
+    },
+    {
+      "id": "M2",
+      "path": ".",
+      "tier": "B",
+      "public": false,
+      "run_verifiers": false
+    }
+  ]
+}
