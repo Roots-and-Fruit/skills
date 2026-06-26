@@ -1,0 +1,342 @@
+{
+  "handoff_version": "1.0",
+  "skill": "robots-txt-audit",
+  "skill_version": "1.2.0",
+  "mode": "audit",
+  "inputs": {
+    "domain": "example.com",
+    "key_pages": [],
+    "crawl_policy": "audit_only"
+  },
+  "discovery": {
+    "found": true,
+    "urls_checked": [
+      "https://example.com/robots.txt",
+      "https://www.example.com/robots.txt"
+    ],
+    "resolved_url": "https://example.com/robots.txt"
+  },
+  "parsed": {
+    "group_count": 2,
+    "rule_count": 6,
+    "user_agent_tokens": [
+      "*",
+      "BadBot"
+    ],
+    "sitemap_directives": [
+      "https://www.example.com/sitemap_index.xml"
+    ]
+  },
+  "policy_summary": {
+    "search_bots": "allowed",
+    "ai_answer_bots": "allowed",
+    "ai_training_bots": "allowed"
+  },
+  "crawlability": {
+    "key_pages_provided": 0,
+    "fully_crawlable": null,
+    "blocked_key_pages": []
+  },
+  "crawler_rules": [
+    {
+      "user_agent": "*",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /wp-admin/",
+        "Allow: /wp-admin/admin-ajax.php"
+      ]
+    }
+  ],
+  "audit_checks": [
+    {
+      "id": "R1",
+      "name": "File accessible",
+      "status": "pass",
+      "note": ""
+    },
+    {
+      "id": "R4",
+      "name": "AI bot differentiation",
+      "status": "warn",
+      "note": "Training bots inherit allow from User-agent: *"
+    },
+    {
+      "id": "R5",
+      "name": "Cornerstone crawlability",
+      "status": "na",
+      "note": "No key_pages provided"
+    },
+    {
+      "id": "R7",
+      "name": "Sitemap declaration",
+      "status": "warn",
+      "note": "Declaration valid; endpoint returned HTTP 500"
+    },
+    {
+      "id": "R7a",
+      "name": "Sitemap present",
+      "status": "pass",
+      "note": ""
+    },
+    {
+      "id": "R7b",
+      "name": "Sitemap absolute URL",
+      "status": "pass",
+      "note": ""
+    },
+    {
+      "id": "R7c",
+      "name": "Sitemap host match",
+      "status": "pass",
+      "note": ""
+    },
+    {
+      "id": "R7d",
+      "name": "Sitemap shape",
+      "status": "pass",
+      "note": "sitemap_index.xml"
+    },
+    {
+      "id": "R7e",
+      "name": "Sitemap endpoint fetch",
+      "status": "warn",
+      "note": "HTTP 500 on https://www.example.com/sitemap_index.xml"
+    }
+  ],
+  "crawler_matrix": [
+    {
+      "token": "Googlebot",
+      "roles": [
+        "indexing"
+      ],
+      "role_label": "indexing",
+      "controls": "Traditional Google Search crawling and indexing",
+      "paired_token": "Google-Extended",
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "allowed",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "note": "Keep unblocked for SEO unless there is a precise non-search reason."
+    },
+    {
+      "token": "bingbot",
+      "roles": [
+        "indexing"
+      ],
+      "role_label": "indexing",
+      "controls": "Bing search crawling and indexing",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "allowed",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "note": null
+    },
+    {
+      "token": "Applebot",
+      "roles": [
+        "indexing",
+        "ai_answer"
+      ],
+      "role_label": "indexing, ai_answer",
+      "controls": "Apple Search, Siri, and Spotlight discovery",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "allowed",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "note": null
+    },
+    {
+      "token": "OAI-SearchBot",
+      "roles": [
+        "ai_answer",
+        "indexing"
+      ],
+      "role_label": "ai_answer, indexing",
+      "controls": "ChatGPT search retrieval and citation discovery",
+      "paired_token": "GPTBot",
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "allowed",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "note": "Allow for GEO; distinct from training crawler GPTBot."
+    },
+    {
+      "token": "PerplexityBot",
+      "roles": [
+        "ai_answer",
+        "indexing"
+      ],
+      "role_label": "ai_answer, indexing",
+      "controls": "Perplexity search indexing and answer citations",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "allowed",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "note": null
+    },
+    {
+      "token": "GPTBot",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "OpenAI model training crawl",
+      "paired_token": "OAI-SearchBot",
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "note": "Blocking limits training reuse; does not block ChatGPT search bot."
+    },
+    {
+      "token": "Google-Extended",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "Google generative-AI product training token (robots.txt only)",
+      "paired_token": "Googlebot",
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "note": "Does not affect Google Search when Googlebot remains allowed."
+    },
+    {
+      "token": "CCBot",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "Common Crawl corpus inclusion",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "note": null
+    },
+    {
+      "token": "ClaudeBot",
+      "roles": [
+        "ai_training",
+        "ai_answer"
+      ],
+      "role_label": "ai_training, ai_answer",
+      "controls": "Anthropic crawl — verify current docs for training vs fetch behavior",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "allowed",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "note": "Registry default blocks training posture; confirm against live Anthropic policy."
+    },
+    {
+      "token": "anthropic-ai",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "Anthropic legacy training crawl token",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "note": null
+    },
+    {
+      "token": "Applebot-Extended",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "Apple foundation-model training token",
+      "paired_token": "Applebot",
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "note": null
+    },
+    {
+      "token": "Meta-ExternalAgent",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "Meta AI/product improvement crawl",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "note": null
+    },
+    {
+      "token": "ChatGPT-User",
+      "roles": [
+        "user_triggered"
+      ],
+      "role_label": "user_triggered",
+      "controls": "User-prompted URL fetch in ChatGPT",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "note": "May not obey robots.txt like automated crawlers; document only."
+    },
+    {
+      "token": "Perplexity-User",
+      "roles": [
+        "user_triggered"
+      ],
+      "role_label": "user_triggered",
+      "controls": "User-prompted fetch in Perplexity",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "note": "May not obey robots.txt like automated crawlers; document only."
+    }
+  ],
+  "sitemap_validation": {
+    "present": true,
+    "urls": [
+      "https://www.example.com/sitemap_index.xml"
+    ],
+    "valid_urls": [
+      "https://www.example.com/sitemap_index.xml"
+    ],
+    "host_match": true,
+    "absolute_urls": true,
+    "endpoint_fetch": [
+      {
+        "url": "https://www.example.com/sitemap_index.xml",
+        "status": 500,
+        "ok": false
+      }
+    ],
+    "issues": [
+      {
+        "id": "SM7",
+        "severity": "warn",
+        "message": "Sitemap URL returned HTTP 500: https://www.example.com/sitemap_index.xml"
+      }
+    ],
+    "status": "warn"
+  },
+  "policy_compliance": null,
+  "draft_robots_txt": null,
+  "deployment_note": "No deployment performed. Live file at https://example.com/robots.txt",
+  "limitations": [
+    "Sitemap URL returned HTTP 500 during fetch — declaration valid, endpoint may be broken",
+    "No key_pages supplied for cornerstone crawlability check",
+    "max_discovery compliance not evaluated (audit_only policy)"
+  ]
+}

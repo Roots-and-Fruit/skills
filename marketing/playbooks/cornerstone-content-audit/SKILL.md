@@ -22,7 +22,7 @@ Audits a site's most important content — the 3–7 cornerstone pages that shou
 | Phase 3b | Fan-Out Coverage Analysis | `../../fan-out-coverage-analysis/SKILL.md` |
 | Phase 3c | Information Gain Evaluator | `../../information-gain-evaluator/SKILL.md` |
 | Phase 4a | SEO Cannibalization Audit | `../../seo-cannibalization-audit/SKILL.md` |
-| Phase 5h | llms.txt Audit | `../../llms-txt-audit/SKILL.md` |
+| Phase 5h | robots.txt Audit | `../../robots-txt-audit/SKILL.md` |
 
 Read each linked `SKILL.md` before calling it. Follow its workflow exactly.
 
@@ -45,7 +45,7 @@ On the **first user-facing response**:
 2. Name exact skills for that scope (see Architecture).
 3. Preview deliverable shape for that scope.
 4. State the Phase 2 approval checkpoint when nomination is involved.
-5. Frame recommendations around audit dimensions (rankings, fan-out, information gain, AI citability, cannibalization, pruning, `llms.txt`).
+5. Frame recommendations around audit dimensions (rankings, fan-out, information gain, AI citability, cannibalization, pruning, AI crawler permissions via `robots.txt`).
 
 Use `AskQuestion` for Phase 2 approval when available; otherwise wait for explicit user confirmation.
 
@@ -131,6 +131,7 @@ Pass: `target_url`, `primary_keyword`.
 1. `ai_opt_llm_ment_search` — domain in LLM mentions for primary keyword
 2. `ai_opt_llm_ment_top_pages` — pages AI cites for keyword
 3. Structure check (WebFetch): H2/H3 hierarchy, data tables, FAQ blocks, extractable passages
+4. **Crawlability flag (lightweight):** if `robots.txt` is already fetched in-session, note whether this cornerstone path is blocked for `Googlebot` or major AI answer bots — full policy audit remains Phase 5h
 
 ### 3e: Scorecard template
 
@@ -180,15 +181,27 @@ Classify: **Consolidate** | **Improve** | **Deindex** | **Delete**
 
 Synthesize Phases 3–4. Per cornerstone: content (from 3c), internal links (from 3b), keyword realignment, SERP features, fan-out gap content, cannibalization fixes, pruning.
 
-### 5h: llms.txt
+### 5h: robots.txt and AI crawler policy
 
-**Call:** [llms.txt Audit](../../llms-txt-audit/SKILL.md)
+**Call:** [robots.txt Audit](../../robots-txt-audit/SKILL.md)
 
-Pass `domain` and `key_pages` (confirmed cornerstone URLs from Phase 2).
+Pass:
+
+- `domain`
+- `key_pages` — confirmed cornerstone URLs from Phase 2
+- `crawl_policy` — default `max_discovery` unless user specifies otherwise
+
+Receive **handoff JSON v1.0** (`REFERENCE.md` in robots skill) for the report's crawler policy section.
+
+Cross-check when available:
+
+- Phase 1 catalog — sitemap URLs blocked by `Disallow`
+- Phase 3d — weak AI mentions plus blocked answer bots → flag as likely discoverability issue
+- Phase 4 pruning — pages marked **Deindex** vs training-crawler exposure (note only; do not block audit)
 
 ### Prioritization
 
-- **Quick wins:** internal links, title/meta/H1, schema, `llms.txt`
+- **Quick wins:** internal links, title/meta/H1, schema, **robots.txt fixes** that unblock cornerstones or wrongly block discovery crawlers
 - **Medium effort:** freshness, information gain, heading structure, clear pruning
 - **Strategic:** new cluster content, major rewrites, architecture changes
 
@@ -206,7 +219,7 @@ Pass `domain` and `key_pages` (confirmed cornerstone URLs from Phase 2).
 ## Enhancement Plan
 ### Quick Wins / Medium Effort / Strategic Projects
 ## New Content Opportunities
-## llms.txt Recommendation
+## robots.txt & AI Crawler Policy
 ## Appendix: Full Page Catalog
 ```
 
@@ -230,6 +243,6 @@ Pass `domain` and `key_pages` (confirmed cornerstone URLs from Phase 2).
 
 ## Research basis
 
-Cornerstone content practice (Yoast, HubSpot, etc.) plus 2025–2026 GEO: AI Overview fan-out, information gain for citations, `llms.txt`, content pruning impact, structured-content citation lift.
+Cornerstone content practice (Yoast, HubSpot, etc.) plus 2025–2026 GEO: AI Overview fan-out, information gain for citations, selective `robots.txt` crawler policy (RFC 9309; training vs answer/search bots), content pruning impact, structured-content citation lift.
 
 **Requirements:** `REQUIREMENTS.md`

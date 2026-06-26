@@ -1,0 +1,13 @@
+# Intentionally bad for max_discovery regression — do not deploy
+
+User-agent: Googlebot
+Disallow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: *
+Allow: /

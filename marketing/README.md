@@ -57,17 +57,18 @@ Detect when multiple pages compete for the same keywords; output conflicts, hub/
 
 ---
 
-### llms.txt Audit
+### robots.txt Audit
 
-**Path:** [`llms-txt-audit/`](llms-txt-audit/)  
-**Version:** 1.0.0 — audit, generate, or update `llms.txt` for AI visibility
+**Path:** [`robots-txt-audit/`](robots-txt-audit/)  
+**Version:** 1.2.0 — per-bot matrix in handoff, SM7/R7e sitemap fetch, `fully_crawlable: null` when no key pages
 
-**Data required:** WebFetch; optional key page URLs — see [`llms-txt-audit/REQUIREMENTS.md`](llms-txt-audit/REQUIREMENTS.md).
+**Data required:** WebFetch; optional key page URLs and crawl policy — see [`robots-txt-audit/REQUIREMENTS.md`](robots-txt-audit/REQUIREMENTS.md).
 
 **Example prompts:**
 
-- *"Audit **llms.txt** for **example.com**"*
-- *"Generate **llms.txt** for **example.com** using these key pages: [urls]"*
+- *"Audit **robots.txt** for **example.com**"*
+- *"Check if AI crawlers can reach our cornerstone pages on **example.com**"*
+- *"Generate **robots.txt** for **example.com** — max discovery policy"*
 
 **Pairs with:** [Cornerstone Content Audit](playbooks/cornerstone-content-audit/) (Phase 5h).
 

@@ -2,7 +2,7 @@
 
 Multi-phase workflows that orchestrate skills under `marketing/`. Each playbook folder contains a `SKILL.md` plus `REQUIREMENTS.md`.
 
-Playbooks **call** capability and composite skills under `marketing/` (catalog, fan-out, information gain, cannibalization, llms.txt) rather than duplicating their logic.
+Playbooks **call** capability and composite skills under `marketing/` (catalog, fan-out, information gain, cannibalization, robots.txt) rather than duplicating their logic.
 
 | Playbook | Status |
 |----------|--------|

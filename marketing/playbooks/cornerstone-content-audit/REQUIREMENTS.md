@@ -38,7 +38,7 @@ This playbook is a **workflow for an AI agent**. It orchestrates other marketing
 | 3b | Fan-Out Coverage Analysis | `../../fan-out-coverage-analysis/SKILL.md` |
 | 3c | Information Gain Evaluator | `../../information-gain-evaluator/SKILL.md` |
 | 4a | SEO Cannibalization Audit | `../../seo-cannibalization-audit/SKILL.md` |
-| 5h | llms.txt Audit | `../../llms-txt-audit/SKILL.md` |
+| 5h | robots.txt Audit | `../../robots-txt-audit/SKILL.md` |
 
 ---
 
