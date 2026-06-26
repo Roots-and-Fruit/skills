@@ -12,7 +12,7 @@ version: 2.3.0
 
 ## Purpose
 
-Google AI Overviews decompose a query into parallel sub-queries. This workflow approximates that fan-out from SERP + Labs data. With a **user-supplied domain**, it also measures which sub-queries the site covers and packages a neutral handoff. **Without a domain**, it runs **keyword-only SERP fan-out** (no coverage checks, no site assumptions).
+Approximate query fan-out from SERP + Labs data. With a **user-supplied domain**, measure which sub-queries the site covers. **Without a domain**, run **keyword-only SERP fan-out** (no coverage checks).
 
 ## Domain policy (non-negotiable)
 

@@ -12,9 +12,7 @@ version: 1.1.0
 
 ## Purpose
 
-AI systems preferentially cite content with high **information gain** — unique data, original research, novel frameworks. Generic pages that rehash common knowledge get ignored because the model can cite anyone. This workflow compares a target page to its SERP competitors and scores how much genuinely new, **cite-worthy** information it contributes for the **primary keyword**.
-
-**Ship bar:** handoff must pass `node scripts/verify-handoff.mjs` including **R1–R18** rigorous checks (schema v1.1).
+Compare a target page to SERP competitors and score cite-worthy **information gain** for the **primary keyword**.
 
 **Not this skill:** publish-readiness gates, HTML audit deliverables, or brief-fidelity checks.
 
