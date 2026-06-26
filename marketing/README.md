@@ -8,6 +8,71 @@ Skills live in subfolders under `marketing/`. Each folder is self-contained: rea
 
 ## Available skills
 
+### Site Content Catalog
+
+**Path:** [`site-content-catalog/`](site-content-catalog/)  
+**Version:** 1.1.0 — modes, handoff v1.0, page-type classifier + regression (G1–G14, T1–T9)
+
+Build a page inventory (URL, `page_type`, optional SEO signals) for audits and playbooks.
+
+| Mode | You provide | You get |
+|------|-------------|---------|
+| **sitemap_only** | Sitemap or domain + WebFetch | URLs, types, lastmod — handoff v1.0 |
+| **sitemap_enriched** | + DataForSEO MCP | + keywords, ETV, backlinks, depth counts |
+| **labs_fallback** | Domain, no sitemap + MCP | Ranked URLs only + limitations |
+
+**Data required:** see [`site-content-catalog/REQUIREMENTS.md`](site-content-catalog/REQUIREMENTS.md).
+
+**Regression:**
+
+```bash
+node site-content-catalog/scripts/verify-scorecard.mjs
+node site-content-catalog/scripts/verify-handoff.mjs
+```
+
+**Example prompts:**
+
+- *"Catalog **example.com** — sitemap at **https://example.com/sitemap.xml**"*
+- *"Inventory all pages under **/blog/** on **example.com** — sitemap only"*
+
+**Pairs with:** [Cornerstone Content Audit](playbooks/cornerstone-content-audit/) (Phase 1).
+
+---
+
+### SEO Cannibalization Audit
+
+**Path:** [`seo-cannibalization-audit/`](seo-cannibalization-audit/)  
+**Version:** 1.0.0 — same-domain keyword overlap, intent comparison, resolution recommendations
+
+Detect when multiple pages compete for the same keywords; output conflicts, hub/spoke checks, and retire/differentiate/301 guidance.
+
+**Data required:** DataForSEO MCP — see [`seo-cannibalization-audit/REQUIREMENTS.md`](seo-cannibalization-audit/REQUIREMENTS.md).
+
+**Example prompts:**
+
+- *"Check cannibalization on **example.com** for **https://example.com/pricing**"*
+- *"Which pages on **example.com** compete for **enterprise SSO**?"*
+
+**Pairs with:** [Cornerstone Content Audit](playbooks/cornerstone-content-audit/) (Phase 4a).
+
+---
+
+### llms.txt Audit
+
+**Path:** [`llms-txt-audit/`](llms-txt-audit/)  
+**Version:** 1.0.0 — audit, generate, or update `llms.txt` for AI visibility
+
+**Data required:** WebFetch; optional key page URLs — see [`llms-txt-audit/REQUIREMENTS.md`](llms-txt-audit/REQUIREMENTS.md).
+
+**Example prompts:**
+
+- *"Audit **llms.txt** for **example.com**"*
+- *"Generate **llms.txt** for **example.com** using these key pages: [urls]"*
+
+**Pairs with:** [Cornerstone Content Audit](playbooks/cornerstone-content-audit/) (Phase 5h).
+
+---
+
 ### Fan-Out Coverage Analysis
 
 **Path:** [`fan-out-coverage-analysis/`](fan-out-coverage-analysis/)  
@@ -73,6 +138,16 @@ See [`information-gain-evaluator/examples/SCORECARD-enterprise-sso.md`](informat
 - *"Pinned competitors mode — target [url], keyword [kw], competitors [url1], [url2], [url3]"*
 
 **Pairs with:** Fan-Out Coverage Analysis (upstream gaps + `intent_lane`).
+
+---
+
+## Playbooks (in progress)
+
+Multi-phase orchestrators live under [`playbooks/`](playbooks/). Not yet in the root install index.
+
+| Playbook | Path |
+|----------|------|
+| Cornerstone Content Audit | [`playbooks/cornerstone-content-audit/`](playbooks/cornerstone-content-audit/) |
 
 ---
 
