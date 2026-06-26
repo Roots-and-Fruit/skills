@@ -2,11 +2,9 @@
 name: Information Gain Evaluator
 type: composite
 description: >
-  Evaluate how much unique, non-redundant value a page adds compared to what
-  already ranks for the same keyword. Scores original data, unique frameworks,
-  first-hand experience, novel angles, and citable specificity.
-  Use for information gain evaluation, content uniqueness checks, SERP
-  differentiation, or "what makes this page worth citing".
+  Use when evaluating information gain, content uniqueness, SERP differentiation,
+  or what makes a page worth citing. Scores unique value vs what already ranks
+  for the same keyword.
 version: 1.1.0
 ---
 

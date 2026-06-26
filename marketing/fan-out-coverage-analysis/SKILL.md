@@ -2,10 +2,9 @@
 name: Fan-Out Coverage Analysis
 type: composite
 description: >
-  Simulate AI query fan-out for a keyword; optionally check which sub-queries
-  a user-supplied domain covers. Use for fan-out coverage, sub-query coverage,
-  topic coverage analysis, AI coverage gaps, or keyword-only SERP fan-out when
-  no domain is provided.
+  Use when analyzing fan-out coverage, sub-query coverage, topic coverage gaps,
+  or keyword-only SERP fan-out without a domain. Simulates AI query fan-out and
+  optional domain coverage checks for a keyword.
 version: 2.3.0
 ---
 
