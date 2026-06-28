@@ -20,7 +20,8 @@ git config core.hooksPath .githooks
 
 | Belongs in **this repo** | Keep **out** of this repo |
 |--------------------------|---------------------------|
-| Fictional fixtures (`*.handoff.fixture.json`) | Client deliverables and roadmaps (`ROADMAP.md`) |
+| Fictional fixtures (`*.handoff.fixture.json`) | Client deliverables and internal roadmaps (`ROADMAP.md`) |
+| `FUTURE-WORK.md` (public-safe planning — no client slugs or private paths) | Live GSC/GA4 exports and client override files |
 | `example.com`, `acme.io`, `example-*` SaaS domains | Real client domains, slugs, or product names in fixtures |
 | Playbook `SKILL.md`, `EXAMPLES.md`, `REFERENCE.md` | `GROOT`, `CLIENTS/`, `_ORCHESTRATOR`, `groot.config` references |
 | Skill verifiers and SCORECARDs | Scraped site corpora under `research/` |

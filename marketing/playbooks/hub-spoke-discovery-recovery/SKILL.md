@@ -355,7 +355,7 @@ Pass: `domain`, `key_pages` (audit targets), `crawl_policy` default `max_discove
 
 `dataforseo_labs_google_keywords_for_site`, `dataforseo_labs_google_ranked_keywords`, `dataforseo_labs_google_related_keywords`, `dataforseo_labs_google_keyword_suggestions`, `dataforseo_labs_google_keyword_ideas`, `backlinks_summary`, `serp_organic_live_advanced`, `on_page_content_parsing`, `ai_opt_llm_ment_search`, `ai_opt_llm_ment_top_pages`
 
-**Requirements:** `REQUIREMENTS.md` · **Triangulation SSOT:** `REFERENCE.md`
+**Requirements:** `REQUIREMENTS.md` · **Triangulation SSOT:** `REFERENCE.md` · **Future work:** `FUTURE-WORK.md`
 
 ## Done definition
 
