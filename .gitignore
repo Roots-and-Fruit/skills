@@ -8,4 +8,5 @@ Thumbs.db
 research/
 
 # Agent live-test handoffs (promote to fixtures manually after review)
+**/examples/live-run-*.handoff.json
 marketing/skills/information-gain-evaluator/examples/live-run-*.handoff.json

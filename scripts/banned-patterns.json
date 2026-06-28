@@ -1,0 +1,50 @@
+{
+  "banned_substrings": [
+    { "id": "P1", "pattern": "GROOT", "flags": "i", "note": "Internal orchestrator workspace" },
+    { "id": "P2", "pattern": "CLIENTS/", "flags": "i", "note": "Client-scoped paths" },
+    { "id": "P3", "pattern": "_ORCHESTRATOR", "flags": "i", "note": "Internal orchestrator paths" },
+    { "id": "P4", "pattern": "groot.config", "flags": "i", "note": "Per-client config" },
+    { "id": "P5", "pattern": "nerdpress", "flags": "i", "note": "Client slug" },
+    { "id": "P6", "pattern": "mattcromwell", "flags": "i", "note": "Real practitioner site used as live fixture" },
+    { "id": "P7", "pattern": "hubbub", "flags": "i", "note": "Real product name in test data" },
+    { "id": "P8", "pattern": "shootproof", "flags": "i", "note": "Real competitor brand" },
+    { "id": "P9", "pattern": "pixieset", "flags": "i", "note": "Real competitor brand" }
+  ],
+  "substring_scan_exclude": [
+    "scripts/banned-patterns.json",
+    "scripts/verify-public-hygiene.mjs",
+    "CONTRIBUTING.md"
+  ],
+  "banned_path_globs": [
+    { "id": "B1", "pattern": "research/**", "note": "Local scraped corpora" },
+    { "id": "B2", "pattern": "**/ROADMAP.md", "note": "Internal planning docs" },
+    { "id": "B3", "pattern": "**/live-run-*.handoff.json", "note": "Unreviewed live agent handoffs" }
+  ],
+  "fixture_domain_allowlist": [
+    "example.com",
+    "acme.io",
+    "example-wp-support.io",
+    "example-photo.io",
+    "example-saas.com",
+    "competitor-a.example",
+    "competitor-b.example",
+    "competitor-c.example"
+  ],
+  "fixture_url_host_allowlist": [
+    "example.com",
+    "acme.io",
+    "example-wp-support.io",
+    "example-photo.io",
+    "example-saas.com",
+    "vendor-a.com",
+    "vendor-b.com",
+    "example-vendor.com",
+    "competitor-a.example",
+    "competitor-b.example",
+    "competitor-c.example",
+    "developer.wordpress.org",
+    "wordpress.org",
+    "wp-kama.com",
+    "github.com"
+  ]
+}

@@ -172,6 +172,7 @@ skills/
 - **Domain-agnostic by default** — skills ask for the site/domain; they do not guess from context.
 - **Structured handoffs** — reports plus JSON payloads for downstream briefs, audits, or writing.
 - **Data-source flexible** — MCP or CSV where documented; no skill runs on vibes alone.
+- **Public hygiene gate** — run `node scripts/verify-public-hygiene.mjs` before commit; see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ---
 
