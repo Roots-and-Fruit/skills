@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.1",
   "skill": "web-scrape-to-md",
-  "skill_version": "1.1.0",
+  "skill_version": "1.1.2",
   "generated_at": "2026-06-27T17:00:00.000Z",
   "mode": "summary_only",
   "inputs": {
@@ -20,11 +20,11 @@
       "https://example.com/sitemap-post-type-page.xml"
     ],
     "blog_archive_fetched": true,
-    "blog_archive_url": "https://example.com/articles/",
+    "blog_archive_url": "https://example.com/blog/",
     "freshness_goal": true,
     "recent_posts_discovered": [
-      "https://example.com/articles/marketing-skills-are-overrated/",
-      "https://example.com/articles/why-product-launch-matters/"
+      "https://example.com/blog/widget-pricing-guide/",
+      "https://example.com/blog/product-launch-story/"
     ],
     "search_rounds": 0,
     "markdown_direct_count": 0,
@@ -47,45 +47,45 @@
       "fetch_format": "html"
     },
     {
-      "url": "https://example.com/articles/marketing-skills-are-overrated/",
-      "final_url": "https://example.com/articles/marketing-skills-are-overrated/",
+      "url": "https://example.com/blog/widget-pricing-guide/",
+      "final_url": "https://example.com/blog/widget-pricing-guide/",
       "status": "ok",
       "intent": "reference",
-      "source_tag": "sitemap_child_discovered",
+      "source_tag": "archive_discovered",
       "fetch_format": "html",
-      "quality_note": "Newest post from child sitemap after root sitemap HTTP 500"
+      "quality_note": "Newest post via extractArchivePostUrls on blog index"
     },
     {
-      "url": "https://example.com/articles/launch/",
-      "final_url": "https://example.com/articles/launch/",
+      "url": "https://example.com/blog/launch/",
+      "final_url": "https://example.com/blog/launch/",
       "status": "ok",
       "intent": "identity",
       "source_tag": "llms_seed",
       "fetch_format": "html"
     },
     {
-      "url": "https://example.com/articles/why-product-launch-matters/",
-      "final_url": "https://example.com/articles/why-product-launch-matters/",
+      "url": "https://example.com/blog/product-launch-story/",
+      "final_url": "https://example.com/blog/product-launch-story/",
       "status": "ok",
       "intent": "evidence",
       "source_tag": "archive_discovered",
       "fetch_format": "html",
-      "quality_note": "Discovered via /articles/ archive after sitemap root failure"
+      "quality_note": "Discovered via blog archive after sitemap root failure"
     }
   ],
   "corpus_files": [],
   "recommended_keep": [
     "https://example.com/",
-    "https://example.com/articles/marketing-skills-are-overrated/",
-    "https://example.com/articles/launch/"
+    "https://example.com/blog/widget-pricing-guide/",
+    "https://example.com/blog/launch/"
   ],
   "recommended_drop": [],
   "limitations": [
     "sitemap.xml returned HTTP 500 via WebFetch; child post sitemap succeeded",
-    "llms.txt lists /articles/ archive — fetched for recent post discovery, not skipped"
+    "llms.txt lists blog archive URL — fetched for link extraction, not skipped"
   ],
   "efficiency_notes": [
-    "Avoided WebSearch after child sitemap + archive yielded fresh posts",
+    "Avoided WebSearch after archive link extraction yielded fresh posts",
     "markdown_direct_count counts page fetches only — llms.txt seed does not increment it"
   ]
 }

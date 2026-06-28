@@ -34,13 +34,29 @@ Then **WebSearch** only for remaining gaps (goal-driven queries below).
 
 ### llms.txt archive rule (non-negotiable)
 
-When `llms.txt` (or llms-full) links a **Blog / articles archive** index (e.g. `/articles/`, `/blog/`):
+When `llms.txt` (or llms-full) links a **blog archive index** URL (detect with `isArchiveIndexUrl()`):
 
 1. **Fetch that URL once** for child post link discovery.
-2. Tag discovered posts `source_tag: archive_discovered` (or `sitemap_child_discovered` if also in sitemap).
-3. Do **not** add the archive index itself to `recommended_drop` without fetching it when llms listed it as a Key Resource.
+2. Pass the URL as the **first seed** to `blogArchiveCandidates(domain, [archiveUrl])`.
+3. Tag discovered posts `archive_discovered` (or `sitemap_child_discovered` if also in sitemap).
+4. Do **not** add the archive index to `recommended_drop` without fetching it when llms listed it.
 
 Other archive indexes (tag, author, date) remain excluded unless the user requests them.
+
+---
+
+## Archive link extraction (before slug recovery)
+
+After `WebFetch` of an archive index, scan the **raw response** for permalinks — markdown conversion often drops `href`s while keeping excerpt text.
+
+1. Run `extractArchivePostUrls(content, archiveUrl, domain)` from `scripts/wp-sitemap-fallback.mjs`.
+2. Parses markdown links `[text](url)` and HTML `href="..."` on the same host.
+3. Keeps URLs **deeper than** the archive path (child posts, not the index itself).
+4. Record results in `recent_posts_discovered[]` before any slug guessing.
+
+**Do not** conclude "no permalinks" when only the markdown summary lacks links — the HTML may still contain them; re-read the fetch payload or request link-bearing sections.
+
+Slug recovery (`§ Slug recovery`) runs only when link extraction returns nothing usable.
 
 ---
 
@@ -75,16 +91,17 @@ If child sitemaps also fail → blog archive fallback (`§ Blog archive fallback
 
 When sitemap discovery is incomplete or failed:
 
+1. Collect **seed URLs** from llms.txt archive links (`isArchiveIndexUrl()`).
+2. Build try-list: `blogArchiveCandidates(domain, seedUrls)` — seeds first, then generic `/blog/`, `/news/`, `/posts/`, `/insights/`.
+3. `WebFetch` each until one returns content; set `blog_archive_fetched` and `blog_archive_url`.
+4. Run **archive link extraction** on the response (`§ Archive link extraction`).
+5. If links still missing, use top-of-page teaser order for slug recovery (last resort).
+
 ```bash
 node scripts/wp-sitemap-fallback.mjs --domain {domain} --blog-archive
 ```
 
-Try in order: `/articles/`, `/blog/`, `/news/`.
-
-1. `WebFetch` the first that returns content.
-2. Set `blog_archive_fetched: true` and `blog_archive_url`.
-3. Extract up to **3** newest post links from index copy (top of page = recency heuristic).
-4. Add posts to curated URL set — do not bulk-fetch the full archive listing page unless user asks.
+(Generic fallbacks only — prefer llms-seeded archive URL when available.)
 
 ---
 
@@ -104,6 +121,21 @@ When `freshness_goal` is true:
 | 4 | Populate `recent_posts_discovered[]` with those URLs |
 
 **Completion:** at least one recent post URL discovered when the site has a public blog and discovery tools partially work.
+
+---
+
+## Slug recovery (last resort)
+
+Use **only when** archive link extraction and sitemap discovery did not yield a permalink.
+
+1. Take the **first sentence** of each teaser (text before `;` or `.`).
+2. `slugCandidatesFromTeaser(teaser)` — full headline, drop-first-word, drop lead-in variants.
+3. `pathPrefix = blogPathPrefixFromArchiveUrl(blog_archive_url)` — from the fetched archive, not a guessed path.
+4. `postUrlsFromSlugs(domain, candidates, pathPrefix)` → `WebFetch` each until one `ok`.
+5. `WebSearch`: `site:{domain} "{teaser}"`.
+6. Mark `unresolved` only after steps 1–5.
+
+**Do not** invent slug words absent from the teaser. Record attempted slugs in `limitations[]`.
 
 ---
 
@@ -129,7 +161,7 @@ Apply on every **page** fetch:
 | `llms_seed` | From llms.txt / llms-full.txt (page URL, not the txt file itself) |
 | `sitemap_discovered` | From root sitemap.xml |
 | `sitemap_child_discovered` | From child sitemap XML |
-| `archive_discovered` | Post URL found via blog/articles archive index |
+| `archive_discovered` | Post URL found via blog or content archive index |
 | `search_discovered` | From WebSearch |
 | `nav_discovered` | From fetched page navigation |
 
@@ -218,7 +250,8 @@ Fetch limits, thin sections, paywall, missing data.
 | E4 | Format mix | Same as E2 / G16 |
 | E5 | Coverage honesty | `completed_ok` ≤ `coverage_target` unless exhaustive noted |
 | E6 | Sitemap fallback | When `sitemap_root_status` is `http_error`, `sitemap_child_urls_tried.length` ≥ 1 OR `blog_archive_fetched` OR noted in `limitations` |
-| E7 | Freshness | When `freshness_goal`, `recent_posts_discovered.length` ≥ 1 OR blog absence noted in `limitations` |
+| E7 | Freshness | When `freshness_goal`, every archive-visible post in `recent_posts_discovered[]` OR slug recovery + search exhausted |
+| E8 | Slug recovery | When archive teaser lacks permalink, ≥2 slug candidates tried before `unresolved` |
 
 ---
 
@@ -284,3 +317,5 @@ Unchanged from v1.0 — see prior fields in package v1.0.0 docs; `source_tag` en
 |---------|-------|
 | 1.0.0 | Initial public handoff; Q/E/G layers |
 | 1.1.0 | Sitemap/blog fallbacks, freshness pass, llms archive rule, count semantics, handoff v1.1 |
+| 1.1.1 | Slug recovery; archive index deprioritized in corpus |
+| 1.1.2 | Archive link extraction before slug recovery; domain-agnostic blog paths (llms seeds + generic fallbacks) |

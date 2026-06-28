@@ -6,7 +6,7 @@ description: >
   or preparing lower-token source files from WebSearch/WebFetch. Discovers URLs,
   prefers markdown-native endpoints, recovers from sitemap failures, and emits
   efficient high-signal page files plus a structured run handoff.
-version: 1.1.0
+version: 1.1.2
 ---
 
 # Web Scrape to Markdown
@@ -72,8 +72,8 @@ Before bulk HTML page fetches:
 1. `WebFetch` in order: `/llms.txt`, `/llms-full.txt`, `/llms.md`, `/sitemap.xml`.
 2. Record `discovery_summary.llms_endpoints_checked: true` and `sitemap_root_status` (`ok` | `http_error` | `missing`).
 3. **Sitemap root failure** — if `/sitemap.xml` returns HTTP error, try child sitemaps from `node scripts/wp-sitemap-fallback.mjs --domain <domain>` (`REFERENCE.md` § Sitemap fallback).
-4. **llms.txt blog/archive links** — when llms lists a Blog/articles archive URL, **fetch that index for child post links** even though other archive indexes are normally excluded (`REFERENCE.md` § llms archive rule).
-5. **Blog archive fallback** — when root + child sitemaps fail or omit posts, `WebFetch` archive candidates (`--blog-archive` flag on fallback script).
+4. **llms.txt blog/archive links** — when llms lists a blog or content archive URL, **fetch that index for child post links** even though other archive indexes are normally excluded (`REFERENCE.md` § llms archive rule).
+5. **Blog archive fallback** — when root + child sitemaps fail or omit posts, fetch archive URLs: **llms-seeded archive links first**, then `blogArchiveCandidates(domain, seeds)` (`REFERENCE.md`).
 6. `WebSearch` only when llms, sitemap, and archive passes still leave gaps.
 
 **Completion criterion:** `sitemap_child_urls_tried[]` populated when root sitemap failed; llms-seeded archive URLs fetched for discovery when present.
@@ -85,10 +85,15 @@ Set `discovery_summary.freshness_goal: true` when the goal mentions blog, articl
 When `freshness_goal` is true:
 
 1. Prefer **newest posts** from child post sitemap `<lastmod>` order or archive index (top **3** by default).
-2. Add discovered post URLs to `recent_posts_discovered[]` and the curated fetch set.
-3. Do **not** skip the archive index solely as "low-signal" when freshness is required.
+2. **Archive link extraction** — on each archive index fetch, run `extractArchivePostUrls()` on the raw response (`REFERENCE.md` § Archive link extraction). Use discovered `href`s before any slug guessing.
+3. Add discovered post URLs to `recent_posts_discovered[]` and the curated fetch set.
+4. Do **not** skip the archive index solely as "low-signal" when freshness is required.
+5. **Slug recovery** (last resort only) — when link extraction finds teasers but no URLs (`REFERENCE.md` § Slug recovery):
+   - Derive `pathPrefix` from `blog_archive_url` via `blogPathPrefixFromArchiveUrl()` — never hardcode a site path.
+   - Run `slugCandidatesFromTeaser()` and `postUrlsFromSlugs(domain, candidates, pathPrefix)`.
+   - If slug attempts fail, `WebSearch` with the **exact teaser sentence** in quotes.
 
-**Completion criterion:** `recent_posts_discovered[]` has ≥1 URL when freshness_goal is true and the site publishes posts.
+**Completion criterion:** `recent_posts_discovered[]` lists every post visible on the archive index; unresolved only after link extraction + slug candidates + exact-title search.
 
 ### Step 2 — URL curation
 
@@ -117,8 +122,9 @@ For `corpus_run`, one file per page (`{slug}.md`) using `REFERENCE.md` template.
 - Extract for the **declared goal** — not full page dumps.
 - Q-layer checklist in `REFERENCE.md`.
 - Cap ~80–120 lines per page unless user requests full capture.
+- **Prefer post body files over archive index files** when coverage is tight — document discovery in `limitations[]` instead of a dedicated archive-index corpus file unless the user asks for one.
 
-**Completion criterion:** every `ok` URL in `corpus_run` has a `corpus_files[]` entry passing Q-layer.
+**Completion criterion:** every `ok` URL in `corpus_run` has a `corpus_files[]` entry passing Q-layer; archive post URLs extracted before slug recovery when freshness applies.
 
 ### Step 5 — Handoff + INDEX
 
@@ -161,7 +167,7 @@ Golden fixtures: `examples/example-saas.handoff.fixture.json`, `examples/example
 - [ ] User inputs echoed in `handoff.inputs` — no invented domain
 - [ ] `llms_endpoints_checked` true; `sitemap_root_status` recorded
 - [ ] Sitemap root HTTP error → child sitemaps tried and/or blog archive fetched
-- [ ] `freshness_goal` true → `recent_posts_discovered[]` populated when posts exist
+- [ ] Archive fetch → `extractArchivePostUrls()` on raw response before slug recovery
 - [ ] Every curated URL in `url_results[]`; counts reconciled (`completed_ok`, format counts)
 - [ ] `markdown_direct_count` counts **page fetches** only — not llms.txt
 - [ ] `corpus_run`: each `ok` URL has corpus file meeting Q-layer

@@ -10,7 +10,7 @@ node scripts/verify-scorecard.mjs
 node scripts/wp-sitemap-fallback.mjs --domain example.com
 ```
 
-**Ship gate:** all G1–G19, E1–E7 (when applicable), Q1–Q8, S1–S6 pass.
+**Ship gate:** all G1–G19, E1–E7 (when applicable), Q1–Q8, S1–S9 pass.
 
 ---
 
@@ -54,7 +54,8 @@ Verifier: `node scripts/verify-scorecard.mjs` · SSOT: `REFERENCE.md` § Efficie
 | E4 | Format mix | Same as E2 / G16 |
 | E5 | Coverage honesty | `completed_ok` ≤ `coverage_target` unless exhaustive noted |
 | E6 | Sitemap fallback | when `sitemap_root_status: http_error`, child URLs tried OR archive fetched OR noted |
-| E7 | Freshness | when `freshness_goal`, `recent_posts_discovered` ≥ 1 OR no-blog noted |
+| E7 | Freshness | when `freshness_goal`, posts in `recent_posts_discovered` or slug recovery noted |
+| E8 | Slug recovery | ≥2 slug candidates from teaser before `unresolved` (agent rule; see S7–S8) |
 
 ---
 
@@ -68,7 +69,7 @@ Verifier: `node scripts/verify-scorecard.mjs` · SSOT: `REFERENCE.md` § Efficie
 
 ---
 
-## Layer S — Sitemap fallback script (S1–S6)
+## Layer S — Sitemap fallback script (S1–S9)
 
 Verifier: `verify-scorecard.mjs` · SSOT: `scripts/wp-sitemap-fallback.mjs`
 
@@ -76,10 +77,13 @@ Verifier: `verify-scorecard.mjs` · SSOT: `scripts/wp-sitemap-fallback.mjs`
 |----|-------|-----------|
 | S1 | Post child sitemap | Slim SEO post XML in child list |
 | S2 | Page child sitemap | Slim SEO page XML in child list |
-| S3 | Blog archive order | `/articles/` first archive candidate |
+| S3 | Blog archive seeds | llms seed URL tried before generic fallbacks |
 | S4 | Parse locs | `parseSitemapLocs` extracts `<loc>` |
-| S5 | Archive detect | `/articles/` index yes; `/articles/launch/` no |
+| S5 | Archive detect | `/blog/` index yes; `/blog/launch/` post no |
 | S6 | Freshness heuristic | research+blog goal true; pricing-only false |
+| S7 | Slug candidates | drop-first-word yields expected slug |
+| S8 | Post URL build | `postUrlsFromSlugs` uses `blog_archive_url` prefix |
+| S9 | Link extraction | `extractArchivePostUrls` finds child post href |
 
 ---
 
@@ -88,4 +92,4 @@ Verifier: `verify-scorecard.mjs` · SSOT: `scripts/wp-sitemap-fallback.mjs`
 | Version | Notes |
 |---------|-------|
 | 1.0.0 | Initial G/E/Q layers |
-| 1.1.0 | Sitemap/blog fallbacks, freshness, G17–G19 count fix, S-layer, example-sitemap-fail fixture |
+| 1.1.2 | Archive link extraction (S9); domain-agnostic blog paths |

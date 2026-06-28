@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * WordPress / Slim SEO sitemap fallback URL candidates when root sitemap fails.
+ * WordPress / Slim SEO sitemap fallback and blog-archive helpers.
  *
  * Usage:
  *   node scripts/wp-sitemap-fallback.mjs --domain example.com
@@ -33,10 +33,94 @@ export function childSitemapCandidates(domain) {
   ];
 }
 
-/** Blog index paths to fetch for recent post link extraction when sitemap unavailable. */
-export function blogArchiveCandidates(domain) {
+const GENERIC_BLOG_PATHS = ["/blog/", "/news/", "/posts/", "/insights/"];
+
+/**
+ * Blog index URLs to try when sitemap discovery fails.
+ * @param {string} domain
+ * @param {string[]} [seedUrls] — archive URLs from llms.txt or user input (tried first)
+ */
+export function blogArchiveCandidates(domain, seedUrls = []) {
   const base = siteBase(domain);
-  return [`${base}/articles/`, `${base}/blog/`, `${base}/news/`];
+  const seen = new Set();
+  const out = [];
+
+  const push = (raw) => {
+    if (!raw || typeof raw !== "string") {
+      return;
+    }
+    try {
+      const url = raw.startsWith("http")
+        ? raw
+        : `${base}${raw.startsWith("/") ? raw : `/${raw}`}`;
+      const normalized = new URL(url).toString();
+      if (!seen.has(normalized)) {
+        seen.add(normalized);
+        out.push(normalized);
+      }
+    } catch {
+      /* skip invalid */
+    }
+  };
+
+  for (const seed of seedUrls) {
+    push(seed);
+  }
+  for (const segment of GENERIC_BLOG_PATHS) {
+    push(`${base}${segment.replace(/^\//, "")}`);
+  }
+  return out;
+}
+
+/** Path prefix for post permalinks from a fetched archive index URL. */
+export function blogPathPrefixFromArchiveUrl(archiveUrl) {
+  const u = new URL(archiveUrl);
+  let pathname = u.pathname;
+  if (!pathname.endsWith("/")) {
+    pathname = `${pathname}/`;
+  }
+  return pathname;
+}
+
+/** Extract same-domain post URLs from archive page fetch (markdown or HTML). */
+export function extractArchivePostUrls(content, archiveUrl, domain) {
+  const host = normalizeDomain(domain).replace(/^www\./i, "");
+  const archivePath = blogPathPrefixFromArchiveUrl(archiveUrl);
+  const archiveDepth = archivePath.split("/").filter(Boolean).length;
+  const urls = new Set();
+  const patterns = [
+    /\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/gi,
+    /href=["'](https?:\/\/[^"'#]+)["']/gi
+  ];
+
+  for (const re of patterns) {
+    let match = re.exec(content);
+    while (match) {
+      try {
+        const u = new URL(match[1]);
+        const linkHost = u.hostname.replace(/^www\./i, "");
+        if (linkHost !== host && !linkHost.endsWith(`.${host}`)) {
+          match = re.exec(content);
+          continue;
+        }
+        const depth = u.pathname.split("/").filter(Boolean).length;
+        if (depth <= archiveDepth) {
+          match = re.exec(content);
+          continue;
+        }
+        if (!u.pathname.startsWith(archivePath.replace(/\/$/, ""))) {
+          match = re.exec(content);
+          continue;
+        }
+        urls.add(u.href.endsWith("/") ? u.href : `${u.href}/`);
+      } catch {
+        /* skip */
+      }
+      match = re.exec(content);
+    }
+  }
+
+  return [...urls];
 }
 
 /** Extract <loc> URLs from sitemap XML text (stdlib only). */
@@ -51,11 +135,17 @@ export function parseSitemapLocs(xml) {
   return locs;
 }
 
-/** Heuristic: llms.txt line links to a blog/articles archive index. */
+/** Heuristic: URL is a blog/post archive index (not a single post). */
 export function isArchiveIndexUrl(url) {
   try {
     const pathname = new URL(url).pathname.replace(/\/+$/, "") || "/";
-    return /\/(articles|blog|news|posts)$/i.test(pathname);
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length !== 1) {
+      return false;
+    }
+    return /^(blog|news|posts|insights|resources|articles|writing)$/i.test(
+      segments[0]
+    );
   } catch {
     return false;
   }
@@ -67,6 +157,60 @@ export function goalNeedsFreshness(goal) {
   return /\b(blog|article|post|corpus|research|content|publish|recent|latest|news)\b/.test(
     text
   );
+}
+
+/** Lowercase hyphen slug from plain text (WordPress-style permalinks). */
+export function slugify(text) {
+  return String(text)
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[''"]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 96);
+}
+
+/**
+ * Ordered slug candidates when archive teaser has no permalink.
+ * First sentence only; tries full headline, drop-first-word, and drop lead-in variants.
+ */
+export function slugCandidatesFromTeaser(teaser) {
+  const head = String(teaser).split(/[;.!?]/)[0].trim();
+  if (!head) {
+    return [];
+  }
+
+  const candidates = [];
+  const push = (phrase) => {
+    const slug = slugify(phrase);
+    if (slug && !candidates.includes(slug)) {
+      candidates.push(slug);
+    }
+  };
+
+  push(head);
+  const words = head.split(/\s+/);
+  if (words.length > 3) {
+    push(words.slice(1).join(" "));
+  }
+  push(head.replace(/^(agent|the|a|an|my|our)\s+/i, ""));
+
+  return candidates;
+}
+
+/**
+ * Build post permalinks from slug candidates under the archive path prefix.
+ * @param {string} pathPrefix — from `blogPathPrefixFromArchiveUrl(blog_archive_url)` (never hardcode a site path)
+ */
+export function postUrlsFromSlugs(domain, slugs, pathPrefix) {
+  if (!pathPrefix) {
+    throw new Error("pathPrefix required — derive from blog_archive_url");
+  }
+  const base = siteBase(domain);
+  const prefix = pathPrefix.startsWith("/") ? pathPrefix : `/${pathPrefix}`;
+  const segment = prefix.endsWith("/") ? prefix : `${prefix}/`;
+  return slugs.map((slug) => `${base}${segment}${slug}/`.replace(/([^:]\/)\/+/g, "$1"));
 }
 
 function parseArgs(argv) {

@@ -11,10 +11,14 @@ import { fileURLToPath } from "node:url";
 import { assessPageMd } from "./assess-page-md.mjs";
 import {
   blogArchiveCandidates,
+  blogPathPrefixFromArchiveUrl,
   childSitemapCandidates,
+  extractArchivePostUrls,
   goalNeedsFreshness,
   isArchiveIndexUrl,
-  parseSitemapLocs
+  parseSitemapLocs,
+  postUrlsFromSlugs,
+  slugCandidatesFromTeaser
 } from "./wp-sitemap-fallback.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -85,7 +89,7 @@ function runEfficiencyChecks(data, label) {
     failed += check(
       "E7",
       d.recent_posts_discovered.length >= 1 ||
-        data.limitations.some((line) => /blog|post|no public/i.test(String(line)))
+        data.limitations.some((line) => /blog|post|no public|slug/i.test(String(line)))
     );
   }
 
@@ -126,18 +130,18 @@ function runFallbackScriptChecks() {
     children.includes("https://example.com/sitemap-post-type-page.xml")
   );
 
-  const archives = blogArchiveCandidates("example.com");
-  failed += check("S3", archives[0] === "https://example.com/articles/");
+  const seeds = blogArchiveCandidates("example.com", ["https://example.com/blog/"]);
+  failed += check("S3", seeds[0] === "https://example.com/blog/");
 
   const xml =
-    '<?xml version="1.0"?><urlset><url><loc>https://example.com/articles/a/</loc></url></urlset>';
+    '<?xml version="1.0"?><urlset><url><loc>https://example.com/blog/a/</loc></url></urlset>';
   const locs = parseSitemapLocs(xml);
-  failed += check("S4", locs.length === 1 && locs[0].endsWith("/articles/a/"));
+  failed += check("S4", locs.length === 1 && locs[0].endsWith("/blog/a/"));
 
   failed += check(
     "S5",
-    isArchiveIndexUrl("https://example.com/articles/") &&
-      !isArchiveIndexUrl("https://example.com/articles/launch/")
+    isArchiveIndexUrl("https://example.com/blog/") &&
+      !isArchiveIndexUrl("https://example.com/blog/launch/")
   );
 
   failed += check(
@@ -145,6 +149,26 @@ function runFallbackScriptChecks() {
     goalNeedsFreshness("research corpus with latest blog posts") &&
       !goalNeedsFreshness("pricing page audit only")
   );
+
+  const teaser = "The ultimate widget pricing guide; how we benchmark plans";
+  const slugs = slugCandidatesFromTeaser(teaser);
+  failed += check("S7", slugs.includes("ultimate-widget-pricing-guide"));
+
+  const prefix = blogPathPrefixFromArchiveUrl("https://example.com/blog/");
+  const urls = postUrlsFromSlugs("example.com", ["widget-pricing-guide"], prefix);
+  failed += check(
+    "S8",
+    urls[0] === "https://example.com/blog/widget-pricing-guide/"
+  );
+
+  const html =
+    '<h2><a href="https://example.com/blog/post-one/">Post One</a></h2>';
+  const extracted = extractArchivePostUrls(
+    html,
+    "https://example.com/blog/",
+    "example.com"
+  );
+  failed += check("S9", extracted.includes("https://example.com/blog/post-one/"));
 
   return failed;
 }
