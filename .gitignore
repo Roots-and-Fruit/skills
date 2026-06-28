@@ -4,5 +4,8 @@
 .DS_Store
 Thumbs.db
 
+# Local research corpus (scraped site content; never publish)
+research/
+
 # Agent live-test handoffs (promote to fixtures manually after review)
 marketing/skills/information-gain-evaluator/examples/live-run-*.handoff.json
