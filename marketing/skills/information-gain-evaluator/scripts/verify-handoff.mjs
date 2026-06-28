@@ -8,7 +8,7 @@
  * Usage:
  *   node scripts/verify-handoff.mjs [path/to/handoff.json] [--gold PROFILE]
  *
- * Profiles: commercial-vs-diy (fictional mismatch), plugin-readme-practitioner (live aligned-high)
+ * Profiles: commercial-vs-diy (fictional mismatch), plugin-readme-practitioner (aligned-high fixture)
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";

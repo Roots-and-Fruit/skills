@@ -27,6 +27,14 @@ Skills are built for **Cursor** (or any agent runtime that supports the [Agent S
 | [Site Content Catalog](marketing/skills/site-content-catalog/) | Sitemap or domain page inventory with `page_type` labels and optional SEO signals (handoff v1.0, WordPress child sitemaps) |
 | [Analytics and Search Console Performance Audit](marketing/skills/analytics-and-searchconsole-performance-audit/) | GSC query-intent discovery + optional GA4 conversion quadrants (`discovery_only` / `discovery_plus_conversions`); handoff v1.0; Phase 1a for hub-and-spoke playbook |
 | [robots.txt Audit](marketing/skills/robots-txt-audit/) | AI crawler permissions, cornerstone crawlability, and policy-aligned robots.txt (handoff v1.0) |
+| [SEO Cannibalization Audit](marketing/skills/seo-cannibalization-audit/) | Same-domain keyword overlap, intent comparison, resolution recommendations (playbook Phase 4a) |
+
+### Playbooks (in progress)
+
+| Playbook | Description |
+|----------|-------------|
+| [Hub & Spoke Discovery & Recovery](marketing/playbooks/hub-spoke-discovery-recovery/) | Bottom-up discovery — GSC/GA4 performance matrix + DataForSEO triangulation + recovery plan (v0.3.0) |
+| [Cornerstone Content Audit](marketing/playbooks/cornerstone-content-audit/) | Top-down cornerstone health audit when pillars are already known |
 
 See [`marketing/README.md`](marketing/README.md) for skill-specific setup and data requirements.
 
@@ -37,6 +45,7 @@ See [`marketing/README.md`](marketing/README.md) for skill-specific setup and da
 | Utility | Description |
 |---------|-------------|
 | [write-a-skill](utilities/write-a-skill/) | Author skills — predictability + right-sized tiers; regression when earned |
+| [web-scrape-to-md](utilities/web-scrape-to-md/) | Scrape sites to markdown — llms-first, sitemap/blog fallbacks, freshness pass, handoff v1.1 |
 
 See [`utilities/README.md`](utilities/README.md).
 
@@ -140,15 +149,19 @@ skills/
 ├── marketing/
 │   ├── README.md
 │   ├── playbooks/
-│   │   └── cornerstone-content-audit/
+│   │   ├── cornerstone-content-audit/
+│   │   ├── cornerstone-discovery-audit/   # redirect stub → hub-spoke-discovery-recovery
+│   │   └── hub-spoke-discovery-recovery/
 │   └── skills/
+│       ├── analytics-and-searchconsole-performance-audit/
 │       ├── fan-out-coverage-analysis/
 │       ├── information-gain-evaluator/
 │       ├── site-content-catalog/
 │       ├── seo-cannibalization-audit/
 │       └── robots-txt-audit/
 ├── utilities/
-│   └── write-a-skill/
+│   ├── write-a-skill/
+│   └── web-scrape-to-md/
 └── product-dev/
 ```
 

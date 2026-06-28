@@ -1,0 +1,127 @@
+{
+  "handoff_version": "1.1",
+  "skill": "web-scrape-to-md",
+  "skill_version": "1.1.0",
+  "generated_at": "2026-06-27T12:00:00.000Z",
+  "mode": "corpus_run",
+  "inputs": {
+    "domain": "example.com",
+    "goal": "competitor positioning and pricing research",
+    "coverage_target": 5,
+    "output_dir": "research/corpus/example-com"
+  },
+  "discovery_summary": {
+    "llms_endpoints_checked": true,
+    "llms_txt_status": "found",
+    "sitemap_checked": true,
+    "sitemap_root_status": "ok",
+    "sitemap_child_urls_tried": [],
+    "blog_archive_fetched": false,
+    "freshness_goal": false,
+    "recent_posts_discovered": [],
+    "search_rounds": 1,
+    "markdown_direct_count": 3,
+    "html_fallback_count": 2,
+    "discovery_sources": ["llms_seed", "sitemap_discovered", "search_discovered"],
+    "completed_ok": 5,
+    "completed_total": 5
+  },
+  "url_results": [
+    {
+      "url": "https://example.com/",
+      "final_url": "https://example.com/",
+      "status": "ok",
+      "intent": "identity",
+      "source_tag": "llms_seed",
+      "fetch_format": "markdown",
+      "quality_note": "Hero and positioning extracted"
+    },
+    {
+      "url": "https://example.com/pricing",
+      "final_url": "https://example.com/pricing",
+      "status": "ok",
+      "intent": "value",
+      "source_tag": "llms_seed",
+      "fetch_format": "markdown",
+      "quality_note": "Plan tiers preserved"
+    },
+    {
+      "url": "https://example.com/customers/acme",
+      "final_url": "https://example.com/customers/acme",
+      "status": "ok",
+      "intent": "evidence",
+      "source_tag": "sitemap_discovered",
+      "fetch_format": "markdown",
+      "quality_note": "Case study quotes kept"
+    },
+    {
+      "url": "https://example.com/docs/getting-started",
+      "final_url": "https://example.com/docs/getting-started",
+      "status": "ok",
+      "intent": "reference",
+      "source_tag": "sitemap_discovered",
+      "fetch_format": "html",
+      "quality_note": "No markdown endpoint; structured summary"
+    },
+    {
+      "url": "https://example.com/compare",
+      "final_url": "https://example.com/compare",
+      "status": "ok",
+      "intent": "identity",
+      "source_tag": "search_discovered",
+      "fetch_format": "html",
+      "quality_note": "Comparison table summarized"
+    }
+  ],
+  "corpus_files": [
+    {
+      "path": "research/corpus/example-com/home.md",
+      "url": "https://example.com/",
+      "line_count": 42,
+      "fetch_format": "markdown",
+      "quality_pass": true
+    },
+    {
+      "path": "research/corpus/example-com/pricing.md",
+      "url": "https://example.com/pricing",
+      "line_count": 38,
+      "fetch_format": "markdown",
+      "quality_pass": true
+    },
+    {
+      "path": "research/corpus/example-com/customers-acme.md",
+      "url": "https://example.com/customers/acme",
+      "line_count": 55,
+      "fetch_format": "markdown",
+      "quality_pass": true
+    },
+    {
+      "path": "research/corpus/example-com/docs-getting-started.md",
+      "url": "https://example.com/docs/getting-started",
+      "line_count": 67,
+      "fetch_format": "html",
+      "quality_pass": true
+    },
+    {
+      "path": "research/corpus/example-com/compare.md",
+      "url": "https://example.com/compare",
+      "line_count": 48,
+      "fetch_format": "html",
+      "quality_pass": true
+    }
+  ],
+  "recommended_keep": [
+    "https://example.com/",
+    "https://example.com/pricing",
+    "https://example.com/customers/acme",
+    "https://example.com/compare"
+  ],
+  "recommended_drop": [
+    "https://example.com/tag/product-updates"
+  ],
+  "limitations": [],
+  "efficiency_notes": [
+    "Seeded URL set from llms.txt before HTML fallbacks",
+    "Three markdown-direct page fetches avoided HTML parsing"
+  ]
+}

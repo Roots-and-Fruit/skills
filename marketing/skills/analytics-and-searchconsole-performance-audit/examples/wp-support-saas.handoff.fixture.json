@@ -1,0 +1,543 @@
+{
+  "handoff_version": "1.0",
+  "skill": "analytics-and-searchconsole-performance-audit",
+  "skill_version": "1.3.1",
+  "generated_at": "2026-06-28T15:43:59.876Z",
+  "mode": "full",
+  "inputs": {
+    "domain": "example-wp-support.io",
+    "date_range": "2025-06-26/2026-06-25",
+    "analysis_mode": "discovery_plus_conversions",
+    "conversion_events": [
+      "demo_request",
+      "trial_signup"
+    ],
+    "intended_hubs": [
+      "https://example-wp-support.io/how-we-help",
+      "https://example-wp-support.io/pricing",
+      "https://example-wp-support.io/contact",
+      "https://example-wp-support.io/support-plans"
+    ],
+    "protected_pages": [
+      "https://example-wp-support.io/about"
+    ],
+    "visibility_threshold": 0.5,
+    "value_threshold": 0.5
+  },
+  "summary": {
+    "total_pages": 10,
+    "gsc_pages": 8,
+    "ga4_pages": 10,
+    "quadrant_counts": {
+      "unicorn": 4,
+      "prune_candidate": 4,
+      "hidden_gem": 1,
+      "protected_review": 1
+    }
+  },
+  "top_by_quadrant": {
+    "unicorn": [
+      {
+        "url": "https://example-wp-support.io/pricing",
+        "visibility_score": 0.6937,
+        "value_score": 0.755,
+        "flags": [
+          "intended_hub",
+          "intended_hub_brand_only",
+          "building_toward_intent"
+        ]
+      },
+      {
+        "url": "https://example-wp-support.io/how-to-transfer-your-domain-to-cloudflare",
+        "visibility_score": 0.575,
+        "value_score": 0.545,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      },
+      {
+        "url": "https://example-wp-support.io/google-tag-assistant",
+        "visibility_score": 0.5625,
+        "value_score": 0.53,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      },
+      {
+        "url": "https://example-wp-support.io/",
+        "visibility_score": 0.5437,
+        "value_score": 0.9,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      }
+    ],
+    "prune_candidate": [
+      {
+        "url": "https://example-wp-support.io/blog/how-to-transfer-your-dns-to-cloudflare",
+        "visibility_score": 0.45,
+        "value_score": 0.035,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      },
+      {
+        "url": "https://example-wp-support.io/support-plans",
+        "visibility_score": 0.2875,
+        "value_score": 0.14,
+        "flags": [
+          "intended_hub",
+          "low_ctr_high_impressions",
+          "intended_hub_brand_only",
+          "building_toward_intent"
+        ]
+      },
+      {
+        "url": "https://example-wp-support.io/how-we-help",
+        "visibility_score": 0.1222,
+        "value_score": 0,
+        "flags": [
+          "intended_hub"
+        ]
+      },
+      {
+        "url": "https://example-wp-support.io/careers",
+        "visibility_score": null,
+        "value_score": 0.21,
+        "flags": []
+      }
+    ],
+    "hidden_gem": [
+      {
+        "url": "https://example-wp-support.io/contact",
+        "visibility_score": 0.225,
+        "value_score": 0.64,
+        "flags": [
+          "intended_hub",
+          "low_ctr_high_impressions",
+          "converts_without_search_clicks",
+          "intended_hub_brand_only",
+          "building_toward_intent"
+        ]
+      }
+    ],
+    "protected_review": [
+      {
+        "url": "https://example-wp-support.io/about",
+        "visibility_score": null,
+        "value_score": 0.07,
+        "flags": [
+          "protected"
+        ]
+      }
+    ]
+  },
+  "pages": [
+    {
+      "url": "https://example-wp-support.io/how-to-transfer-your-domain-to-cloudflare",
+      "gsc": {
+        "url": "https://example-wp-support.io/how-to-transfer-your-domain-to-cloudflare",
+        "impressions": 38600,
+        "clicks": 155,
+        "ctr": 0.004015544041450777,
+        "avg_position": 13.04119170984456,
+        "query_breadth": 3
+      },
+      "ga4": {
+        "url": "https://example-wp-support.io/how-to-transfer-your-domain-to-cloudflare",
+        "sessions": 890,
+        "engagement_rate": 0.34,
+        "conversions": {
+          "demo_request": 1,
+          "trial_signup": 0
+        },
+        "conversion_total": 1
+      },
+      "visibility_score": 0.575,
+      "value_score": 0.545,
+      "hub_type_hint": "commercial",
+      "quadrant": "unicorn",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Protect and replicate patterns on underperforming hubs."
+    },
+    {
+      "url": "https://example-wp-support.io/google-tag-assistant",
+      "gsc": {
+        "url": "https://example-wp-support.io/google-tag-assistant",
+        "impressions": 4490,
+        "clicks": 34,
+        "ctr": 0.0075723830734966595,
+        "avg_position": 7.49554565701559,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example-wp-support.io/google-tag-assistant",
+        "sessions": 410,
+        "engagement_rate": 0.31,
+        "conversions": {
+          "demo_request": 1,
+          "trial_signup": 0
+        },
+        "conversion_total": 1
+      },
+      "visibility_score": 0.5625,
+      "value_score": 0.53,
+      "hub_type_hint": "commercial",
+      "quadrant": "unicorn",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Protect and replicate patterns on underperforming hubs."
+    },
+    {
+      "url": "https://example-wp-support.io/blog/how-to-transfer-your-dns-to-cloudflare",
+      "gsc": {
+        "url": "https://example-wp-support.io/blog/how-to-transfer-your-dns-to-cloudflare",
+        "impressions": 1540,
+        "clicks": 12,
+        "ctr": 0.007792207792207792,
+        "avg_position": 8.2,
+        "query_breadth": 1
+      },
+      "ga4": {
+        "url": "https://example-wp-support.io/blog/how-to-transfer-your-dns-to-cloudflare",
+        "sessions": 29,
+        "engagement_rate": 0.38,
+        "conversions": {
+          "demo_request": 0,
+          "trial_signup": 0
+        },
+        "conversion_total": 0
+      },
+      "visibility_score": 0.45,
+      "value_score": 0.035,
+      "hub_type_hint": "technical",
+      "quadrant": "prune_candidate",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Review for consolidate, redirect, or improve — not auto-delete."
+    },
+    {
+      "url": "https://example-wp-support.io/how-we-help",
+      "gsc": {
+        "url": "https://example-wp-support.io/how-we-help",
+        "impressions": 600,
+        "clicks": 3,
+        "ctr": 0.005,
+        "avg_position": 29.55,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example-wp-support.io/how-we-help",
+        "sessions": 26,
+        "engagement_rate": 1,
+        "conversions": {
+          "demo_request": 0,
+          "trial_signup": 0
+        },
+        "conversion_total": 0
+      },
+      "visibility_score": 0.1222,
+      "value_score": 0,
+      "hub_type_hint": "commercial",
+      "quadrant": "prune_candidate",
+      "flags": [
+        "intended_hub"
+      ],
+      "confidence": "medium",
+      "recommended_review": "Review for consolidate, redirect, or improve — not auto-delete."
+    },
+    {
+      "url": "https://example-wp-support.io/pricing",
+      "gsc": {
+        "url": "https://example-wp-support.io/pricing",
+        "impressions": 7600,
+        "clicks": 80,
+        "ctr": 0.010526315789473684,
+        "avg_position": 8.81842105263158,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example-wp-support.io/pricing",
+        "sessions": 124,
+        "engagement_rate": 0.6,
+        "conversions": {
+          "demo_request": 8,
+          "trial_signup": 2
+        },
+        "conversion_total": 10
+      },
+      "visibility_score": 0.6937,
+      "value_score": 0.755,
+      "hub_type_hint": "commercial",
+      "quadrant": "unicorn",
+      "flags": [
+        "intended_hub",
+        "intended_hub_brand_only",
+        "building_toward_intent"
+      ],
+      "confidence": "high",
+      "recommended_review": "Protect and replicate patterns on underperforming hubs."
+    },
+    {
+      "url": "https://example-wp-support.io/support-plans",
+      "gsc": {
+        "url": "https://example-wp-support.io/support-plans",
+        "impressions": 38600,
+        "clicks": 29,
+        "ctr": 0.0007512953367875648,
+        "avg_position": 15.922279792746114,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example-wp-support.io/support-plans",
+        "sessions": 70,
+        "engagement_rate": 0.62,
+        "conversions": {
+          "demo_request": 0,
+          "trial_signup": 0
+        },
+        "conversion_total": 0
+      },
+      "visibility_score": 0.2875,
+      "value_score": 0.14,
+      "hub_type_hint": "commercial",
+      "quadrant": "prune_candidate",
+      "flags": [
+        "intended_hub",
+        "low_ctr_high_impressions",
+        "intended_hub_brand_only",
+        "building_toward_intent"
+      ],
+      "confidence": "high",
+      "recommended_review": "Review for consolidate, redirect, or improve — not auto-delete."
+    },
+    {
+      "url": "https://example-wp-support.io/contact",
+      "gsc": {
+        "url": "https://example-wp-support.io/contact",
+        "impressions": 1045,
+        "clicks": 2,
+        "ctr": 0.0019138755980861245,
+        "avg_position": 2.3,
+        "query_breadth": 1
+      },
+      "ga4": {
+        "url": "https://example-wp-support.io/contact",
+        "sessions": 42,
+        "engagement_rate": 0.74,
+        "conversions": {
+          "demo_request": 7,
+          "trial_signup": 1
+        },
+        "conversion_total": 8
+      },
+      "visibility_score": 0.225,
+      "value_score": 0.64,
+      "hub_type_hint": "commercial",
+      "quadrant": "hidden_gem",
+      "flags": [
+        "intended_hub",
+        "low_ctr_high_impressions",
+        "converts_without_search_clicks",
+        "intended_hub_brand_only",
+        "building_toward_intent"
+      ],
+      "confidence": "high",
+      "recommended_review": "Increase organic visibility with spokes and internal links from high-traffic pages."
+    },
+    {
+      "url": "https://example-wp-support.io/",
+      "gsc": {
+        "url": "https://example-wp-support.io/",
+        "impressions": 9800,
+        "clicks": 55,
+        "ctr": 0.005612244897959183,
+        "avg_position": 9.1,
+        "query_breadth": 1
+      },
+      "ga4": {
+        "url": "https://example-wp-support.io/",
+        "sessions": 1387,
+        "engagement_rate": 0.45,
+        "conversions": {
+          "demo_request": 17,
+          "trial_signup": 4
+        },
+        "conversion_total": 21
+      },
+      "visibility_score": 0.5437,
+      "value_score": 0.9,
+      "hub_type_hint": "unknown",
+      "quadrant": "unicorn",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Protect and replicate patterns on underperforming hubs."
+    },
+    {
+      "url": "https://example-wp-support.io/careers",
+      "gsc": null,
+      "ga4": {
+        "url": "https://example-wp-support.io/careers",
+        "sessions": 347,
+        "engagement_rate": 0.05,
+        "conversions": {
+          "demo_request": 0,
+          "trial_signup": 0
+        },
+        "conversion_total": 0
+      },
+      "visibility_score": null,
+      "value_score": 0.21,
+      "hub_type_hint": "trust",
+      "quadrant": "prune_candidate",
+      "flags": [],
+      "confidence": "medium",
+      "recommended_review": "Review for consolidate, redirect, or improve — not auto-delete."
+    },
+    {
+      "url": "https://example-wp-support.io/about",
+      "gsc": null,
+      "ga4": {
+        "url": "https://example-wp-support.io/about",
+        "sessions": 38,
+        "engagement_rate": 0.5,
+        "conversions": {
+          "demo_request": 0,
+          "trial_signup": 0
+        },
+        "conversion_total": 0
+      },
+      "visibility_score": null,
+      "value_score": 0.07,
+      "hub_type_hint": "trust",
+      "quadrant": "protected_review",
+      "flags": [
+        "protected"
+      ],
+      "confidence": "medium",
+      "recommended_review": "Protected page — review manually; do not auto-prune."
+    }
+  ],
+  "limitations": [],
+  "discovery": {
+    "intent_split": {
+      "brand": {
+        "clicks": 167,
+        "impressions": 57225,
+        "query_count": 6
+      },
+      "commercial": {
+        "clicks": 2,
+        "impressions": 420,
+        "query_count": 1
+      },
+      "job": {
+        "clicks": 0,
+        "impressions": 0,
+        "query_count": 0
+      },
+      "product": {
+        "clicks": 0,
+        "impressions": 0,
+        "query_count": 0
+      },
+      "diy": {
+        "clicks": 0,
+        "impressions": 0,
+        "query_count": 0
+      },
+      "other": {
+        "clicks": 201,
+        "impressions": 44630,
+        "query_count": 6
+      }
+    },
+    "intended_hubs": [
+      {
+        "url": "https://example-wp-support.io/how-we-help",
+        "verdict": "discovering",
+        "top_queries": [
+          {
+            "query": "wordpress maintenance",
+            "clicks": 2,
+            "impressions": 420,
+            "intent": "commercial"
+          },
+          {
+            "query": "wordpress support plans",
+            "clicks": 1,
+            "impressions": 180,
+            "intent": "brand"
+          }
+        ],
+        "gsc_clicks": 3,
+        "gsc_impressions": 600
+      },
+      {
+        "url": "https://example-wp-support.io/pricing",
+        "verdict": "brand_only",
+        "top_queries": [
+          {
+            "query": "example wp support pricing",
+            "clicks": 62,
+            "impressions": 5400,
+            "intent": "brand"
+          },
+          {
+            "query": "wordpress support pricing",
+            "clicks": 18,
+            "impressions": 2200,
+            "intent": "brand"
+          }
+        ],
+        "gsc_clicks": 80,
+        "gsc_impressions": 7600
+      },
+      {
+        "url": "https://example-wp-support.io/contact",
+        "verdict": "brand_only",
+        "top_queries": [
+          {
+            "query": "contact wordpress support",
+            "clicks": 2,
+            "impressions": 1045,
+            "intent": "brand"
+          }
+        ],
+        "gsc_clicks": 2,
+        "gsc_impressions": 1045
+      },
+      {
+        "url": "https://example-wp-support.io/support-plans",
+        "verdict": "brand_only",
+        "top_queries": [
+          {
+            "query": "wordpress support plans",
+            "clicks": 21,
+            "impressions": 30400,
+            "intent": "brand"
+          },
+          {
+            "query": "managed wordpress support",
+            "clicks": 8,
+            "impressions": 8200,
+            "intent": "brand"
+          }
+        ],
+        "gsc_clicks": 29,
+        "gsc_impressions": 38600
+      }
+    ],
+    "misalignments": [],
+    "indexing_noise_urls": []
+  }
+}

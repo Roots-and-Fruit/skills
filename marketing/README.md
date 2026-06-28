@@ -69,7 +69,7 @@ node skills/analytics-and-searchconsole-performance-audit/scripts/verify-scoreca
 - *"Audit GA4 and Search Console exports for **example.com** — conversions: **demo_request**"*
 - *"Which landing pages are accidental hubs vs hidden gems on **example.com**?"*
 
-**Pairs with:** [Hub & Spoke Discovery & Recovery](playbooks/hub-spoke-discovery-recovery/) (Phase 1a, in progress).
+**Pairs with:** [Hub & Spoke Discovery & Recovery](playbooks/hub-spoke-discovery-recovery/) (Phase 1a).
 
 ---
 
@@ -165,7 +165,7 @@ node skills/information-gain-evaluator/scripts/verify-handoff.mjs skills/informa
 
 See [`skills/information-gain-evaluator/examples/SCORECARD-enterprise-sso.md`](skills/information-gain-evaluator/examples/SCORECARD-enterprise-sso.md) and [`SCORECARD-commercial-vs-diy.md`](skills/information-gain-evaluator/examples/SCORECARD-commercial-vs-diy.md).
 
-**Live sample run:** [`skills/information-gain-evaluator/examples/plugin-readme-practitioner.handoff.fixture.json`](skills/information-gain-evaluator/examples/plugin-readme-practitioner.handoff.fixture.json) — aligned how-to on a mixed SERP (`high` overall, `partial` citation fit).
+**Aligned-high fixture:** [`skills/information-gain-evaluator/examples/plugin-readme-practitioner.handoff.fixture.json`](skills/information-gain-evaluator/examples/plugin-readme-practitioner.handoff.fixture.json) — practitioner guide vs handbook SERP on `example.com` (`high` overall, `partial` citation fit).
 
 **Example prompts:**
 
@@ -180,9 +180,14 @@ See [`skills/information-gain-evaluator/examples/SCORECARD-enterprise-sso.md`](s
 
 Multi-phase orchestrators live under [`playbooks/`](playbooks/). Not yet in the root install index.
 
-| Playbook | Path |
-|----------|------|
-| Cornerstone Content Audit | [`playbooks/cornerstone-content-audit/`](playbooks/cornerstone-content-audit/) |
+**Vocabulary:** **Hub & Spoke** = architecture; **Cornerstone** = quality bar for hub/spoke pages; **Discovery & Recovery** = bottom-up triangulation when the site is messy.
+
+| Playbook | Path | When |
+|----------|------|------|
+| Cornerstone Content Audit | [`playbooks/cornerstone-content-audit/`](playbooks/cornerstone-content-audit/) | Top-down — known cornerstones, health check |
+| Hub & Spoke Discovery & Recovery | [`playbooks/hub-spoke-discovery-recovery/`](playbooks/hub-spoke-discovery-recovery/) | Bottom-up — accidental hubs, GSC/GA4 triangulation, new client onboarding (v0.3.0) |
+
+See [`playbooks/README.md`](playbooks/README.md) for the full decision table.
 
 ---
 

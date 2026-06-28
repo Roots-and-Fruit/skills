@@ -1,0 +1,91 @@
+{
+  "handoff_version": "1.1",
+  "skill": "web-scrape-to-md",
+  "skill_version": "1.1.0",
+  "generated_at": "2026-06-27T17:00:00.000Z",
+  "mode": "summary_only",
+  "inputs": {
+    "domain": "example.com",
+    "goal": "research corpus — positioning plus latest blog posts",
+    "coverage_target": 10,
+    "output_dir": null
+  },
+  "discovery_summary": {
+    "llms_endpoints_checked": true,
+    "llms_txt_status": "found",
+    "sitemap_checked": true,
+    "sitemap_root_status": "http_error",
+    "sitemap_child_urls_tried": [
+      "https://example.com/sitemap-post-type-post.xml",
+      "https://example.com/sitemap-post-type-page.xml"
+    ],
+    "blog_archive_fetched": true,
+    "blog_archive_url": "https://example.com/articles/",
+    "freshness_goal": true,
+    "recent_posts_discovered": [
+      "https://example.com/articles/marketing-skills-are-overrated/",
+      "https://example.com/articles/why-product-launch-matters/"
+    ],
+    "search_rounds": 0,
+    "markdown_direct_count": 0,
+    "html_fallback_count": 4,
+    "discovery_sources": [
+      "llms_seed",
+      "sitemap_child_discovered",
+      "archive_discovered"
+    ],
+    "completed_ok": 4,
+    "completed_total": 4
+  },
+  "url_results": [
+    {
+      "url": "https://example.com/",
+      "final_url": "https://example.com/",
+      "status": "ok",
+      "intent": "identity",
+      "source_tag": "llms_seed",
+      "fetch_format": "html"
+    },
+    {
+      "url": "https://example.com/articles/marketing-skills-are-overrated/",
+      "final_url": "https://example.com/articles/marketing-skills-are-overrated/",
+      "status": "ok",
+      "intent": "reference",
+      "source_tag": "sitemap_child_discovered",
+      "fetch_format": "html",
+      "quality_note": "Newest post from child sitemap after root sitemap HTTP 500"
+    },
+    {
+      "url": "https://example.com/articles/launch/",
+      "final_url": "https://example.com/articles/launch/",
+      "status": "ok",
+      "intent": "identity",
+      "source_tag": "llms_seed",
+      "fetch_format": "html"
+    },
+    {
+      "url": "https://example.com/articles/why-product-launch-matters/",
+      "final_url": "https://example.com/articles/why-product-launch-matters/",
+      "status": "ok",
+      "intent": "evidence",
+      "source_tag": "archive_discovered",
+      "fetch_format": "html",
+      "quality_note": "Discovered via /articles/ archive after sitemap root failure"
+    }
+  ],
+  "corpus_files": [],
+  "recommended_keep": [
+    "https://example.com/",
+    "https://example.com/articles/marketing-skills-are-overrated/",
+    "https://example.com/articles/launch/"
+  ],
+  "recommended_drop": [],
+  "limitations": [
+    "sitemap.xml returned HTTP 500 via WebFetch; child post sitemap succeeded",
+    "llms.txt lists /articles/ archive — fetched for recent post discovery, not skipped"
+  ],
+  "efficiency_notes": [
+    "Avoided WebSearch after child sitemap + archive yielded fresh posts",
+    "markdown_direct_count counts page fetches only — llms.txt seed does not increment it"
+  ]
+}

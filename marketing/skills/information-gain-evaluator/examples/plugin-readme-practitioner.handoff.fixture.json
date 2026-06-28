@@ -1,0 +1,215 @@
+{
+  "handoff_version": "1.1",
+  "skill": "information-gain-evaluator",
+  "skill_version": "1.1.0",
+  "generated_at": "2026-06-25T22:15:00.000Z",
+  "mode": "live_url",
+  "confidence": "high",
+  "inputs": {
+    "target_url": "https://example.com/blog/plugin-readme-optimization/",
+    "target_label": "Example Author — How to Optimize Plugin READMEs for Better Search Results",
+    "primary_keyword": "WordPress plugin readme",
+    "competitor_urls": [],
+    "intent_lane": "primary_topic",
+    "location_name": "United States",
+    "language_code": "en"
+  },
+  "serp_context": {
+    "ai_overview_present": false,
+    "people_also_ask": [],
+    "related_searches": [
+      "Wordpress plugin readme github",
+      "Wordpress plugin readme txt",
+      "Wordpress plugin readme generator",
+      "Readme validator",
+      "WordPress plugin development",
+      "WordPress plugin tester",
+      "Wordpress plugin banner size",
+      "WordPress plugin structure"
+    ],
+    "intent_lanes_detected": [
+      "primary_topic",
+      "tool_discovery",
+      "community",
+      "directory"
+    ],
+    "intent_split": "mixed",
+    "lane_counts": {
+      "primary_topic": 5,
+      "tool_discovery": 2,
+      "community": 1,
+      "directory": 1
+    }
+  },
+  "competitor_set": [
+    {
+      "url": "https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/",
+      "domain": "developer.wordpress.org",
+      "title": "Plugin Readmes – Plugin Handbook",
+      "lane": "primary_topic",
+      "fetch_status": "ok"
+    },
+    {
+      "url": "https://wp-kama.com/handbook/plugin/wordpress-org/readme-txt",
+      "domain": "wp-kama.com",
+      "title": "readme.txt — (Plugin → WordPress.org Catalog)",
+      "lane": "primary_topic",
+      "fetch_status": "ok"
+    },
+    {
+      "url": "https://wordpress.org/plugins/readme.txt",
+      "domain": "wordpress.org",
+      "title": "README.txt file (canonical example)",
+      "lane": "primary_topic",
+      "fetch_status": "ok"
+    },
+    {
+      "url": "https://github.com/markjaquith/WordPress-Plugin-Readme-Parser",
+      "domain": "github.com",
+      "title": "WordPress-Plugin-Readme-Parser",
+      "lane": "primary_topic",
+      "fetch_status": "unfetchable"
+    }
+  ],
+  "table_stakes": [
+    "readme.txt header fields (Plugin Name, Tags, Stable tag, Contributors, license, short description)",
+    "Standard readme sections: Description, Installation, FAQ, Screenshots, Changelog, Upgrade Notice",
+    "Stable tag and trunk parsing — which readme.txt version WordPress.org displays",
+    "Markdown subset supported inside readme body sections",
+    "150-character short description limit with no markup in the header blurb",
+    "Screenshot naming (screenshot-N.ext) and placement in /assets or plugin root",
+    "Video embed by pasting a supported oEmbed URL on its own line",
+    "readme.txt file size guidance (~10k) and changelog splitting patterns",
+    "Validator or preview tools to check readme.txt compliance before publish",
+    "Since WordPress 5.8, Requires PHP and Requires at least are read from the main plugin PHP file"
+  ],
+  "table_stakes_gaps": [
+    "No complete annotated readme.txt template covering every header field and section",
+    "Limited stable-tag versus trunk parsing mechanics beyond a trunk-update note",
+    "No markdown syntax reference or supported formatting examples",
+    "No file-size limit guidance or changelog.txt split recommendation",
+    "Does not document WP 5.8 shift of Requires PHP / Requires at least to the main plugin file"
+  ],
+  "unique_strengths": [
+    "Plugin Directory search framing (query matching, on-page optimization, mitigating factors) with exact-match tag behavior competitors omit",
+    "Seven-step readme optimization workflow tied to a user adoption journey from awareness through testing",
+    "Keyword-research methodology with example SEO tool volume and commercial-intent tables when WordPress.org shares no search data",
+    "Benefits-over-features copy rewrite pattern using Example Donate Plugin donation-plugin examples from direct author work"
+  ],
+  "baseline_coverage_pct": 50,
+  "citation_fit_for_keyword": "partial",
+  "page_keyword_fit": "aligned",
+  "citation_fit_rationale": "The Plugin Handbook remains the primary cite for readme.txt syntax and parsing; this guide is the stronger primary cite for Plugin Directory SEO, tag strategy, and adoption-oriented readme copy.",
+  "dimensions": [
+    {
+      "id": "original_data",
+      "label": "Original Data",
+      "score": "medium",
+      "finding": "Includes example SEO tool keyword-volume and commercial-intent percentages for example plugins, but no proprietary readme A/B or ranking outcome benchmarks.",
+      "evidence_target": "Table for Example Gallery Plugin / Example Proofing Plugin lists 'client photo gallery' at 3.1K monthly volume with 64% commercial intent alongside related keyphrases and volumes.",
+      "evidence_competitors": [
+        {
+          "url": "https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/",
+          "snippet": "Canonical handbook explains readme structure and parsing but provides no search-volume or Plugin Directory ranking metrics."
+        },
+        {
+          "url": "https://wordpress.org/plugins/readme.txt",
+          "snippet": "Official example readme.txt is a structural template only — no keyword research, volumes, or directory search performance data."
+        }
+      ]
+    },
+    {
+      "id": "unique_framework",
+      "label": "Unique Framework",
+      "score": "medium",
+      "finding": "Clear multi-part models (adoption journey, query/on-page/mitigating factors, seven optimization steps) but not packaged as one named, reusable methodology.",
+      "evidence_target": "Maps the WordPress plugin user adoption journey from Awareness through Searching, Testing, Adopting, Investing, Buying-In, and Failing/Praising before the seven readme steps.",
+      "evidence_competitors": [
+        {
+          "url": "https://wp-kama.com/handbook/plugin/wordpress-org/readme-txt",
+          "snippet": "Reference handbook walks header fields, sections, parsing rules, and markdown — no optimization workflow or adoption funnel."
+        },
+        {
+          "url": "https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/",
+          "snippet": "Organized as technical readme specification (header, stable tag parsing, markdown, embeds) without a staged optimization model."
+        }
+      ]
+    },
+    {
+      "id": "first_hand_experience",
+      "label": "First-Hand Experience",
+      "score": "high",
+      "finding": "Sustained first-person plugin-author voice with named products (Example Donate Plugin, Example Gallery Plugin, Example Proofing Plugin), tag choices, and a cited support-forum ranking anecdote.",
+      "evidence_target": "Example Donate Plugin tags narrowed to 'crowdfunding, donate, donation, fundraising, recurring donations' after years of iteration; cites Example SEO Plugin author a community plugin author moving from 10th to 6th after resolving support tickets.",
+      "evidence_competitors": [
+        {
+          "url": "https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/",
+          "snippet": "Third-person Plugin Handbook documentation with no author implementation narratives or named plugin case studies."
+        },
+        {
+          "url": "https://wp-kama.com/handbook/plugin/wordpress-org/readme-txt",
+          "snippet": "Technical reference describing readme fields and parsing with no 'we optimized' accounts or product-specific outcomes."
+        }
+      ]
+    },
+    {
+      "id": "novel_angle",
+      "label": "Novel Angle",
+      "score": "high",
+      "finding": "Shifts from file-format documentation to Plugin Directory discoverability, keyword intent, and persuasive education — an informational angle handbook competitors do not take.",
+      "evidence_target": "Opens with discoverability and education goals for readme.txt, then decodes Plugin Directory rankings via query matching and exact-match tags rather than section syntax alone.",
+      "evidence_competitors": [
+        {
+          "url": "https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/",
+          "snippet": "Focuses on readme.txt standard compliance, stable-tag parsing, markdown, and embed mechanics — not directory SEO or keyword strategy."
+        },
+        {
+          "url": "https://wordpress.org/plugins/readme.txt",
+          "snippet": "Serves as a canonical structural example file with placeholder sections, not search optimization or adoption guidance."
+        }
+      ]
+    },
+    {
+      "id": "citable_specificity",
+      "label": "Citable Specificity",
+      "score": "high",
+      "finding": "Multiple self-contained, fact-dense claims about directory search behavior, tag limits, and readme update mechanics suitable for AI citation.",
+      "evidence_target": "'The first 5 are the only ones that appear on your page, and they are the only ones that impact search' and 'Plugin Directory search is not that smart — it relies very heavily on exact match terms.'",
+      "evidence_competitors": [
+        {
+          "url": "https://wp-kama.com/handbook/plugin/wordpress-org/readme-txt",
+          "snippet": "Documents that tags help users find plugins in the repository but does not explain five-tag search impact or exact-match ranking behavior."
+        },
+        {
+          "url": "https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/",
+          "snippet": "States tags are used in search matching but does not quantify the five-tag limit's ranking effect or contrast .org exact match with Google synonym handling."
+        }
+      ]
+    }
+  ],
+  "overall": "high",
+  "baseline_completeness": "adequate",
+  "recommendations": [
+    {
+      "dimension": "original_data",
+      "action": "Publish a first-party readme optimization outcomes table from plugins you have advised.",
+      "example_artifact": "Table: before/after PluginRank position and active-install delta for 10 plugins after readme tag and FAQ changes; include measurement window and whether trunk-only readme updates were used."
+    },
+    {
+      "dimension": "unique_framework",
+      "action": "Name and diagram the adoption-journey plus seven-step readme model as a single citable framework.",
+      "example_artifact": "The README GLAM model — Goals, Lane (query intent), Apply tags, Message (benefits), Assets (video/screenshots), Monitor (PluginRank/UTMs), Loop (trunk A/B tweaks)."
+    },
+    {
+      "dimension": "table_stakes",
+      "action": "Add a compact 'format vs optimization' sidebar linking to handbook stable-tag rules and a minimal annotated readme.txt skeleton.",
+      "example_artifact": "Two-column table: left lists stable-tag/trunk parsing and 150-char short-description rules with handbook links; right maps each readme section to your Step 2–4 optimization tactics."
+    }
+  ],
+  "limitations": [
+    "SERP mixes tool_discovery (wpreadme.com, generatewp.com), community (reddit), and directory (VS Marketplace) lanes; competitor set limited to four primary_topic URLs excluding target domain.",
+    "github.com/markjaquith/WordPress-Plugin-Readme-Parser returned no substantive body text — excluded from evidence_competitors.",
+    "DataForSEO SERP response did not include people_also_ask or ai_overview blocks for this keyword pull.",
+    "developer.wordpress.org initial fetch included page chrome; substantive handbook passages were verified from extracted body content."
+  ]
+}

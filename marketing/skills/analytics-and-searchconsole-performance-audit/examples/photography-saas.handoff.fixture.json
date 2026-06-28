@@ -1,0 +1,363 @@
+{
+  "handoff_version": "1.0",
+  "skill": "analytics-and-searchconsole-performance-audit",
+  "skill_version": "1.3.1",
+  "generated_at": "2026-06-28T15:43:59.825Z",
+  "mode": "full",
+  "inputs": {
+    "domain": "example-photo.io",
+    "date_range": "2026-01-01/2026-06-28",
+    "analysis_mode": "discovery_plus_conversions",
+    "conversion_events": [
+      "trial_signup",
+      "purchase"
+    ],
+    "intended_hubs": [
+      "https://example-photo.io/pro",
+      "https://example-photo.io/blog/what-is-photo-proofing"
+    ],
+    "protected_pages": [],
+    "visibility_threshold": 0.5,
+    "value_threshold": 0.5
+  },
+  "summary": {
+    "total_pages": 6,
+    "gsc_pages": 5,
+    "ga4_pages": 6,
+    "quadrant_counts": {
+      "accidental_hub": 1,
+      "prune_candidate": 2,
+      "hidden_gem": 2,
+      "unicorn": 1
+    }
+  },
+  "top_by_quadrant": {
+    "accidental_hub": [
+      {
+        "url": "https://example-photo.io/blog/competitor-a-review",
+        "visibility_score": 0.65,
+        "value_score": 0.1917,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      }
+    ],
+    "prune_candidate": [
+      {
+        "url": "https://example-photo.io/blog/competitor-b-alternatives",
+        "visibility_score": 0.39,
+        "value_score": 0.3583,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      },
+      {
+        "url": "https://example-photo.io/blog/legacy-selling-photos-post",
+        "visibility_score": 0.0255,
+        "value_score": 0,
+        "flags": [
+          "low_ctr_high_impressions"
+        ]
+      }
+    ],
+    "hidden_gem": [
+      {
+        "url": "https://example-photo.io/blog/what-is-photo-proofing",
+        "visibility_score": 0.2805,
+        "value_score": 0.45,
+        "flags": [
+          "intended_hub",
+          "low_ctr_high_impressions",
+          "intended_hub_brand_only",
+          "building_toward_intent"
+        ]
+      },
+      {
+        "url": "https://example-photo.io/pricing",
+        "visibility_score": null,
+        "value_score": 0.6667,
+        "flags": []
+      }
+    ],
+    "unicorn": [
+      {
+        "url": "https://example-photo.io/pro",
+        "visibility_score": 0.442,
+        "value_score": 0.8333,
+        "flags": [
+          "intended_hub"
+        ]
+      }
+    ]
+  },
+  "pages": [
+    {
+      "url": "https://example-photo.io/blog/competitor-a-review",
+      "gsc": {
+        "url": "https://example-photo.io/blog/competitor-a-review",
+        "impressions": 36300,
+        "clicks": 44,
+        "ctr": 0.0012121212121212121,
+        "avg_position": 8.282644628099174,
+        "query_breadth": 3
+      },
+      "ga4": {
+        "url": "https://example-photo.io/blog/competitor-a-review",
+        "sessions": 54,
+        "engagement_rate": 0.31,
+        "conversions": {
+          "trial_signup": 1,
+          "purchase": 0
+        },
+        "conversion_total": 1
+      },
+      "visibility_score": 0.65,
+      "value_score": 0.1917,
+      "hub_type_hint": "technical",
+      "quadrant": "accidental_hub",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Review for spoke extraction, hub retrofit, or commercial routing."
+    },
+    {
+      "url": "https://example-photo.io/blog/competitor-b-alternatives",
+      "gsc": {
+        "url": "https://example-photo.io/blog/competitor-b-alternatives",
+        "impressions": 1634,
+        "clicks": 5,
+        "ctr": 0.0030599755201958386,
+        "avg_position": 12.214198286413708,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example-photo.io/blog/competitor-b-alternatives",
+        "sessions": 85,
+        "engagement_rate": 0.29,
+        "conversions": {
+          "trial_signup": 2,
+          "purchase": 0
+        },
+        "conversion_total": 2
+      },
+      "visibility_score": 0.39,
+      "value_score": 0.3583,
+      "hub_type_hint": "technical",
+      "quadrant": "prune_candidate",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "high",
+      "recommended_review": "Review for consolidate, redirect, or improve — not auto-delete."
+    },
+    {
+      "url": "https://example-photo.io/blog/what-is-photo-proofing",
+      "gsc": {
+        "url": "https://example-photo.io/blog/what-is-photo-proofing",
+        "impressions": 1476,
+        "clicks": 5,
+        "ctr": 0.0033875338753387536,
+        "avg_position": 24.545596205962056,
+        "query_breadth": 3
+      },
+      "ga4": {
+        "url": "https://example-photo.io/blog/what-is-photo-proofing",
+        "sessions": 42,
+        "engagement_rate": 0.48,
+        "conversions": {
+          "trial_signup": 4,
+          "purchase": 1
+        },
+        "conversion_total": 5
+      },
+      "visibility_score": 0.2805,
+      "value_score": 0.45,
+      "hub_type_hint": "technical",
+      "quadrant": "hidden_gem",
+      "flags": [
+        "intended_hub",
+        "low_ctr_high_impressions",
+        "intended_hub_brand_only",
+        "building_toward_intent"
+      ],
+      "confidence": "high",
+      "recommended_review": "Increase organic visibility with spokes and internal links from high-traffic pages."
+    },
+    {
+      "url": "https://example-photo.io/pro",
+      "gsc": {
+        "url": "https://example-photo.io/pro",
+        "impressions": 530,
+        "clicks": 7,
+        "ctr": 0.013207547169811321,
+        "avg_position": 23.050943396226415,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example-photo.io/pro",
+        "sessions": 347,
+        "engagement_rate": 0.62,
+        "conversions": {
+          "trial_signup": 28,
+          "purchase": 6
+        },
+        "conversion_total": 34
+      },
+      "visibility_score": 0.442,
+      "value_score": 0.8333,
+      "hub_type_hint": "commercial",
+      "quadrant": "unicorn",
+      "flags": [
+        "intended_hub"
+      ],
+      "confidence": "high",
+      "recommended_review": "Protect and replicate patterns on underperforming hubs."
+    },
+    {
+      "url": "https://example-photo.io/blog/legacy-selling-photos-post",
+      "gsc": {
+        "url": "https://example-photo.io/blog/legacy-selling-photos-post",
+        "impressions": 1300,
+        "clicks": 1,
+        "ctr": 0.0007692307692307692,
+        "avg_position": 39.90769230769231,
+        "query_breadth": 2
+      },
+      "ga4": {
+        "url": "https://example-photo.io/blog/legacy-selling-photos-post",
+        "sessions": 30,
+        "engagement_rate": 0.18,
+        "conversions": {
+          "trial_signup": 0,
+          "purchase": 0
+        },
+        "conversion_total": 0
+      },
+      "visibility_score": 0.0255,
+      "value_score": 0,
+      "hub_type_hint": "technical",
+      "quadrant": "prune_candidate",
+      "flags": [
+        "low_ctr_high_impressions"
+      ],
+      "confidence": "medium",
+      "recommended_review": "Review for consolidate, redirect, or improve — not auto-delete."
+    },
+    {
+      "url": "https://example-photo.io/pricing",
+      "gsc": null,
+      "ga4": {
+        "url": "https://example-photo.io/pricing",
+        "sessions": 88,
+        "engagement_rate": 0.71,
+        "conversions": {
+          "trial_signup": 12,
+          "purchase": 2
+        },
+        "conversion_total": 14
+      },
+      "visibility_score": null,
+      "value_score": 0.6667,
+      "hub_type_hint": "commercial",
+      "quadrant": "hidden_gem",
+      "flags": [],
+      "confidence": "high",
+      "recommended_review": "Increase organic visibility with spokes and internal links from high-traffic pages."
+    }
+  ],
+  "limitations": [],
+  "discovery": {
+    "intent_split": {
+      "brand": {
+        "clicks": 10,
+        "impressions": 3096,
+        "query_count": 6
+      },
+      "commercial": {
+        "clicks": 6,
+        "impressions": 4100,
+        "query_count": 1
+      },
+      "job": {
+        "clicks": 0,
+        "impressions": 0,
+        "query_count": 0
+      },
+      "product": {
+        "clicks": 0,
+        "impressions": 0,
+        "query_count": 0
+      },
+      "diy": {
+        "clicks": 0,
+        "impressions": 0,
+        "query_count": 0
+      },
+      "other": {
+        "clicks": 46,
+        "impressions": 34044,
+        "query_count": 5
+      }
+    },
+    "intended_hubs": [
+      {
+        "url": "https://example-photo.io/pro",
+        "verdict": "discovering",
+        "top_queries": [
+          {
+            "query": "example photo proofing",
+            "clicks": 4,
+            "impressions": 320,
+            "intent": "brand"
+          },
+          {
+            "query": "client gallery software",
+            "clicks": 3,
+            "impressions": 210,
+            "intent": "other"
+          }
+        ],
+        "gsc_clicks": 7,
+        "gsc_impressions": 530
+      },
+      {
+        "url": "https://example-photo.io/blog/what-is-photo-proofing",
+        "verdict": "brand_only",
+        "top_queries": [
+          {
+            "query": "photo proofing",
+            "clicks": 2,
+            "impressions": 853,
+            "intent": "brand"
+          },
+          {
+            "query": "what is photo proofing",
+            "clicks": 2,
+            "impressions": 83,
+            "intent": "brand"
+          },
+          {
+            "query": "photo proofing software",
+            "clicks": 1,
+            "impressions": 540,
+            "intent": "brand"
+          }
+        ],
+        "gsc_clicks": 5,
+        "gsc_impressions": 1476
+      }
+    ],
+    "misalignments": [
+      {
+        "url": "https://example-photo.io/blog/competitor-a-review",
+        "query": "competitor a pricing",
+        "clicks": 6,
+        "impressions": 4100,
+        "query_intent": "commercial",
+        "hub_type_hint": "technical"
+      }
+    ],
+    "indexing_noise_urls": []
+  }
+}

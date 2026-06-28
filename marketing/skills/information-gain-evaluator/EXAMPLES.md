@@ -60,7 +60,7 @@ When a **how-to guide** competes on a **mixed SERP** where the handbook owns for
 - `overall: high` when first-hand experience, novel angle, and citable specificity carry differentiation
 - `baseline_coverage_pct` often ~50% — adequate, not weak
 
-Live fixture: `examples/plugin-readme-practitioner.handoff.fixture.json` (example.com, keyword `WordPress plugin readme`)
+Aligned-high fixture: `examples/plugin-readme-practitioner.handoff.fixture.json` (`example.com`, keyword `WordPress plugin readme`)
 
 ## Mode — pinned competitors
 

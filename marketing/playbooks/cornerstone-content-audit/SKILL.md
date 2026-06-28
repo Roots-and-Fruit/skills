@@ -10,9 +10,15 @@ version: 0.1.0
 
 # Cornerstone Content Audit
 
+**Also known as:** top-down cornerstone audit.
+
 ## Overview
 
 Audits a site's most important content — the 3–7 cornerstone pages that should rank highest, attract links, and be cited by AI search. Identifies those pages, evaluates health across traditional and AI-era dimensions, detects cannibalization and pruning opportunities, and produces a prioritized enhancement plan.
+
+**Hub & Spoke** is the content architecture — one hub owns a topic cluster; spokes answer sub-intents and link up. **Cornerstone** is the quality standard for those pages (depth, intent, linking, fan-out, citability) — not a separate architecture. Use this playbook when cornerstones are **already known** or nominated from a catalog.
+
+**Not this playbook:** Messy site, accidental hubs, or GSC/GA4 triangulation before you trust the architecture → [Hub & Spoke Discovery & Recovery](../hub-spoke-discovery-recovery/SKILL.md).
 
 ## Architecture
 
@@ -234,6 +240,17 @@ Cross-check when available:
 | Full audit | 1–6 |
 | Fan-out for {keyword} | Fan-out skill only |
 | Information gain on {URL} | Information gain skill only |
+
+---
+
+## When to use which playbook
+
+| Situation | Playbook |
+|-----------|----------|
+| Known cornerstones, health check only | **This playbook** |
+| Messy site, accidental hubs, new client | [Hub & Spoke Discovery & Recovery](../hub-spoke-discovery-recovery/SKILL.md) |
+| Have GSC/GA4 exports, need triage fast | [Hub & Spoke Discovery & Recovery](../hub-spoke-discovery-recovery/SKILL.md) Phases 1a–2 |
+| Single keyword / fan-out gap | [Fan-Out Coverage Analysis](../../skills/fan-out-coverage-analysis/SKILL.md) only |
 
 ---
 

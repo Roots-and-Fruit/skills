@@ -21,6 +21,13 @@
       "tier": "C",
       "public": true,
       "run_verifiers": true
+    },
+    {
+      "id": "M4",
+      "path": "../../utilities/web-scrape-to-md",
+      "tier": "C",
+      "public": false,
+      "run_verifiers": true
     }
   ]
 }

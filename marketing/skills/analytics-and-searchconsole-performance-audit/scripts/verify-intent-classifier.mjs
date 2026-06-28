@@ -37,7 +37,7 @@ const cases = [
   },
   {
     id: "I5",
-    domain: "example.com",
+    domain: "acme.io",
     query: "wordpress analytics plugin",
     expect: "product"
   },
