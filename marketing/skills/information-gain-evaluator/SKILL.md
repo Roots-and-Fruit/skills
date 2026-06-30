@@ -1,5 +1,5 @@
 ---
-name: Information Gain Evaluator
+name: Information-Gain-Evaluator
 type: composite
 description: >
   Use when evaluating information gain, content uniqueness, SERP differentiation,

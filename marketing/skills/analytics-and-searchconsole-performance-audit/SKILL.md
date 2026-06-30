@@ -1,5 +1,5 @@
 ---
-name: Analytics and Search Console Performance Audit
+name: Analytics-and-Search-Console-Performance-Audit
 type: composite
 description: >
   Use when triaging landing pages with Google Analytics (GA4) and Google Search Console

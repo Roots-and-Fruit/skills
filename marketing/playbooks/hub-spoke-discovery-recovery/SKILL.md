@@ -1,5 +1,5 @@
 ---
-name: Hub and Spoke Discovery and Recovery
+name: Hub-and-Spoke-Discovery-and-Recovery
 type: playbook
 description: >
   Use when recovering hub-and-spoke content architecture on a messy site — accidental

@@ -1,5 +1,5 @@
 ---
-name: SEO Cannibalization Audit
+name: SEO-Cannibalization-Audit
 type: composite
 description: >
   Use when auditing keyword cannibalization, page overlap, or consolidation,

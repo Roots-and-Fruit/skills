@@ -1,5 +1,5 @@
 ---
-name: Cornerstone Content Audit
+name: Cornerstone-Content-Audit
 type: playbook
 description: >
   Use when running a cornerstone content audit, pillar content review, or content

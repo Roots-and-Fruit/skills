@@ -1,5 +1,5 @@
 ---
-name: Site Content Catalog
+name: Site-Content-Catalog
 type: capability
 description: >
   Use when cataloging a site, building a page inventory, crawling a sitemap, or

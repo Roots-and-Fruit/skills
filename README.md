@@ -133,7 +133,7 @@ Copy-Item -Recurse marketing\skills\fan-out-coverage-analysis "$env:USERPROFILE\
 1. Configure MCP or data exports per the skill's `REQUIREMENTS.md` (e.g. DataForSEO for fan-out).
 2. Restart Cursor if skills do not appear immediately.
 3. **Invoke** in Agent chat:
-   - Type `/` and pick the skill, or
+   - Type `/` and pick the skill (frontmatter `name` is a single token — hyphens, no spaces, e.g. `/Fan-Out-Coverage-Analysis`), or
    - Attach `@SKILL.md`, or
    - Describe the task — the agent matches on the skill `description`.
 
