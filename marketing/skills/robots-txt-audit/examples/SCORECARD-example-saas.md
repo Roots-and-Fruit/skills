@@ -14,7 +14,7 @@ Fictional domain: `example.com`. Run verifiers from `marketing/skills/robots-txt
 |----|-------|---------|
 | P1–P8 | Good file is max_discovery compliant | `example-good.robots.txt.fixture.txt` |
 | P9–P13 | Bad policy fails compliance | `example-bad-max-discovery.robots.txt.fixture.txt` |
-| P14–P16 | Wrong-host sitemap fails declaration | `example-bad-sitemap.robots.txt.fixture.txt` |
+| P14–P16 | Off-host sitemap warns (SM4); does not fail max_discovery | `example-bad-sitemap.robots.txt.fixture.txt` |
 | P19–P21 | SM7 pass on 200; warn on 500 without breaking max_discovery | synthetic fetch results |
 | P17–P18 | Generate handoff draft passes | `example-generate.handoff.fixture.json` |
 
@@ -57,6 +57,7 @@ node scripts/verify-robots-structure.mjs
 node scripts/verify-max-discovery.mjs
 node scripts/verify-max-discovery-contract.mjs
 node scripts/verify-handoff.mjs
+node scripts/verify-v1_3-changes.mjs
 ```
 
 Maintain fixtures: `node scripts/refresh-handoff-fixtures.mjs`

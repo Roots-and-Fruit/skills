@@ -62,7 +62,7 @@ Full registry: `scripts/crawler-registry.mjs` (verify against provider docs befo
 
 | `crawl_policy` | Intent |
 |----------------|--------|
-| `max_discovery` | Allow search + answer bots; block common training bots; restrict admin/cart/checkout; **valid sitemap required** |
+| `max_discovery` | **Opt-in preset:** allow search + answer bots; block common training bots; restrict admin/cart/checkout; valid on-host sitemap preferred |
 | `block_training_allow_answers` | Same operational rules as max_discovery |
 | `restrictive` | Block training bots; document tradeoff on AI citations |
 | `audit_only` | Report current state; recommend only on clear risks — **no** max_discovery compliance gate |
@@ -82,9 +82,9 @@ Full registry: `scripts/crawler-registry.mjs` (verify against provider docs befo
 | MD_bingbot | `bingbot` allowed at `/` |
 | MD_GOOGLE_PAIRING | Not: Googlebot blocked + Google-Extended allowed |
 | MD_OPENAI_PAIRING | Not: OAI-SearchBot blocked + GPTBot allowed |
-| MD_PATH_* | `*` blocks `/admin/`, `/cart/`, `/checkout/` |
+| MD_PATH_* | `*` blocks `/admin/` **or** `/wp-admin/`, plus `/cart/`, `/checkout/` |
 | MD_SITEMAP_PRESENT | At least one `Sitemap:` line |
-| MD_SITEMAP_VALID | Sitemap passes `validateSitemaps()` |
+| MD_SITEMAP_VALID | Sitemap fails `validateSitemaps()` with **fail**-severity issues (SM4 off-host alone is warn) |
 
 ## Sitemap declaration rules (R7)
 
@@ -95,7 +95,7 @@ Full registry: `scripts/crawler-registry.mjs` (verify against provider docs befo
 | SM1 | At least one `Sitemap:` directive |
 | SM2 | Each URL is absolute `http(s)://` |
 | SM3 | Prefer `https://` (warn on `http://`) |
-| SM4 | Host matches `{domain}` or `www.{domain}` |
+| SM4 | Host matches `{domain}` or `www.{domain}` (**warn** if off-host — Google allows off-host sitemaps) |
 | SM5 | Path contains `sitemap` or ends in `.xml` (warn if unusual) |
 | SM6 | Optional: expected URL from user/catalog not declared (warn) |
 | SM7 | WebFetch declared URL; warn on HTTP 4xx/5xx |
@@ -208,7 +208,7 @@ When file not found:
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.2.0",
+  "skill_version": "1.3.0",
   "mode": "audit",
   "inputs": {
     "domain": "example.com",
@@ -265,6 +265,14 @@ When file not found:
     "compliant": true,
     "violations": []
   },
+  "audit_findings": [
+    {
+      "id": "AF_R4_INHERITED_TRAINING",
+      "tier": "warn",
+      "rubric": "R4",
+      "message": "Training bots inherit allow from User-agent: * (GPTBot, Google-Extended) — informational unless client opts into training blocks."
+    }
+  ],
   "draft_robots_txt": null,
   "deployment_note": "Place at https://example.com/robots.txt",
   "limitations": []
@@ -280,6 +288,7 @@ When file not found:
 | `crawlability.fully_crawlable` | `null` when `key_pages_provided` is 0; otherwise non-negative integer |
 | `sitemap_validation` | Required when `discovery.found`; include `endpoint_fetch[]` after WebFetch |
 | `policy_compliance` | Required when `crawl_policy` is `max_discovery` — from `assessMaxDiscovery()` |
+| `audit_findings` | Recommended on all modes — from `buildAuditFindings()` / `assessment.audit_findings` (`tier`: `fail` · `warn` · `info`) |
 | `discovery.urls_checked` | Always both `https://{domain}/robots.txt` and `https://www.{domain}/robots.txt` (apex first) — fails **G27** if either is missing |
 | `limitations[]` | CDN unverified, stale crawler registry, no catalog for sitemap cross-check |
 

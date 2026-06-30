@@ -45,11 +45,10 @@ export const FIXTURE_EXPECTATIONS = {
       "MD_GPTBot",
       "MD_Google_Extended",
       "MD_CCBot",
-      "MD_PATH__admin_",
       "MD_PATH__cart_",
       "MD_PATH__checkout_"
     ],
-    forbiddenViolationIds: ["MD_GOOGLE_PAIRING", "MD_OPENAI_PAIRING"],
+    forbiddenViolationIds: ["MD_PATH__admin_", "MD_GOOGLE_PAIRING", "MD_OPENAI_PAIRING"],
     sitemapFetch200: [
       { url: "https://www.example.com/sitemap_index.xml", status: 200 }
     ],

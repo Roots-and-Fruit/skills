@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.2.0",
+  "skill_version": "1.3.0",
   "mode": "recommend",
   "inputs": {
     "domain": "example.com",
@@ -82,7 +82,7 @@
       "id": "R6",
       "name": "Low-value path hygiene",
       "status": "pass",
-      "note": "WordPress admin/login/xmlrpc/search restricted; template /admin/|/cart/|/checkout/ gaps noted in policy_compliance"
+      "note": "WordPress /wp-admin/ satisfies admin intent; /cart/ and /checkout/ gaps in policy_compliance"
     },
     {
       "id": "R7",
@@ -396,14 +396,6 @@
         "message": "CCBot should be blocked for max_discovery (training crawl)"
       },
       {
-        "id": "MD_PATH__admin_",
-        "token": "*",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/admin/",
-        "message": "Wildcard should restrict low-value path /admin/"
-      },
-      {
         "id": "MD_PATH__cart_",
         "token": "*",
         "expected": "block",
@@ -421,9 +413,23 @@
       }
     ]
   },
+  "audit_findings": [
+    {
+      "id": "AF_SM7",
+      "tier": "warn",
+      "rubric": "R7",
+      "message": "Sitemap URL returned HTTP 500: https://www.example.com/sitemap_index.xml"
+    },
+    {
+      "id": "AF_POLICY_GAP",
+      "tier": "warn",
+      "rubric": "policy",
+      "message": "5 max_discovery violation(s) — see policy_compliance."
+    }
+  ],
   "draft_robots_txt": null,
   "deployment_note": "Apply recommended training-crawler blocks; fix sitemap endpoint; re-test with verify-max-discovery-contract.mjs policy expectations.",
   "limitations": [
-    "Template path violations (/admin/, /cart/, /checkout/) flagged; /wp-admin/ satisfies admin intent for WordPress"
+    "Template path violations (/cart/, /checkout/) flagged; /wp-admin/ satisfies admin intent for WordPress"
   ]
 }

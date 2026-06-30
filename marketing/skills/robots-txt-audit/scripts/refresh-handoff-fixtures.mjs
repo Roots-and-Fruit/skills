@@ -31,7 +31,7 @@ const wpAssessMaxDiscovery = assessRobotsTxtContent(
 const auditOnly = {
   handoff_version: "1.0",
   skill: "robots-txt-audit",
-  skill_version: "1.2.0",
+  skill_version: "1.3.0",
   mode: "audit",
   inputs: {
     domain: "example.com",
@@ -108,6 +108,7 @@ const auditOnly = {
   crawler_matrix: wpAssessAuditOnly.assessment.crawler_matrix,
   sitemap_validation: wpAssessAuditOnly.assessment.sitemap_validation,
   policy_compliance: null,
+  audit_findings: wpAssessAuditOnly.assessment.audit_findings,
   draft_robots_txt: null,
   deployment_note:
     "No deployment performed. Live file at https://example.com/robots.txt",
@@ -126,7 +127,7 @@ writeFileSync(
 const maxDiscoveryRecommend = {
   handoff_version: "1.0",
   skill: "robots-txt-audit",
-  skill_version: "1.2.0",
+  skill_version: "1.3.0",
   mode: "recommend",
   inputs: {
     domain: "example.com",
@@ -184,7 +185,7 @@ const maxDiscoveryRecommend = {
       id: "R6",
       name: "Low-value path hygiene",
       status: "pass",
-      note: "WordPress admin/login/xmlrpc/search restricted; template /admin/|/cart/|/checkout/ gaps noted in policy_compliance"
+      note: "WordPress /wp-admin/ satisfies admin intent; /cart/ and /checkout/ gaps in policy_compliance"
     },
     {
       id: "R7",
@@ -209,11 +210,12 @@ const maxDiscoveryRecommend = {
   crawler_matrix: wpAssessMaxDiscovery.assessment.crawler_matrix,
   sitemap_validation: wpAssessMaxDiscovery.assessment.sitemap_validation,
   policy_compliance: wpAssessMaxDiscovery.assessment.policy_compliance,
+  audit_findings: wpAssessMaxDiscovery.assessment.audit_findings,
   draft_robots_txt: null,
   deployment_note:
     "Apply recommended training-crawler blocks; fix sitemap endpoint; re-test with verify-max-discovery-contract.mjs policy expectations.",
   limitations: [
-    "Template path violations (/admin/, /cart/, /checkout/) flagged; /wp-admin/ satisfies admin intent for WordPress"
+    "Template path violations (/cart/, /checkout/) flagged; /wp-admin/ satisfies admin intent for WordPress"
   ]
 };
 
@@ -232,9 +234,10 @@ const goodAssess = assessRobotsTxtContent(good, "max_discovery", "example.com", 
 const audit = JSON.parse(
   readFileSync("examples/example-audit.handoff.fixture.json", "utf8")
 );
-audit.skill_version = "1.2.0";
+audit.skill_version = "1.3.0";
 audit.crawler_matrix = goodAssess.assessment.crawler_matrix;
 audit.sitemap_validation = goodAssess.assessment.sitemap_validation;
+audit.audit_findings = goodAssess.assessment.audit_findings;
 if (!audit.audit_checks.some((row) => row.id === "R7d")) {
   audit.audit_checks.splice(7, 0, {
     id: "R7d",
@@ -259,7 +262,7 @@ writeFileSync(
 const generate = JSON.parse(
   readFileSync("examples/example-generate.handoff.fixture.json", "utf8")
 );
-generate.skill_version = "1.2.0";
+generate.skill_version = "1.3.0";
 const draftAssess = assessRobotsTxtContent(
   generate.draft_robots_txt,
   "max_discovery",
@@ -273,6 +276,7 @@ const draftAssess = assessRobotsTxtContent(
 generate.crawler_matrix = draftAssess.assessment.crawler_matrix;
 generate.sitemap_validation = draftAssess.assessment.sitemap_validation;
 generate.policy_compliance = draftAssess.assessment.policy_compliance;
+generate.audit_findings = draftAssess.assessment.audit_findings;
 writeFileSync(
   "examples/example-generate.handoff.fixture.json",
   `${JSON.stringify(generate, null, 2)}\n`
@@ -281,7 +285,7 @@ writeFileSync(
 const recommend = JSON.parse(
   readFileSync("examples/example-recommend.handoff.fixture.json", "utf8")
 );
-recommend.skill_version = "1.2.0";
+recommend.skill_version = "1.3.0";
 const recContent = `User-agent: GPTBot\nDisallow: /\n\nUser-agent: *\nAllow: /`;
 const recAssess = assessRobotsTxtContent(
   recContent,
@@ -289,6 +293,7 @@ const recAssess = assessRobotsTxtContent(
   recommend.inputs.domain
 );
 recommend.crawler_matrix = recAssess.assessment.crawler_matrix;
+recommend.audit_findings = recAssess.assessment.audit_findings;
 recommend.sitemap_validation = {
   present: false,
   urls: [],

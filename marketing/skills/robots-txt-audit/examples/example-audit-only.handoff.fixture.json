@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.2.0",
+  "skill_version": "1.3.0",
   "mode": "audit",
   "inputs": {
     "domain": "example.com",
@@ -332,6 +332,20 @@
     "status": "warn"
   },
   "policy_compliance": null,
+  "audit_findings": [
+    {
+      "id": "AF_SM7",
+      "tier": "warn",
+      "rubric": "R7",
+      "message": "Sitemap URL returned HTTP 500: https://www.example.com/sitemap_index.xml"
+    },
+    {
+      "id": "AF_R4_INHERITED_TRAINING",
+      "tier": "warn",
+      "rubric": "R4",
+      "message": "Training bots inherit allow from User-agent: * (GPTBot, Google-Extended, CCBot, ClaudeBot, anthropic-ai, Applebot-Extended, Meta-ExternalAgent) — informational unless client opts into training blocks."
+    }
+  ],
   "draft_robots_txt": null,
   "deployment_note": "No deployment performed. Live file at https://example.com/robots.txt",
   "limitations": [

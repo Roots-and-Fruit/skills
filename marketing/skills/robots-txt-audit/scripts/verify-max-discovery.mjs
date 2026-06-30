@@ -140,7 +140,7 @@ function runBadSitemapFixture() {
 
   checks.push({
     id: "P14",
-    pass: () => assessment.sitemap_validation?.status === "fail"
+    pass: () => assessment.sitemap_validation?.status === "warn"
   });
 
   checks.push({
@@ -151,7 +151,7 @@ function runBadSitemapFixture() {
 
   checks.push({
     id: "P16",
-    pass: () => assessment.policy_compliance?.compliant === false
+    pass: () => assessment.policy_compliance?.compliant === true
   });
 
   return { label: "example-bad-sitemap.robots.txt.fixture.txt", checks };
