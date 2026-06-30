@@ -1,5 +1,5 @@
 ---
-name: robots.txt Audit
+name: robots.txt-Audit
 type: capability
 description: >
   Use when auditing robots.txt, AI crawler permissions, GEO crawl policy,

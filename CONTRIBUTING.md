@@ -10,6 +10,8 @@ node scripts/verify-public-hygiene.mjs
 
 CI runs the same check on every push and pull request to `master`.
 
+**Skill names:** frontmatter `name` must be a single token (hyphens, no spaces) so `/slash` invocation works — see [`utilities/write-a-skill/REFERENCE.md`](utilities/write-a-skill/REFERENCE.md) § Name (slash invocation).
+
 Optional local hook (run once per clone):
 
 ```bash

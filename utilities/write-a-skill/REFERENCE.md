@@ -124,6 +124,20 @@ The `description` is the **only** preloaded routing signal on model-invoked skil
 
 **Verifier (model-invoked):** P13 description **starts with** trigger line; P14 ≥2 phrases on that line (`verify-skill-package.mjs`).
 
+### Name (slash invocation)
+
+Frontmatter `name` is the **slash-command token** in Cursor, Claude Code, and similar hosts. **No spaces** — hosts treat the first space as the end of the command and pass the rest as arguments, so the skill silently never loads.
+
+| Rule | Example |
+|------|---------|
+| Single token; hyphens between words | `Fan-Out-Coverage-Analysis` |
+| Preserve intentional punctuation | `robots.txt-Audit` |
+| Human title stays in `#` heading | `# Fan-Out Coverage Analysis` |
+
+Folder slug (`fan-out-coverage-analysis`) and handoff `skill` field stay kebab-case. **`name`** is the user-facing invocation id and may use Title-Case-With-Hyphens when that reads better in `/` menus.
+
+**Verifier:** `N1` in `scripts/verify-public-hygiene.mjs` (repo-wide); fails if `name:` contains whitespace.
+
 ### Body duplication vs trigger vocabulary
 
 | OK in `description` | Not OK anywhere |

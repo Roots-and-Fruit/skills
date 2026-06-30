@@ -225,6 +225,34 @@ function scanFixtureDomains(files, config) {
   return failures;
 }
 
+function scanSkillInvocationNames(files) {
+  const failures = [];
+  for (const abs of files) {
+    const rel = posixRel(abs);
+    if (!rel.endsWith("SKILL.md")) {
+      continue;
+    }
+    const text = fs.readFileSync(abs, "utf8");
+    const block = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!block) {
+      continue;
+    }
+    const nameMatch = block[1].match(/^name:\s*(.+)$/m);
+    if (!nameMatch) {
+      continue;
+    }
+    const name = nameMatch[1].trim();
+    if (/\s/.test(name)) {
+      failures.push({
+        id: "N1",
+        file: rel,
+        message: `Frontmatter name "${name}" contains spaces — use hyphens for slash invocation (e.g. ${name.replace(/\s+/g, "-")})`
+      });
+    }
+  }
+  return failures;
+}
+
 function main() {
   const config = loadConfig();
   const files = listTrackedFiles();
@@ -232,7 +260,8 @@ function main() {
     ...scanBannedPaths(files, config),
     ...scanBannedSubstrings(files, config),
     ...scanFixtureNaming(files),
-    ...scanFixtureDomains(files, config)
+    ...scanFixtureDomains(files, config),
+    ...scanSkillInvocationNames(files)
   ];
 
   if (failures.length === 0) {

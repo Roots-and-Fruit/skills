@@ -1,5 +1,5 @@
 ---
-name: Fan-Out Coverage Analysis
+name: Fan-Out-Coverage-Analysis
 type: composite
 description: >
   Use when analyzing fan-out coverage, sub-query coverage, topic coverage gaps,
