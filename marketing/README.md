@@ -94,7 +94,7 @@ Detect when multiple pages compete for the same keywords; output conflicts, hub/
 ### robots.txt Audit
 
 **Path:** [`skills/robots-txt-audit/`](skills/robots-txt-audit/)  
-**Version:** 1.2.0 — per-bot matrix in handoff, SM7/R7e sitemap fetch, `fully_crawlable: null` when no key pages
+**Version:** 1.3.0 — WP `/wp-admin/` admin path; SM4 off-host warn; `audit_findings[]`; `verify-v1_3-changes.mjs`
 
 **Data required:** WebFetch; optional key page URLs and crawl policy — see [`skills/robots-txt-audit/REQUIREMENTS.md`](skills/robots-txt-audit/REQUIREMENTS.md).
 

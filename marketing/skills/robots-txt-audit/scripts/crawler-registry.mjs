@@ -114,6 +114,14 @@ export const MAX_DISCOVERY_REQUIRED_TOKENS = [
 /** Paths that should be blocked for User-agent: * under max_discovery */
 export const MAX_DISCOVERY_RESTRICTED_PATHS = ["/admin/", "/cart/", "/checkout/"];
 
+/**
+ * Alternate paths that satisfy a restricted-path check (e.g. WP uses /wp-admin/ not /admin/).
+ * Key is the canonical template path from MAX_DISCOVERY_RESTRICTED_PATHS.
+ */
+export const MAX_DISCOVERY_PATH_ALTERNATIVES = {
+  "/admin/": ["/admin/", "/wp-admin/"]
+};
+
 /** Discovery crawlers used for cornerstone path checks (R5) */
 export const DISCOVERY_CRAWLERS = ["Googlebot", "OAI-SearchBot", "PerplexityBot"];
 

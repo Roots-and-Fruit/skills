@@ -7,7 +7,7 @@ description: >
   OAI-SearchBot, and Google-Extended. Audits selective crawler rules per bot
   (training vs indexing crawl), validates Sitemap directives, and drafts
   policy-aligned robots.txt.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # robots.txt Audit
@@ -26,7 +26,7 @@ Audit `/robots.txt` as the **authoritative crawl-permission file** for search an
 
 1. **Domain** — e.g. `example.com` (from user only)
 2. **Key pages** (optional) — cornerstone or priority URLs to check for crawlability
-3. **Crawl policy** (optional) — `max_discovery` | `block_training_allow_answers` | `restrictive` | `audit_only` (default: `audit_only` if missing)
+3. **Crawl policy** (optional) — `max_discovery` | `block_training_allow_answers` | `restrictive` | `audit_only` (default: `audit_only` if missing). **`max_discovery` is an opt-in preset**, not an industry default — use only when the client chooses GEO + training blocks.
 
 If domain is missing, ask once:
 
@@ -66,6 +66,8 @@ Record **both** in `discovery.urls_checked` (apex first, then `www`). Set `disco
 
 **Completion criterion:** `discovery.found` is boolean; `urls_checked` lists both URLs; never claim a file exists without a successful fetch.
 
+**R1 edge cases:** If the response body looks like HTML (`<!DOCTYPE html`, `<html`), treat as **unfetchable** — same practical effect as many 4xx cases (Google may crawl as if no file). Set `audit_checks` R1 to `fail` and include `AF_R1_HTML` in `audit_findings`. Pass `options.discovery.fetch_suspect: true` into `assessRobotsTxtContent()` when detected.
+
 ## Step 2 — Parse, assess policy, and audit
 
 1. Parse with `scripts/parse-robots-txt.mjs`.
@@ -100,12 +102,12 @@ See `REFERENCE.md` **Training vs indexing crawl** for what each bot controls.
 
 | Check | What to look for |
 |-------|------------------|
-| **R1 File accessible** | 200 at canonical host |
+| **R1 File accessible** | 200 at canonical host with robots.txt body (not HTML error page) |
 | **R2 Syntax / structure** | Valid groups; no accidental global `Disallow: /` on search bots |
 | **R3 Search crawlers** | `Googlebot`, `bingbot` can reach `/` and cornerstone paths |
 | **R4 AI bot differentiation** | Training and answer bots not lumped into one wrong block |
 | **R5 Cornerstone crawlability** | Each `key_pages` path allowed for discovery crawlers; `na` when no key_pages |
-| **R6 Low-value path hygiene** | `/admin`, `/cart`, `/checkout`, etc. restricted where applicable |
+| **R6 Low-value path hygiene** | `/admin` or `/wp-admin`, `/cart`, `/checkout`, etc. restricted where applicable |
 | **R7 Sitemap declaration** | See R7a–R7e below |
 | **R8 Google token hygiene** | Training restriction uses `Google-Extended` not `Googlebot` |
 | **R9 Wildcard vs specific** | `User-agent: *` rules do not silently block intentional AI allows |
@@ -117,15 +119,25 @@ See `REFERENCE.md` **Training vs indexing crawl** for what each bot controls.
 |----|-------|-----------|
 | **R7a** | Present | At least one `Sitemap:` line |
 | **R7b** | Absolute URL | Each value is full `https://` URL (not relative) |
-| **R7c** | Host match | Sitemap host is `{domain}` or `www.{domain}` |
+| **R7c** | Host match | Sitemap host is `{domain}` or `www.{domain}` (warn if off-host — Google allows off-host sitemaps) |
 | **R7d** | Sitemap shape | Path contains `sitemap` or ends in `.xml` (warn if unusual) |
 | **R7e** | Sitemap endpoint fetch | WebFetch each declared URL; warn on HTTP 4xx/5xx (**SM7**) |
 
 Use `validateSitemaps()` from `assess-policy.mjs` with `sitemap_fetch_results`. Populate `sitemap_validation` in handoff including `endpoint_fetch[]`.
 
-**R7 overall:** `pass` when declaration checks pass and endpoint fetch succeeds; `warn` when declaration passes but SM7 fires; `fail` when SM1–SM6 fail.
+**R7 overall:** `pass` when declaration checks pass and endpoint fetch succeeds; `warn` when declaration passes but SM4/SM7 fires; `fail` when SM1–SM2 fail (SM4 off-host alone is **warn**, not fail).
 
-When catalog handoff available: warn if sitemap lists URLs blocked by `Disallow`.
+### audit_only severity (when `policy_compliance` is null)
+
+Populate `audit_findings[]` from `buildAuditFindings()` / `assessment.audit_findings`:
+
+| Tier | When | Examples |
+|------|------|----------|
+| **fail** | Clear crawl/indexing risk | R1 HTML-as-200, reversed Google/OpenAI pairing |
+| **warn** | Informational gap or hygiene | Inherited training-bot allow, SM7 sitemap 5xx, off-host SM4 |
+| **info** | Document only | Reserved for future low-priority notes |
+
+Do **not** fail `audit_only` audits solely because training bots inherit `User-agent: *` allow.
 
 ### max_discovery compliance
 
@@ -174,7 +186,7 @@ Frame limits honestly: robots.txt controls **crawl permission**, not indexing (`
 
 ## Step 6 — Handoff JSON
 
-Emit v1.0 per `REFERENCE.md`. **Always** include `crawler_matrix` when `discovery.found` and mode is `audit` or `recommend`. Include `sitemap_validation` (with `endpoint_fetch`) whenever a file was found.
+Emit v1.0 per `REFERENCE.md`. **Always** include `crawler_matrix` when `discovery.found` and mode is `audit` or `recommend`. Include `sitemap_validation` (with `endpoint_fetch`) whenever a file was found. Include `audit_findings[]` when running `assessRobotsTxtContent()` (copy from `assessment.audit_findings`).
 
 **`crawler_matrix` is machine data, not prose.** Copy the full array from `assessRobotsTxtContent()` → `assessment.crawler_matrix` (same rows as the human per-bot table). Each object needs `token`, `roles`, `rule_source`, `indexing_crawl`, `training_crawl`, `max_discovery_expectation`, etc.
 
@@ -205,6 +217,7 @@ node scripts/verify-robots-structure.mjs
 node scripts/verify-max-discovery.mjs
 node scripts/verify-max-discovery-contract.mjs
 node scripts/verify-handoff.mjs
+node scripts/verify-v1_3-changes.mjs
 ```
 
 ## Pairs with

@@ -6,6 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   CRAWLER_REGISTRY,
+  MAX_DISCOVERY_PATH_ALTERNATIVES,
   MAX_DISCOVERY_REQUIRED_TOKENS,
   MAX_DISCOVERY_RESTRICTED_PATHS
 } from "./crawler-registry.mjs";
@@ -87,8 +88,8 @@ export function validateSitemaps(sitemaps, domain, options = {}) {
     if (!hostMatchesDomain(url, domain)) {
       issues.push({
         id: "SM4",
-        severity: "fail",
-        message: `Sitemap host does not match domain ${domain}: ${url}`
+        severity: "warn",
+        message: `Sitemap host does not match ${domain} (Google allows off-host sitemaps): ${url}`
       });
       continue;
     }
@@ -156,6 +157,17 @@ export function hasExplicitUserAgentGroup(groups, userAgent) {
   return groups.some((group) =>
     group.userAgents.some((agent) => agent.toLowerCase() === ua)
   );
+}
+
+export function isRobotsTxtFetchSuspect(content) {
+  const trimmed = content.trim().toLowerCase();
+  return trimmed.startsWith("<!doctype html") || trimmed.startsWith("<html");
+}
+
+export function isRestrictedPathBlocked(groups, restrictedPath) {
+  const candidates =
+    MAX_DISCOVERY_PATH_ALTERNATIVES[restrictedPath] ?? [restrictedPath];
+  return candidates.some((path) => !isPathAllowedForAgent(groups, "*", path));
 }
 
 export function getSiteAccess(groups, token, probePath = "/") {
@@ -248,14 +260,16 @@ export function assessMaxDiscovery(groups, domain) {
   }
 
   for (const restrictedPath of MAX_DISCOVERY_RESTRICTED_PATHS) {
-    if (isPathAllowedForAgent(groups, "*", restrictedPath)) {
+    if (!isRestrictedPathBlocked(groups, restrictedPath)) {
+      const alts = MAX_DISCOVERY_PATH_ALTERNATIVES[restrictedPath];
+      const pathNote = alts ? `${restrictedPath} (or ${alts.filter((p) => p !== restrictedPath).join(", ")})` : restrictedPath;
       violations.push({
         id: `MD_PATH_${restrictedPath.replace(/\//g, "_")}`,
         token: "*",
         expected: "block",
         actual: "allowed",
         path: restrictedPath,
-        message: `Wildcard should restrict low-value path ${restrictedPath}`
+        message: `Wildcard should restrict low-value path ${pathNote}`
       });
     }
   }
@@ -265,6 +279,94 @@ export function assessMaxDiscovery(groups, domain) {
     compliant: violations.length === 0,
     violations
   };
+}
+
+/**
+ * Structured findings for audit_only handoffs (tiered severity).
+ * @param {ReturnType<typeof assessPolicyCompliance>} assessment
+ * @param {string} crawlPolicy
+ * @param {{ fetch_suspect?: boolean, resolved_url?: string }} [discovery]
+ */
+export function buildAuditFindings(assessment, crawlPolicy, discovery = {}) {
+  /** @type {Array<{ id: string, tier: "fail" | "warn" | "info", rubric: string, message: string }>} */
+  const findings = [];
+
+  if (discovery.fetch_suspect) {
+    findings.push({
+      id: "AF_R1_HTML",
+      tier: "fail",
+      rubric: "R1",
+      message:
+        "Response looks like HTML, not robots.txt — treat as unfetchable; Google treats 4xx/missing as no file (open crawl risk if misconfigured)."
+    });
+  }
+
+  for (const issue of assessment.sitemap_validation?.issues ?? []) {
+    findings.push({
+      id: `AF_${issue.id}`,
+      tier: issue.severity === "fail" ? "fail" : "warn",
+      rubric: "R7",
+      message: issue.message
+    });
+  }
+
+  if (crawlPolicy === "audit_only") {
+    const inheritedTraining = (assessment.crawler_matrix ?? []).filter(
+      (row) =>
+        row.roles?.includes("ai_training") &&
+        row.training_crawl === "allowed" &&
+        row.rule_source === "inherits_user_agent_star"
+    );
+    if (inheritedTraining.length > 0) {
+      findings.push({
+        id: "AF_R4_INHERITED_TRAINING",
+        tier: "warn",
+        rubric: "R4",
+        message: `Training bots inherit allow from User-agent: * (${inheritedTraining.map((r) => r.token).join(", ")}) — informational unless client opts into training blocks.`
+      });
+    }
+  }
+
+  const groups = assessment.crawler_matrix;
+  if (groups) {
+    const googlebot = groups.find((r) => r.token === "Googlebot");
+    const googleExt = groups.find((r) => r.token === "Google-Extended");
+    if (
+      googlebot?.indexing_crawl === "blocked" &&
+      googleExt?.training_crawl === "allowed"
+    ) {
+      findings.push({
+        id: "AF_R8_GOOGLE_PAIRING",
+        tier: "fail",
+        rubric: "R8",
+        message:
+          "Googlebot blocked while Google-Extended allowed — likely reversed intent (Search vs training token)."
+      });
+    }
+
+    const gpt = groups.find((r) => r.token === "GPTBot");
+    const oai = groups.find((r) => r.token === "OAI-SearchBot");
+    if (gpt?.training_crawl === "allowed" && oai?.indexing_crawl === "blocked") {
+      findings.push({
+        id: "AF_R4_OPENAI_PAIRING",
+        tier: "fail",
+        rubric: "R4",
+        message:
+          "OAI-SearchBot blocked while GPTBot allowed — training/discovery pairing reversed."
+      });
+    }
+  }
+
+  if (crawlPolicy === "max_discovery" && assessment.policy_compliance?.violations?.length) {
+    findings.push({
+      id: "AF_POLICY_GAP",
+      tier: "warn",
+      rubric: "policy",
+      message: `${assessment.policy_compliance.violations.length} max_discovery violation(s) — see policy_compliance.`
+    });
+  }
+
+  return findings;
 }
 
 export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}) {
@@ -302,7 +404,12 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
     crawl_policy: crawlPolicy,
     sitemap_validation: sitemap,
     crawler_matrix: matrix,
-    policy_compliance: policyCompliance
+    policy_compliance: policyCompliance,
+    audit_findings: buildAuditFindings(
+      { sitemap_validation: sitemap, crawler_matrix: matrix, policy_compliance: policyCompliance },
+      crawlPolicy,
+      options.discovery ?? {}
+    )
   };
 }
 
