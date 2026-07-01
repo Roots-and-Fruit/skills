@@ -24,6 +24,8 @@ Lead with:
 - **What to do next** — shortened (skip repeating Cloudflare dashboard lecture)
 - **Copy-paste block** — only if required gaps remain
 
+**Footer:** Include `buildLearnMoreFooter()` (article + [Roots & Fruit consulting](https://rootsandfruit.com)). Do **not** repeat per-gap `[Why this matters]` article links on recheck — downsides stay inline in **Still to do**.
+
 Do **not** re-dump the full “What’s working” essay unless something regressed (new required gap).
 
 ## SSOT commands

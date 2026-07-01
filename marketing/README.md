@@ -94,9 +94,9 @@ Detect when multiple pages compete for the same keywords; output conflicts, hub/
 ### robots.txt Audit
 
 **Path:** [`skills/robots-txt-audit/`](skills/robots-txt-audit/)  
-**Version:** 1.4.5 — layperson-first output, re-audit snapshots, Cloudflare origin vs edge guidance, ContentSignals.org presets
+**Version:** 1.4.6 — article learn-more links, Roots & Fruit consulting CTA, layperson-first output, re-audit snapshots, Cloudflare origin vs edge guidance, ContentSignals.org presets
 
-**Data required:** WebFetch; optional key page URLs, crawl policy, and `robots_deployment` — see [`skills/robots-txt-audit/REQUIREMENTS.md`](skills/robots-txt-audit/REQUIREMENTS.md).
+**Data required:** WebFetch; optional key page URLs, crawl policy, and `robots_deployment` — see [`skills/robots-txt-audit/REQUIREMENTS.md`](skills/robots-txt-audit/REQUIREMENTS.md). **Practitioner guide (public):** [robots.txt audit reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) on [Roots & Fruit](https://rootsandfruit.com).
 
 **Example prompts:**
 

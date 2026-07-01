@@ -10,9 +10,9 @@
 
 ---
 
-## Sample layperson chat output (v1.4.2+)
+## Sample layperson chat output (v1.4.6+)
 
-**User sees only this in chat.** Bot tables, handoff JSON, and robots.txt copy go to `reports/{domain}-{date}-detail.md`.
+**User sees only this in chat.** Bot tables, handoff JSON, and robots.txt copy go to `reports/{domain}-{date}-detail.md`. Each gap links to the [public reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/).
 
 ```markdown
 # robots.txt check — example.com
@@ -21,9 +21,9 @@
 
 **Not quite there yet.** Missing:
 
-• No sitemap URL in robots.txt (search engines use this to find your pages)
-• Admin area (/wp-admin/) not blocked from crawlers
-• Cart pages not blocked from crawlers
+• No sitemap URL in robots.txt (search engines use this to find your pages) — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#sitemap-declaration)
+• Admin area (/wp-admin/) not blocked from crawlers — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#path-hygiene)
+• Cart pages not blocked from crawlers — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#path-hygiene)
 
 ## What's working
 
@@ -34,9 +34,9 @@
 
 ## What still needs attention
 
-- No sitemap URL in robots.txt (search engines use this to find your pages)
-- Admin area (/wp-admin/) not blocked from crawlers
-- Cart pages not blocked from crawlers
+- No sitemap URL in robots.txt (search engines use this to find your pages) — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#sitemap-declaration)
+- Admin area (/wp-admin/) not blocked from crawlers — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#path-hygiene)
+- Cart pages not blocked from crawlers — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#path-hygiene)
 
 ## What to do next
 
@@ -47,6 +47,9 @@
 ---
 
 Technical details (bot-by-bot tables, rubric scores, handoff JSON, robots.txt copy): **reports/example.com-2026-07-01-detail.md**
+
+**Learn more:** [robots.txt audit reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/)
+**Need a hand?** [Growth marketing consulting](https://rootsandfruit.com) — Roots & Fruit helps WordPress and SaaS teams with crawl policy, GEO, and content operations.
 ```
 
 See `LAYPERSON-OUTPUT.md` for the full contract.

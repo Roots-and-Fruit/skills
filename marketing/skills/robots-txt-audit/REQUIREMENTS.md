@@ -46,7 +46,10 @@ node scripts/verify-max-discovery.mjs
 node scripts/verify-max-discovery-contract.mjs
 node scripts/verify-handoff.mjs
 node scripts/verify-cloudflare-layers.mjs
+node scripts/verify-reference-links.mjs
 ```
+
+**Practitioner guide (public):** [robots.txt audit reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/)
 
 `verify-max-discovery.mjs` and `verify-max-discovery-contract.mjs` are required when changing `max_discovery` rules, crawler registry, sitemap validation, or handoff contract for `max_discovery` runs.
 

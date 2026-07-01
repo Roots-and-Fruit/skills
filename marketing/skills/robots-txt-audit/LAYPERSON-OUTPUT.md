@@ -11,8 +11,12 @@
 5. **Changes** — Short bullet list of what to add or keep (when fixes are needed).
 6. **Copy-paste block** — **Origin-only** file for SFTP/host when Cloudflare-managed; full file when not. Preceded by **How to update (Cloudflare-managed)** (3 bullets) when CF detected.
 7. **One link** to the local detail report file.
+8. **Learn-more links** (first audit only) — Each missing required/optional item gets `[Why this matters]({article URL}#{anchor})` from `reference-links.mjs` / `GAP_REGISTRY.learn_more_anchor`.
+9. **Footer** — Article link + [Roots & Fruit](https://rootsandfruit.com) growth marketing consulting CTA via `buildLearnMoreFooter()`.
 
 **Do not include in chat:** per-bot matrix tables, rubric R1–R11, handoff JSON, or other long technical appendices (those stay in the detail file).
+
+**Public reference (SSOT):** [robots.txt audit reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/)
 
 ## Detail report file (local)
 
@@ -102,6 +106,6 @@ When the user updated robots.txt or asks to verify again. **Read `RECHECK.md`.**
 {only if required gaps remain}
 ```
 
-**Skip on recheck unless something regressed:** full “What’s working” list, per-bot matrix, handoff JSON in chat.
+**Skip on recheck unless something regressed:** full “What’s working” list, per-bot matrix, handoff JSON in chat, per-gap **Why this matters** article links (downsides stay inline; footer article + consulting CTA still included).
 
 Snapshots: `reports/{domain}-latest-snapshot.json` (written after every audit).

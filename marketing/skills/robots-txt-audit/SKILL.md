@@ -7,7 +7,7 @@ description: >
   OAI-SearchBot, and Google-Extended. Audits selective crawler rules per bot
   (training vs indexing crawl), validates Sitemap directives, and drafts
   policy-aligned robots.txt.
-version: 1.4.5
+version: 1.4.6
 ---
 
 # robots.txt Audit
@@ -18,9 +18,9 @@ Audit `/robots.txt` as the **authoritative crawl-permission file** for search an
 
 **Not this skill:** deploying files, WAF/CDN configuration, server log analysis (note as follow-up), or treating `llms.txt` as a crawl-control mechanism.
 
-**Reference:** `REFERENCE.md` · **Requirements:** `REQUIREMENTS.md` · **Examples:** `EXAMPLES.md` · **Layperson output:** `LAYPERSON-OUTPUT.md` · **Re-audit:** `RECHECK.md` · **Maintainers:** `AGENTS.md`
+**Reference:** [robots.txt audit reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) (public SSOT) · `REFERENCE.md` (handoff + rubric) · **Requirements:** `REQUIREMENTS.md` · **Examples:** `EXAMPLES.md` · **Layperson output:** `LAYPERSON-OUTPUT.md` · **Re-audit:** `RECHECK.md` · **Maintainers:** `AGENTS.md` · **Skill repo:** [GitHub](https://github.com/Roots-and-Fruit/skills/tree/master/marketing/skills/robots-txt-audit)
 
-**SSOT scripts:** `parse-robots-txt.mjs` · `crawler-registry.mjs` · `assess-policy.mjs` · `crawler-registry-cloudflare.mjs` · `content-signals-presets.mjs` · `build-layperson-summary.mjs` · `build-reaudit.mjs` · `audit-gap-registry.mjs`
+**SSOT scripts:** `parse-robots-txt.mjs` · `crawler-registry.mjs` · `assess-policy.mjs` · `crawler-registry-cloudflare.mjs` · `content-signals-presets.mjs` · `build-layperson-summary.mjs` · `build-reaudit.mjs` · `audit-gap-registry.mjs` · `reference-links.mjs`
 
 **Cloudflare companion:** `CLOUDFLARE-MANAGED.md` (invoked when managed markers detected — not a separate installable skill)
 
@@ -264,7 +264,7 @@ Default path: `marketing/skills/robots-txt-audit/reports/{domain}-{date}-detail.
 
 ### Tone
 
-Plain English. No jargon without a one-line explanation. Frame limits honestly: robots.txt is a polite request to crawlers — not a guarantee of Google ranking, AI citations, or security.
+Plain English. No jargon without a one-line explanation. Frame limits honestly: robots.txt is a polite request to crawlers — not a guarantee of Google ranking, AI citations, or security. On **first audit**, link each gap to the [public reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) via `reference-links.mjs`. Close with `buildLearnMoreFooter()` (article + [Roots & Fruit consulting](https://rootsandfruit.com)).
 
 **Generate mode chat:** short verdict + publish steps + link to detail file containing full draft.
 
@@ -311,6 +311,7 @@ node scripts/verify-v1_3-changes.mjs
 node scripts/verify-cloudflare-layers.mjs
 node scripts/verify-layperson-summary.mjs
 node scripts/verify-reaudit.mjs
+node scripts/verify-reference-links.mjs
 ```
 
 ## Pairs with

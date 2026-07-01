@@ -11,6 +11,11 @@ import { assessRobotsTxtContent, normalizeDomain } from "./assess-policy.mjs";
 import { collectGapsFromAssessment, gapFromViolation } from "./audit-gap-registry.mjs";
 import { buildRecommendedRobotsTxt, recommendedRobotsPasteText } from "./build-recommended-robots.mjs";
 import {
+  buildLearnMoreFooter,
+  formatGapBullet,
+  learnMoreUrl
+} from "./reference-links.mjs";
+import {
   buildAuditSnapshot,
   buildReauditSummarySections,
   compareGapSnapshots,
@@ -94,57 +99,43 @@ export function buildWorkingList(assessment, domain) {
  * @param {ReturnType<typeof assessRobotsTxtContent>["assessment"]} assessment
  * @param {{ includeOptional?: boolean }} [options]
  */
-export function buildMissingList(assessment, options = {}) {
+export function buildMissingGapItems(assessment, options = {}) {
   const includeOptional = options.includeOptional !== false;
-  const missing = [];
-  const violations = assessment.policy_compliance?.violations ?? [];
-  const hasSitemapPresent = violations.some((v) => v.id === "MD_SITEMAP_PRESENT");
-
-  for (const v of violations) {
-    if (v.id === "MD_SITEMAP_VALID" && hasSitemapPresent) {
-      continue;
+  const { required, optional } = collectGapsFromAssessment(assessment);
+  const gaps = includeOptional ? [...required, ...optional] : [...required];
+  const seen = new Set();
+  return gaps.filter((gap) => {
+    if (seen.has(gap.id)) {
+      return false;
     }
-    const line = violationToLayperson(v);
-    if (!missing.includes(line)) {
-      missing.push(line);
-    }
-  }
+    seen.add(gap.id);
+    return true;
+  });
+}
 
-  if (assessment.sitemap_validation?.status === "fail" && !hasSitemapPresent && violations.length === 0) {
-    missing.push("No sitemap URL in robots.txt (search engines use this to find your pages)");
-  }
-
-  const optional = [];
-  const matrix = assessment.crawler_matrix ?? [];
-  const anthropic = matrix.find((r) => r.token === "anthropic-ai");
-  if (anthropic?.training_crawl === "allowed") {
-    optional.push("Legacy Anthropic training bot (anthropic-ai) not explicitly blocked");
-  }
-
-  if (
-    assessment.deployment?.model === "cloudflare_managed" &&
-    assessment.content_signals?.cf_managed_star?.ai_input == null &&
-    assessment.crawl_policy === "max_discovery"
-  ) {
-    optional.push("AI “answer” permission (ai-input signal) not declared at origin — optional for GEO alignment");
-  }
-
-  if (includeOptional) {
-    for (const line of optional) {
-      if (!missing.includes(line)) {
-        missing.push(line);
-      }
-    }
-  }
-
-  return missing;
+/**
+ * @param {ReturnType<typeof assessRobotsTxtContent>["assessment"]} assessment
+ * @param {{ includeOptional?: boolean }} [options]
+ */
+export function buildMissingList(assessment, options = {}) {
+  return buildMissingGapItems(assessment, options).map((gap) => gap.label);
 }
 
 /** @param {ReturnType<typeof assessRobotsTxtContent>["assessment"]} assessment */
 export function buildOptionalGaps(assessment) {
-  const full = buildMissingList(assessment, { includeOptional: true });
-  const required = buildMissingList(assessment, { includeOptional: false });
-  return full.filter((line) => !required.includes(line));
+  const { optional } = collectGapsFromAssessment(assessment);
+  return optional.map((gap) => gap.label);
+}
+
+/**
+ * @param {{ id: string, label: string }[]} gaps
+ * @param {{ includeLearnMore?: boolean }} [options]
+ */
+export function formatGapList(gaps, options = {}) {
+  return gaps.map((gap) => {
+    const line = formatGapBullet(gap, { includeLearnMore: options.includeLearnMore });
+    return options.bulletPrefix ? `${options.bulletPrefix}${line}` : line;
+  });
 }
 
 /**
@@ -160,7 +151,7 @@ export function buildActionPlan(assessment, domain) {
     steps.push({
       step: 1,
       who: "Cloudflare + your host",
-      action: "See **How to update (Cloudflare-managed)** below — dashboard toggle stays ON; edit the small origin file via SFTP/host (not the public merged file)."
+      action: `See **How to update (Cloudflare-managed)** below — dashboard toggle stays ON; edit the small origin file via SFTP/host (not the public merged file). [Cloudflare layer explained](${learnMoreUrl("cloudflare-detection")}).`
     });
   }
 
@@ -295,7 +286,9 @@ export function buildLaypersonReauditMarkdown({
     "",
     `Compared to snapshot from **${priorDate}**. Technical detail: **${detailRelativePath}**`,
     "",
-    "_Re-checks always use a fresh live fetch — not chat memory._"
+    "_Re-checks always use a fresh live fetch — not chat memory._",
+    "",
+    buildLearnMoreFooter()
   );
 
   return lines.join("\n");
@@ -330,15 +323,18 @@ export function buildLaypersonSummaryMarkdown({
   }
 
   const working = buildWorkingList(assessment, domain);
-  const missing = buildMissingList(assessment, { includeOptional: false });
-  const optionalGaps = buildOptionalGaps(assessment);
+  const requiredGaps = buildMissingGapItems(assessment, { includeOptional: false });
+  const optionalGaps = collectGapsFromAssessment(assessment).optional;
+  const missing = requiredGaps.map((g) => g.label);
   const plan = buildActionPlan(assessment, domain);
   const compliant = assessment.policy_compliance?.compliant === true && optionalGaps.length === 0;
-  const verdictLine = missing.length === 0
-    ? optionalGaps.length
-      ? "Required items are in place. Optional improvements remain (see below)."
-      : "Nothing missing for your requested policy."
-    : missing.map((m) => `• ${m}`).join("\n");
+  const verdictBullets = formatGapList(requiredGaps, { includeLearnMore: true, bulletPrefix: "• " });
+  const verdictLine =
+    requiredGaps.length === 0
+      ? optionalGaps.length
+        ? "Required items are in place. Optional improvements remain (see below)."
+        : "Nothing missing for your requested policy."
+      : verdictBullets.join("\n");
 
   const lines = [
     `# robots.txt check — ${domain}`,
@@ -355,9 +351,15 @@ export function buildLaypersonSummaryMarkdown({
     "",
     "## What still needs attention",
     "",
-    ...(missing.length ? missing.map((m) => `- ${m}`) : ["- Nothing required"]),
+    ...(requiredGaps.length
+      ? formatGapList(requiredGaps, { includeLearnMore: true }).map((line) => `- ${line}`)
+      : ["- Nothing required"]),
     ...(optionalGaps.length
-      ? ["", "_Optional:_", ...optionalGaps.map((m) => `- ${m}`)]
+      ? [
+          "",
+          "_Optional:_",
+          ...formatGapList(optionalGaps, { includeLearnMore: true }).map((line) => `- ${line}`)
+        ]
       : []),
     "",
     "## What to do next",
@@ -395,7 +397,9 @@ export function buildLaypersonSummaryMarkdown({
     "",
     `Technical details (bot-by-bot tables, rubric scores, handoff JSON, robots.txt copy): **${detailRelativePath}**`,
     "",
-    "_robots.txt tells well-behaved crawlers what they may fetch; it does not guarantee ranking, AI citations, or security._"
+    "_robots.txt tells well-behaved crawlers what they may fetch; it does not guarantee ranking, AI citations, or security._",
+    "",
+    buildLearnMoreFooter()
   );
 
   return lines.join("\n");
@@ -537,7 +541,7 @@ export function buildDetailReportMarkdown({
   const handoff = {
     handoff_version: "1.0",
     skill: "robots-txt-audit",
-    skill_version: "1.4.5",
+    skill_version: "1.4.6",
     mode,
     inputs: { domain, crawl_policy: crawlPolicy, robots_deployment: "auto" },
     discovery: {

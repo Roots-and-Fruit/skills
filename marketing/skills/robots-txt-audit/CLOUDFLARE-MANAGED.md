@@ -3,6 +3,8 @@
 **Invoked by:** parent [`SKILL.md`](SKILL.md) when edge-served `robots.txt` contains Cloudflare managed markers.  
 **Not standalone:** do not run this module without completing parent Step 1 discovery first.
 
+**Layperson context:** [Cloudflare detection](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#cloudflare-detection) · [File accessibility and CDN reality](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#file-accessibility-and-cdn-reality)
+
 **SSOT scripts:** `parseRobotsTxtLayers()` in `parse-robots-txt.mjs` · `assessCloudflareLayer()` / `assessOriginLayer()` in `assess-policy.mjs` · `crawler-registry-cloudflare.mjs` · `buildCloudflareOriginAppend()` in `content-signals-presets.mjs`
 
 **External references:**
