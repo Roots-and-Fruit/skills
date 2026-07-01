@@ -2,14 +2,58 @@
 
 ## Example prompts
 
-- *"Audit **robots.txt** for **example.com**"*
+- *"Audit **robots.txt** for **example.com** — max discovery"*
+- *"Check Cloudflare managed **robots.txt** for **example.com**"*
 - *"Can AI crawlers reach our cornerstone pages on **example.com**?"*
 - *"Check if we're blocking **GPTBot** but allowing **OAI-SearchBot** on **example.com**"*
 - *"Generate **robots.txt** for **example.com** — max discovery policy, key pages: [urls]"*
 
 ---
 
-## Sample audit summary
+## Sample layperson chat output (v1.4.2+)
+
+**User sees only this in chat.** Bot tables, handoff JSON, and robots.txt copy go to `reports/{domain}-{date}-detail.md`.
+
+```markdown
+# robots.txt check — example.com
+
+## Verdict
+
+**Not quite there yet.** Missing:
+
+• No sitemap URL in robots.txt (search engines use this to find your pages)
+• Admin area (/wp-admin/) not blocked from crawlers
+• Cart pages not blocked from crawlers
+
+## What's working
+
+- robots.txt file is online and readable
+- Cloudflare is managing AI training blocks for you (GPTBot, Google-Extended, etc.)
+- Major AI training crawlers are blocked
+- Search and AI answer crawlers are not accidentally blocked
+
+## What still needs attention
+
+- No sitemap URL in robots.txt (search engines use this to find your pages)
+- Admin area (/wp-admin/) not blocked from crawlers
+- Cart pages not blocked from crawlers
+
+## What to do next
+
+1. **You (Cloudflare dashboard)** — Leave “Instruct AI bot traffic with robots.txt” turned ON…
+2. **You (website host / origin robots.txt)** — Paste the origin robots.txt block from the detail report…
+3. **You (verification)** — Open https://example.com/robots.txt in a private browser window…
+
+---
+
+Technical details (bot-by-bot tables, rubric scores, handoff JSON, robots.txt copy): **reports/example.com-2026-07-01-detail.md**
+```
+
+See `LAYPERSON-OUTPUT.md` for the full contract.
+
+---
+
+## Sample audit summary (legacy technical format — detail file only)
 
 ## robots.txt Audit — example.com — 2026-06-26
 
@@ -51,6 +95,8 @@ See `examples/SCORECARD-example-saas.md` for regression IDs (S, P, G layers).
 | `example-bad-max-discovery.robots.txt.fixture.txt` | Reversed Google/OpenAI pairing, no sitemap |
 | `example-audit-only.handoff.fixture.json` | `audit_only`, no key_pages, SM7 warn on sitemap 500 |
 | `example-max-discovery-recommend.handoff.fixture.json` | WP open file + `max_discovery` + `recommend` — canonical `crawler_matrix` shape |
+| `example-cloudflare-managed-origin-append.robots.txt.fixture.txt` | CF managed prepend + origin append (fictional `example.com`) |
+| `example-cloudflare-managed-origin-append.handoff.fixture.json` | CF `recommend` handoff with `layer_assessment`, `origin_append_template`, `content_signals` |
 
 ## Handoff anti-patterns
 

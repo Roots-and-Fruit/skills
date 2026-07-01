@@ -26,7 +26,7 @@ Skills are built for **Cursor** (or any agent runtime that supports the [Agent S
 | [Information Gain Evaluator](marketing/skills/information-gain-evaluator/) | Rigorous SERP-comparative citation gain scoring (handoff v1.1, citation fit + page–keyword fit) |
 | [Site Content Catalog](marketing/skills/site-content-catalog/) | Sitemap or domain page inventory with `page_type` labels and optional SEO signals (handoff v1.0, WordPress child sitemaps) |
 | [Analytics and Search Console Performance Audit](marketing/skills/analytics-and-searchconsole-performance-audit/) | GSC query-intent discovery + optional GA4 conversion quadrants (`discovery_only` / `discovery_plus_conversions`); handoff v1.0; Phase 1a for hub-and-spoke playbook |
-| [robots.txt Audit](marketing/skills/robots-txt-audit/) | AI crawler permissions, cornerstone crawlability, and policy-aligned robots.txt (handoff v1.0) |
+| [robots.txt Audit](marketing/skills/robots-txt-audit/) | AI crawler permissions, cornerstone crawlability, Cloudflare managed layer support, policy-aligned robots.txt (handoff v1.0 + optional v1.1 CF fields) |
 | [SEO Cannibalization Audit](marketing/skills/seo-cannibalization-audit/) | Same-domain keyword overlap, intent comparison, resolution recommendations (playbook Phase 4a) |
 
 ### Playbooks (in progress)

@@ -21,7 +21,7 @@ const SKILL_ROOT = path.resolve(__dirname, "..");
 const SKILLS_REPO_ROOT = path.resolve(SKILL_ROOT, "../../..");
 const CORPUS_ROOT = path.join(
   SKILLS_REPO_ROOT,
-  "research/corpus/plugin-saas-crawl-policy"
+  "research/articles/plugin-saas-crawl-policy"
 );
 const REGRESSION_ROOT = path.join(CORPUS_ROOT, "skill-regression");
 const EXAMPLES = path.join(SKILL_ROOT, "examples");

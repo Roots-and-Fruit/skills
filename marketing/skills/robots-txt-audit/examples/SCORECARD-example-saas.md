@@ -48,6 +48,18 @@ SSOT expectations: `scripts/max-discovery-expectations.mjs`
 | G25 | `audit_only` → `policy_compliance: null` | audit-only |
 | G26 | `crawler_matrix` is a JSON array, not `null` or a string placeholder | all found audit/recommend |
 | G27 | `urls_checked` includes apex + `www` robots.txt for `inputs.domain` | all handoffs |
+| G28 | `layer_assessment` when `deployment.model` is `cloudflare_managed` | CF handoff |
+| G29 | `recommendations_split` when CF + `max_discovery` | CF handoff |
+| G30 | `companion_module` is `CLOUDFLARE-MANAGED.md` when CF managed | CF handoff |
+| G31 | `violations[].layer` when `policy_compliance.layered` | CF handoff |
+| G32 | No `layer_assessment` on `origin_only` handoffs | non-CF handoffs |
+| G33 | `origin_append_template` + `content_signals.preset` when CF + `max_discovery` | CF handoff |
+
+## CF-layer
+
+| ID | Check | Fixture |
+|----|-------|---------|
+| CF1–CF24 | Layer split, CF credit, origin gaps, Content-Signal origin append | `example-cloudflare-managed-origin-append.robots.txt.fixture.txt` |
 
 ## Run
 
@@ -58,6 +70,7 @@ node scripts/verify-max-discovery.mjs
 node scripts/verify-max-discovery-contract.mjs
 node scripts/verify-handoff.mjs
 node scripts/verify-v1_3-changes.mjs
+node scripts/verify-cloudflare-layers.mjs
 ```
 
 Maintain fixtures: `node scripts/refresh-handoff-fixtures.mjs`

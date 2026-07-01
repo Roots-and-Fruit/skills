@@ -347,6 +347,15 @@ function runChecks(data) {
         return true;
       }
       const r4 = data.audit_checks?.find((row) => row.id === "R4");
+      const violations = data.policy_compliance?.violations ?? [];
+      if (data.deployment?.model === "cloudflare_managed") {
+        const onlyOrigin =
+          violations.length > 0 &&
+          violations.every((v) => v.layer === "origin");
+        if (onlyOrigin) {
+          return r4?.status === "pass" || r4?.status === "warn";
+        }
+      }
       return r4?.status === "fail";
     }
   });
@@ -388,6 +397,91 @@ function runChecks(data) {
       const expected = canonicalDiscoveryUrls(domain);
       const checked = data.discovery?.urls_checked ?? [];
       return expected.every((url) => checked.includes(url));
+    }
+  });
+
+  checks.push({
+    id: "G28",
+    pass: () => {
+      if (data.deployment?.model !== "cloudflare_managed") {
+        return true;
+      }
+      const la = data.layer_assessment;
+      return (
+        la &&
+        la.cloudflare &&
+        typeof la.cloudflare.training_bots_blocked === "boolean" &&
+        la.origin &&
+        typeof la.origin.sitemap_present === "boolean"
+      );
+    }
+  });
+
+  checks.push({
+    id: "G29",
+    pass: () => {
+      if (
+        data.deployment?.model !== "cloudflare_managed" ||
+        data.inputs?.crawl_policy !== "max_discovery"
+      ) {
+        return true;
+      }
+      const rs = data.recommendations_split;
+      return (
+        rs &&
+        Array.isArray(rs.cloudflare_dashboard) &&
+        Array.isArray(rs.origin_file) &&
+        Array.isArray(rs.enforcement_optional)
+      );
+    }
+  });
+
+  checks.push({
+    id: "G30",
+    pass: () => {
+      if (data.deployment?.model !== "cloudflare_managed") {
+        return data.deployment?.companion_module == null;
+      }
+      return data.deployment?.companion_module === "CLOUDFLARE-MANAGED.md";
+    }
+  });
+
+  checks.push({
+    id: "G31",
+    pass: () => {
+      if (data.policy_compliance?.layered !== true) {
+        return true;
+      }
+      const violations = data.policy_compliance?.violations ?? [];
+      return violations.every((v) => typeof v.layer === "string");
+    }
+  });
+
+  checks.push({
+    id: "G32",
+    pass: () => {
+      if (data.deployment?.model === "cloudflare_managed") {
+        return true;
+      }
+      return data.layer_assessment == null && data.recommendations_split == null;
+    }
+  });
+
+  checks.push({
+    id: "G33",
+    pass: () => {
+      if (
+        data.deployment?.model !== "cloudflare_managed" ||
+        data.inputs?.crawl_policy !== "max_discovery"
+      ) {
+        return data.origin_append_template == null;
+      }
+      return (
+        typeof data.origin_append_template === "string" &&
+        data.origin_append_template.includes("Content-Signal:") &&
+        data.origin_append_template.includes("ai-input=yes") &&
+        data.content_signals?.preset === "search_and_ai_input"
+      );
     }
   });
 
@@ -434,7 +528,7 @@ function main() {
     process.exit(1);
   }
 
-  console.log(`All G1–G27 passed for ${targets.length} handoff fixture(s).`);
+  console.log(`All G1–G33 passed for ${targets.length} handoff fixture(s).`);
 }
 
 main();

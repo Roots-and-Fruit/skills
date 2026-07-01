@@ -25,6 +25,8 @@ Workflow for an AI agent. Does not deploy files or fetch data on its own.
 
 - **Key page URLs** — cornerstones or priority pages for crawlability check
 - **`crawl_policy`** — `max_discovery`, `block_training_allow_answers`, `restrictive`, or `audit_only`
+- **`robots_deployment`** — `auto`, `origin_only`, or `cloudflare_managed` (default `auto` — detects Cloudflare managed markers)
+- **`content_signals_preset`** — `search_only` | `search_and_ai_input` | `most_restrictive` | `all_permitted` (default: derived from `crawl_policy` when CF managed)
 - **Site Content Catalog handoff** — sitemap cross-check in R7
 
 ---
@@ -43,6 +45,7 @@ node scripts/verify-robots-structure.mjs
 node scripts/verify-max-discovery.mjs
 node scripts/verify-max-discovery-contract.mjs
 node scripts/verify-handoff.mjs
+node scripts/verify-cloudflare-layers.mjs
 ```
 
 `verify-max-discovery.mjs` and `verify-max-discovery-contract.mjs` are required when changing `max_discovery` rules, crawler registry, sitemap validation, or handoff contract for `max_discovery` runs.

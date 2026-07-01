@@ -7,6 +7,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { CLOUDFLARE_MANAGED_MARKERS } from "./crawler-registry-cloudflare.mjs";
 
 export function pathToRegex(pattern) {
   if (pattern === "") {
@@ -85,6 +86,100 @@ export function isPathAllowedForAgent(groups, userAgent, pathname) {
   }
 
   return true;
+}
+
+/**
+ * Parse Content-Signal directives from managed block text.
+ * @param {string} text
+ */
+export function parseContentSignals(text) {
+  const signals = { search: null, ai_input: null, ai_train: null };
+  const match = text.match(/Content-Signal:\s*([^\n#]+)/i);
+  if (!match) {
+    return signals;
+  }
+
+  for (const part of match[1].split(",")) {
+    const [key, value] = part.trim().split("=").map((s) => s.trim());
+    if (!key || !value) {
+      continue;
+    }
+    const normalized = key.toLowerCase().replace(/-/g, "_");
+    if (normalized in signals) {
+      signals[normalized] = value.toLowerCase();
+    }
+  }
+
+  return signals;
+}
+
+/**
+ * Detect Cloudflare managed robots.txt prepend in edge-served content.
+ * @param {string} content
+ */
+export function detectCloudflareManaged(content) {
+  const begin = CLOUDFLARE_MANAGED_MARKERS.begin.test(content);
+  const end = CLOUDFLARE_MANAGED_MARKERS.end.test(content);
+  return begin && end;
+}
+
+/**
+ * Split edge-served robots.txt into Cloudflare managed vs origin layers.
+ * @param {string} content
+ */
+export function parseRobotsTxtLayers(content) {
+  const normalized = content.replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
+
+  let beginIndex = -1;
+  let endIndex = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    if (beginIndex === -1 && CLOUDFLARE_MANAGED_MARKERS.begin.test(lines[i])) {
+      beginIndex = i;
+    }
+    if (CLOUDFLARE_MANAGED_MARKERS.end.test(lines[i])) {
+      endIndex = i;
+    }
+  }
+
+  const detected = beginIndex !== -1 && endIndex !== -1 && endIndex > beginIndex;
+
+  if (!detected) {
+    const effective = parseRobotsTxt(content);
+    return {
+      detected: false,
+      markers: null,
+      cloudflare: null,
+      origin: { raw: content, parsed: effective },
+      effective,
+      content_signals: parseContentSignals(content)
+    };
+  }
+
+  const cloudflareRaw = lines.slice(0, endIndex + 1).join("\n");
+  const originRaw = lines.slice(endIndex + 1).join("\n").trim();
+  const cloudflareParsed = parseRobotsTxt(cloudflareRaw);
+  const originParsed = parseRobotsTxt(originRaw.length > 0 ? originRaw : "");
+  const effective = parseRobotsTxt(content);
+
+  return {
+    detected: true,
+    markers: {
+      begin: lines[beginIndex].trim(),
+      end: lines[endIndex].trim()
+    },
+    cloudflare: {
+      raw: cloudflareRaw,
+      parsed: cloudflareParsed
+    },
+    origin: {
+      raw: originRaw,
+      parsed: originParsed
+    },
+    effective,
+    content_signals: parseContentSignals(cloudflareRaw)
+  };
 }
 
 export function parseRobotsTxt(content) {

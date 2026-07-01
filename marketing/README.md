@@ -94,9 +94,9 @@ Detect when multiple pages compete for the same keywords; output conflicts, hub/
 ### robots.txt Audit
 
 **Path:** [`skills/robots-txt-audit/`](skills/robots-txt-audit/)  
-**Version:** 1.3.0 — WP `/wp-admin/` admin path; SM4 off-host warn; `audit_findings[]`; `verify-v1_3-changes.mjs`
+**Version:** 1.4.5 — layperson-first output, re-audit snapshots, Cloudflare origin vs edge guidance, ContentSignals.org presets
 
-**Data required:** WebFetch; optional key page URLs and crawl policy — see [`skills/robots-txt-audit/REQUIREMENTS.md`](skills/robots-txt-audit/REQUIREMENTS.md).
+**Data required:** WebFetch; optional key page URLs, crawl policy, and `robots_deployment` — see [`skills/robots-txt-audit/REQUIREMENTS.md`](skills/robots-txt-audit/REQUIREMENTS.md).
 
 **Example prompts:**
 
@@ -221,5 +221,6 @@ New marketing skills get their own folder under `marketing/skills/` with at mini
 - `SKILL.md` — agent workflow
 - `REQUIREMENTS.md` — MCP, CSV, or other data dependencies
 - `EXAMPLES.md` — sample shapes (generic domains only in public examples)
+- `AGENTS.md` — repo-root maintainer rules (see [`AGENTS.md`](../AGENTS.md))
 
 Update this README and the root [`README.md`](../README.md) index when you add one.

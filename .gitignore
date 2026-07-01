@@ -13,3 +13,7 @@ research/
 # Agent live-test handoffs (promote to fixtures manually after review)
 **/examples/live-run-*.handoff.json
 marketing/skills/information-gain-evaluator/examples/live-run-*.handoff.json
+
+# Generated audit reports (local runtime output)
+marketing/skills/robots-txt-audit/reports/
+marketing/skills/robots-txt-audit/reports/*-latest-snapshot.json
