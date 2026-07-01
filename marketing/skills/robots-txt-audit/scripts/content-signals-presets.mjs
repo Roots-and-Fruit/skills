@@ -51,6 +51,7 @@ export const ORIGIN_APPEND_SIGNAL_AGENTS = [
   "Googlebot",
   "bingbot",
   "OAI-SearchBot",
+  "Claude-SearchBot",
   "PerplexityBot"
 ];
 

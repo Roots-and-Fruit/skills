@@ -31,7 +31,8 @@ export const CRAWLER_REGISTRY = {
   Applebot: {
     roles: ["indexing", "ai_answer"],
     max_discovery_site_access: "allow",
-    controls: "Apple Search, Siri, and Spotlight discovery"
+    controls: "Apple Search, Siri, and Spotlight discovery",
+    paired_token: "Applebot-Extended"
   },
   "OAI-SearchBot": {
     roles: ["ai_answer", "indexing"],
@@ -39,6 +40,13 @@ export const CRAWLER_REGISTRY = {
     controls: "ChatGPT search retrieval and citation discovery",
     paired_token: "GPTBot",
     note: "Allow for GEO; distinct from training crawler GPTBot."
+  },
+  "Claude-SearchBot": {
+    roles: ["ai_answer", "indexing"],
+    max_discovery_site_access: "allow",
+    controls: "Claude web search retrieval and citation discovery",
+    paired_token: "ClaudeBot",
+    note: "Anthropic search crawler (2026+). Allow for GEO; distinct from training crawler ClaudeBot."
   },
   PerplexityBot: {
     roles: ["ai_answer", "indexing"],
@@ -65,10 +73,11 @@ export const CRAWLER_REGISTRY = {
     controls: "Common Crawl corpus inclusion"
   },
   ClaudeBot: {
-    roles: ["ai_training", "ai_answer"],
+    roles: ["ai_training"],
     max_discovery_site_access: "block",
-    controls: "Anthropic crawl — verify current docs for training vs fetch behavior",
-    note: "Registry default blocks training posture; confirm against live Anthropic policy."
+    controls: "Anthropic model training crawl",
+    paired_token: "Claude-SearchBot",
+    note: "Block training; allow Claude-SearchBot separately for Claude answer citations."
   },
   "anthropic-ai": {
     roles: ["ai_training"],
@@ -84,7 +93,20 @@ export const CRAWLER_REGISTRY = {
   "Meta-ExternalAgent": {
     roles: ["ai_training"],
     max_discovery_site_access: "block",
-    controls: "Meta AI/product improvement crawl"
+    controls: "Meta AI/product improvement crawl",
+    note: "High crawl volume with no referral return — common training-block target."
+  },
+  Bytespider: {
+    roles: ["ai_training"],
+    max_discovery_site_access: "block",
+    controls: "ByteDance AI training crawl",
+    note:
+      "Among the fastest-growing AI crawlers; may ignore robots.txt — pair blocks with CDN/WAF if needed."
+  },
+  Amazonbot: {
+    roles: ["ai_training"],
+    max_discovery_site_access: "block",
+    controls: "Amazon Alexa and product/AI feature crawl"
   },
   "ChatGPT-User": {
     roles: ["user_triggered"],
@@ -105,10 +127,23 @@ export const MAX_DISCOVERY_REQUIRED_TOKENS = [
   "GPTBot",
   "Google-Extended",
   "CCBot",
+  "ClaudeBot",
   "OAI-SearchBot",
+  "Claude-SearchBot",
   "PerplexityBot",
   "Googlebot",
   "bingbot"
+];
+
+/**
+ * Training bots blocked at Cloudflare edge when managed robots.txt is ON.
+ * Origin-only sites should still block these explicitly for max_discovery alignment.
+ */
+export const MAX_DISCOVERY_OPTIONAL_TRAINING_BLOCKS = [
+  "Bytespider",
+  "Meta-ExternalAgent",
+  "Amazonbot",
+  "Applebot-Extended"
 ];
 
 /** Paths that should be blocked for User-agent: * under max_discovery */
@@ -123,7 +158,12 @@ export const MAX_DISCOVERY_PATH_ALTERNATIVES = {
 };
 
 /** Discovery crawlers used for cornerstone path checks (R5) */
-export const DISCOVERY_CRAWLERS = ["Googlebot", "OAI-SearchBot", "PerplexityBot"];
+export const DISCOVERY_CRAWLERS = [
+  "Googlebot",
+  "OAI-SearchBot",
+  "Claude-SearchBot",
+  "PerplexityBot"
+];
 
 export function getCrawlerDefinition(token) {
   return CRAWLER_REGISTRY[token] ?? null;

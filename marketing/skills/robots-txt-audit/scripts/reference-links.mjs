@@ -11,6 +11,14 @@ export const ROOTS_AND_FRUIT_URL = "https://rootsandfruit.com";
 export const ROBOTS_TXT_SKILL_GITHUB_URL =
   "https://github.com/Roots-and-Fruit/skills/tree/master/marketing/skills/robots-txt-audit";
 
+/** Optional deeper reading (industry benchmarks — verify dates in article). */
+export const EXTERNAL_CONTEXT_URLS = {
+  aiCrawlerStatistics:
+    "https://technologychecker.io/blog/ai-crawler-statistics",
+  robotsTxtBlockingReport:
+    "https://technologychecker.io/blog/robots-txt-ai-crawlers-blocking-report"
+};
+
 /** @type {Record<string, string>} */
 export const GAP_LEARN_MORE_ANCHORS = {
   MD_SITEMAP_PRESENT: "sitemap-declaration",
@@ -27,7 +35,14 @@ export const GAP_LEARN_MORE_ANCHORS = {
   MD_bingbot: "training-vs-search-and-answer-bots",
   MD_GOOGLE_PAIRING: "training-vs-search-and-answer-bots",
   MD_OPENAI_PAIRING: "training-vs-search-and-answer-bots",
-  OPT_ANTHROPIC_AI: "training-vs-search-and-answer-bots",
+  MD_ClaudeBot: "anthropic-search-pairing",
+  MD_Claude_SearchBot: "anthropic-search-pairing",
+  MD_ANTHROPIC_PAIRING: "anthropic-search-pairing",
+  OPT_ANTHROPIC_AI: "anthropic-search-pairing",
+  OPT_Bytespider: "enforcement-beyond-robots-txt",
+  OPT_Meta_ExternalAgent: "training-vs-search-and-answer-bots",
+  OPT_Amazonbot: "training-vs-search-and-answer-bots",
+  OPT_Applebot_Extended: "training-vs-search-and-answer-bots",
   OPT_AI_INPUT_SIGNAL: "content-signal-alignment"
 };
 
@@ -71,11 +86,12 @@ export function formatGapBullet(gap, options = {}) {
 }
 
 /**
- * First-audit footer: article + consulting CTA.
+ * First-audit footer: public guide + consulting CTA + optional industry context links.
  */
 export function buildLearnMoreFooter() {
   return [
     `**Learn more:** [robots.txt audit reference guide](${ROBOTS_TXT_GUIDE_URL})`,
+    `**Industry context (mid-2026):** [What AI crawlers want](${EXTERNAL_CONTEXT_URLS.aiCrawlerStatistics}) · [Who gets blocked in robots.txt](${EXTERNAL_CONTEXT_URLS.robotsTxtBlockingReport})`,
     `**Need a hand?** [Growth marketing consulting](${ROOTS_AND_FRUIT_URL}) — Roots & Fruit helps WordPress and SaaS teams with crawl policy, GEO, and content operations.`
   ].join("\n");
 }

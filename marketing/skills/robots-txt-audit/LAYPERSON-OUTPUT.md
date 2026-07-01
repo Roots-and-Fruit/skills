@@ -12,7 +12,7 @@
 6. **Copy-paste block** — **Origin-only** file for SFTP/host when Cloudflare-managed; full file when not. Preceded by **How to update (Cloudflare-managed)** (3 bullets) when CF detected.
 7. **One link** to the local detail report file.
 8. **Learn-more links** (first audit only) — Each missing required/optional item gets `[Why this matters]({article URL}#{anchor})` from `reference-links.mjs` / `GAP_REGISTRY.learn_more_anchor`.
-9. **Footer** — Article link + [Roots & Fruit](https://rootsandfruit.com) growth marketing consulting CTA via `buildLearnMoreFooter()`.
+9. **Footer** — Public [reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) link, optional industry benchmark links, and [Roots & Fruit](https://rootsandfruit.com) consulting CTA via `buildLearnMoreFooter()`.
 
 **Do not include in chat:** per-bot matrix tables, rubric R1–R11, handoff JSON, or other long technical appendices (those stay in the detail file).
 
@@ -61,7 +61,8 @@ Detail report may include the **merged edge preview** for verification; do not p
 | Technical | Say instead |
 |-----------|-------------|
 | GPTBot / Google-Extended blocked | AI training crawlers are blocked |
-| OAI-SearchBot allowed | AI answer/search bots can read your pages |
+| ClaudeBot blocked | Anthropic training crawler is blocked |
+| OAI-SearchBot / Claude-SearchBot allowed | AI answer/search bots can read your pages for citations |
 | MD_SITEMAP_PRESENT | No sitemap URL in robots.txt |
 | origin layer | The part of robots.txt you edit on your server (below Cloudflare’s section) |
 | Content-Signal ai-input=yes | Declared permission for AI answer tools to use your content |

@@ -281,7 +281,8 @@ export function buildRecommendationsSplit(policyCompliance, cloudflareLayer, con
     "Review Signals / crawler logs for unexpected blocks on public content"
   ];
   const enforcementItems = [
-    "Optional: enable AI Crawl Control if bots ignore robots.txt (preference vs enforcement)"
+    "robots.txt is a polite request — roughly 1 in 12 AI crawl requests get a hard 403 at the CDN/server (Cloudflare Radar, H1 2026). Use WAF or bot management when blocks must stick.",
+    "Optional: enable Cloudflare AI Crawl Control (or equivalent) if aggressive bots (e.g. Bytespider) ignore robots.txt or spike server load."
   ];
 
   for (const violation of policyCompliance?.violations ?? []) {
@@ -405,6 +406,22 @@ export function assessMaxDiscoveryLayered(layers) {
     });
   }
 
+  if (
+    getSiteAccess(effectiveGroups, "ClaudeBot", "/") === "allowed" &&
+    getSiteAccess(effectiveGroups, "Claude-SearchBot", "/") === "blocked"
+  ) {
+    violations.push({
+      id: "MD_ANTHROPIC_PAIRING",
+      token: "Claude-SearchBot",
+      expected: "allow",
+      actual: "blocked",
+      path: "/",
+      layer: "effective",
+      message:
+        "Claude-SearchBot blocked while ClaudeBot allowed — training/discovery reversed"
+    });
+  }
+
   for (const restrictedPath of MAX_DISCOVERY_RESTRICTED_PATHS) {
     if (!isRestrictedPathBlocked(originGroups, restrictedPath)) {
       const alts = MAX_DISCOVERY_PATH_ALTERNATIVES[restrictedPath];
@@ -522,6 +539,21 @@ export function assessMaxDiscovery(groups, domain, options = {}) {
     });
   }
 
+  if (
+    getSiteAccess(groups, "ClaudeBot", "/") === "allowed" &&
+    getSiteAccess(groups, "Claude-SearchBot", "/") === "blocked"
+  ) {
+    violations.push({
+      id: "MD_ANTHROPIC_PAIRING",
+      token: "Claude-SearchBot",
+      expected: "allow",
+      actual: "blocked",
+      path: "/",
+      message:
+        "Claude-SearchBot blocked while ClaudeBot allowed — training/discovery reversed"
+    });
+  }
+
   for (const restrictedPath of MAX_DISCOVERY_RESTRICTED_PATHS) {
     if (!isRestrictedPathBlocked(groups, restrictedPath)) {
       const alts = MAX_DISCOVERY_PATH_ALTERNATIVES[restrictedPath];
@@ -617,6 +649,21 @@ export function buildAuditFindings(assessment, crawlPolicy, discovery = {}) {
         rubric: "R4",
         message:
           "OAI-SearchBot blocked while GPTBot allowed — training/discovery pairing reversed."
+      });
+    }
+
+    const claude = groups.find((r) => r.token === "ClaudeBot");
+    const claudeSearch = groups.find((r) => r.token === "Claude-SearchBot");
+    if (
+      claude?.training_crawl === "allowed" &&
+      claudeSearch?.indexing_crawl === "blocked"
+    ) {
+      findings.push({
+        id: "AF_R4_ANTHROPIC_PAIRING",
+        tier: "fail",
+        rubric: "R4",
+        message:
+          "Claude-SearchBot blocked while ClaudeBot allowed — training/discovery pairing reversed."
       });
     }
   }

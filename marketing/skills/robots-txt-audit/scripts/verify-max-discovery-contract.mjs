@@ -230,7 +230,7 @@ function runRequiredTokenCoverageSuite() {
   checks.push({
     id: "PC21",
     pass: () =>
-      ["MD_GPTBot", "MD_Google_Extended", "MD_CCBot"].every((id) =>
+      ["MD_GPTBot", "MD_Google_Extended", "MD_CCBot", "MD_ClaudeBot"].every((id) =>
         violations.some((v) => v.id === id)
       )
   });

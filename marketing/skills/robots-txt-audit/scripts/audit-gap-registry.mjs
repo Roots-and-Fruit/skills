@@ -1,6 +1,7 @@
 /**
  * Stable gap IDs for before/after re-audit tracking.
  */
+import { MAX_DISCOVERY_OPTIONAL_TRAINING_BLOCKS } from "./crawler-registry.mjs";
 
 /** @type {Record<string, { label: string, short: string, downside: string, category: "required" | "optional", learn_more_anchor: string }>} */
 export const GAP_REGISTRY = {
@@ -116,11 +117,67 @@ export const GAP_REGISTRY = {
     category: "required",
     learn_more_anchor: "training-vs-search-and-answer-bots"
   },
+  MD_ClaudeBot: {
+    label: "Anthropic training bot (ClaudeBot) can still crawl the site",
+    short: "ClaudeBot blocked",
+    downside:
+      "Your public content may be collected for Anthropic model training unless you block training crawlers.",
+    category: "required",
+    learn_more_anchor: "anthropic-search-pairing"
+  },
+  MD_Claude_SearchBot: {
+    label: "Claude search/citation bot is blocked (bad for AI visibility)",
+    short: "Claude search allowed",
+    downside:
+      "Claude answer tools may not cite or surface your pages when people ask questions in your niche.",
+    category: "required",
+    learn_more_anchor: "anthropic-search-pairing"
+  },
+  MD_ANTHROPIC_PAIRING: {
+    label: "Claude search blocked but training allowed — settings are reversed",
+    short: "Anthropic rules aligned",
+    downside:
+      "Claude may not cite you in answers while training bots can still ingest your content.",
+    category: "required",
+    learn_more_anchor: "anthropic-search-pairing"
+  },
   OPT_ANTHROPIC_AI: {
     label: "Legacy Anthropic training bot (anthropic-ai) not explicitly blocked",
     short: "Anthropic training blocked",
     downside:
       "Older Anthropic crawlers may still treat your site as open for training unless explicitly blocked.",
+    category: "optional",
+    learn_more_anchor: "anthropic-search-pairing"
+  },
+  OPT_Bytespider: {
+    label: "ByteDance training bot (Bytespider) not explicitly blocked",
+    short: "Bytespider blocked",
+    downside:
+      "A fast-growing training crawler may keep fetching despite industry-wide blocks — consider explicit Disallow plus CDN enforcement if load spikes.",
+    category: "optional",
+    learn_more_anchor: "enforcement-beyond-robots-txt"
+  },
+  OPT_Meta_ExternalAgent: {
+    label: "Meta AI training bot (Meta-ExternalAgent) not explicitly blocked",
+    short: "Meta training blocked",
+    downside:
+      "Meta’s training crawler returns no referral traffic — blocking reduces one-way extraction when bots comply.",
+    category: "optional",
+    learn_more_anchor: "training-vs-search-and-answer-bots"
+  },
+  OPT_Amazonbot: {
+    label: "Amazon training bot (Amazonbot) not explicitly blocked",
+    short: "Amazonbot blocked",
+    downside:
+      "Amazon may use crawled product and content data for Alexa and AI features — retailers often block explicitly.",
+    category: "optional",
+    learn_more_anchor: "training-vs-search-and-answer-bots"
+  },
+  OPT_Applebot_Extended: {
+    label: "Apple AI training bot (Applebot-Extended) not explicitly blocked",
+    short: "Apple training blocked",
+    downside:
+      "Apple may use crawled content for Apple Intelligence training separate from Apple Search indexing.",
     category: "optional",
     learn_more_anchor: "training-vs-search-and-answer-bots"
   },
@@ -193,6 +250,22 @@ export function collectGapsFromAssessment(assessment) {
   if (anthropic?.training_crawl === "allowed" && !seen.has("OPT_ANTHROPIC_AI")) {
     optional.push({ id: "OPT_ANTHROPIC_AI", ...GAP_REGISTRY.OPT_ANTHROPIC_AI });
     seen.add("OPT_ANTHROPIC_AI");
+  }
+
+  const policy = assessment.crawl_policy ?? "audit_only";
+  if (policy === "max_discovery" || policy === "block_training_allow_answers") {
+    for (const token of MAX_DISCOVERY_OPTIONAL_TRAINING_BLOCKS) {
+      const gapId = `OPT_${token.replace(/[^a-zA-Z0-9]/g, "_")}`;
+      const entry = GAP_REGISTRY[gapId];
+      if (!entry || seen.has(gapId)) {
+        continue;
+      }
+      const row = matrix.find((r) => r.token === token);
+      if (row?.training_crawl === "allowed") {
+        optional.push({ id: gapId, ...entry });
+        seen.add(gapId);
+      }
+    }
   }
 
   if (

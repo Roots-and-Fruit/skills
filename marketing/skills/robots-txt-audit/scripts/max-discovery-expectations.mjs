@@ -12,16 +12,20 @@ export const FIXTURE_EXPECTATIONS = {
       "MD_GPTBot",
       "MD_Google_Extended",
       "MD_CCBot",
+      "MD_ClaudeBot",
+      "MD_Claude_SearchBot",
       "MD_GOOGLE_PAIRING",
       "MD_OPENAI_PAIRING",
+      "MD_ANTHROPIC_PAIRING",
       "MD_SITEMAP_PRESENT"
     ],
     sitemapStatusWith200: "pass",
-    trainingTokensBlocked: ["GPTBot", "Google-Extended", "CCBot"],
+    trainingTokensBlocked: ["GPTBot", "Google-Extended", "CCBot", "ClaudeBot"],
     discoveryTokensAllowed: [
       "Googlebot",
       "bingbot",
       "OAI-SearchBot",
+      "Claude-SearchBot",
       "PerplexityBot"
     ]
   },
@@ -31,6 +35,7 @@ export const FIXTURE_EXPECTATIONS = {
       "MD_GPTBot",
       "MD_Google_Extended",
       "MD_CCBot",
+      "MD_ClaudeBot",
       "MD_Googlebot",
       "MD_OAI_SearchBot",
       "MD_OPENAI_PAIRING",
@@ -45,10 +50,16 @@ export const FIXTURE_EXPECTATIONS = {
       "MD_GPTBot",
       "MD_Google_Extended",
       "MD_CCBot",
+      "MD_ClaudeBot",
       "MD_PATH__cart_",
       "MD_PATH__checkout_"
     ],
-    forbiddenViolationIds: ["MD_PATH__admin_", "MD_GOOGLE_PAIRING", "MD_OPENAI_PAIRING"],
+    forbiddenViolationIds: [
+      "MD_PATH__admin_",
+      "MD_GOOGLE_PAIRING",
+      "MD_OPENAI_PAIRING",
+      "MD_ANTHROPIC_PAIRING"
+    ],
     sitemapFetch200: [
       { url: "https://www.example.com/sitemap_index.xml", status: 200 }
     ],
@@ -90,4 +101,4 @@ export function allRequiredTokensCovered(violations, expectedAccess) {
   ).every((token) => blocked.includes(token));
 }
 
-export const REQUIRED_TRAINING_BLOCKS = ["GPTBot", "Google-Extended", "CCBot"];
+export const REQUIRED_TRAINING_BLOCKS = ["GPTBot", "Google-Extended", "CCBot", "ClaudeBot"];

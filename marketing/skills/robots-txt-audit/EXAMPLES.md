@@ -10,7 +10,7 @@
 
 ---
 
-## Sample layperson chat output (v1.4.6+)
+## Sample layperson chat output (v1.5.0+)
 
 **User sees only this in chat.** Bot tables, handoff JSON, and robots.txt copy go to `reports/{domain}-{date}-detail.md`. Each gap links to the [public reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/).
 
@@ -49,6 +49,7 @@
 Technical details (bot-by-bot tables, rubric scores, handoff JSON, robots.txt copy): **reports/example.com-2026-07-01-detail.md**
 
 **Learn more:** [robots.txt audit reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/)
+**Industry context (mid-2026):** [What AI crawlers want](https://technologychecker.io/blog/ai-crawler-statistics) · [Who gets blocked in robots.txt](https://technologychecker.io/blog/robots-txt-ai-crawlers-blocking-report)
 **Need a hand?** [Growth marketing consulting](https://rootsandfruit.com) — Roots & Fruit helps WordPress and SaaS teams with crawl policy, GEO, and content operations.
 ```
 

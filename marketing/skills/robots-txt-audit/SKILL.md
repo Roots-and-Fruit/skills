@@ -7,7 +7,7 @@ description: >
   OAI-SearchBot, and Google-Extended. Audits selective crawler rules per bot
   (training vs indexing crawl), validates Sitemap directives, and drafts
   policy-aligned robots.txt.
-version: 1.4.6
+version: 1.5.0
 ---
 
 # robots.txt Audit
@@ -130,6 +130,7 @@ Bots without a dedicated `User-agent` group inherit `User-agent: *` rules — se
 
 - `Googlebot` (indexing) blocked but `Google-Extended` (training token) allowed
 - `OAI-SearchBot` (answer) blocked but `GPTBot` (training) allowed
+- `Claude-SearchBot` (answer) blocked but `ClaudeBot` (training) allowed
 
 See `REFERENCE.md` **Training vs indexing crawl** for what each bot controls.
 
@@ -169,7 +170,7 @@ Populate `audit_findings[]` from `buildAuditFindings()` / `assessment.audit_find
 
 | Tier | When | Examples |
 |------|------|----------|
-| **fail** | Clear crawl/indexing risk | R1 HTML-as-200, reversed Google/OpenAI pairing |
+| **fail** | Clear crawl/indexing risk | R1 HTML-as-200, reversed Google/OpenAI/Anthropic pairing |
 | **warn** | Informational gap or hygiene | Inherited training-bot allow, SM7 sitemap 5xx, off-host SM4 |
 | **info** | Document only | Reserved for future low-priority notes |
 
@@ -195,7 +196,7 @@ When `crawl_policy` is `max_discovery` and CF managed is detected, include **`or
 Common fixes (translate to layperson steps in chat; technical snippets go in detail file):
 
 - Unblock `Googlebot` / `bingbot`; block `Google-Extended` instead for training-only restriction
-- Unblock `OAI-SearchBot` / `PerplexityBot`; keep `GPTBot` blocked
+- Unblock `OAI-SearchBot` / `Claude-SearchBot` / `PerplexityBot`; keep `GPTBot` and `ClaudeBot` blocked
 - Add explicit `Allow: /` for answer bots under complex wildcard rules
 - Fix cornerstone path blocked by overly broad `Disallow`
 - Add or fix `Sitemap: https://{domain}/sitemap.xml` (absolute, correct host)
@@ -206,7 +207,7 @@ Set `mode: "recommend"` when primary deliverable is policy change guidance.
 
 When file not found or user requests a draft, build from `REFERENCE.md` policy template matching `crawl_policy`:
 
-- **`max_discovery`:** allow search + answer bots; block `GPTBot`, `Google-Extended`, `CCBot`; restrict admin/cart/checkout; declare sitemap
+- **`max_discovery`:** allow search + answer bots; block `GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`; restrict admin/cart/checkout; declare sitemap
 - Include comments explaining each blocked agent
 - `Sitemap: https://{domain}/sitemap.xml` unless user provides another canonical sitemap URL
 
@@ -264,7 +265,7 @@ Default path: `marketing/skills/robots-txt-audit/reports/{domain}-{date}-detail.
 
 ### Tone
 
-Plain English. No jargon without a one-line explanation. Frame limits honestly: robots.txt is a polite request to crawlers — not a guarantee of Google ranking, AI citations, or security. On **first audit**, link each gap to the [public reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) via `reference-links.mjs`. Close with `buildLearnMoreFooter()` (article + [Roots & Fruit consulting](https://rootsandfruit.com)).
+Plain English. No jargon without a one-line explanation. Frame limits honestly: robots.txt is a polite request to crawlers — not a guarantee of Google ranking, AI citations, or security; aggressive bots may ignore it (use CDN/WAF when enforcement matters). On **first audit**, link each gap to the [public reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) via `reference-links.mjs`. Close with `buildLearnMoreFooter()` (guide + optional industry benchmarks + [Roots & Fruit consulting](https://rootsandfruit.com)).
 
 **Generate mode chat:** short verdict + publish steps + link to detail file containing full draft.
 

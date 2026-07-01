@@ -24,7 +24,9 @@ Lead with:
 - **What to do next** — shortened (skip repeating Cloudflare dashboard lecture)
 - **Copy-paste block** — only if required gaps remain
 
-**Footer:** Include `buildLearnMoreFooter()` (article + [Roots & Fruit consulting](https://rootsandfruit.com)). Do **not** repeat per-gap `[Why this matters]` article links on recheck — downsides stay inline in **Still to do**.
+**Footer:** Include `buildLearnMoreFooter()` (public reference guide + industry context links + [Roots & Fruit consulting](https://rootsandfruit.com)). Do **not** repeat per-gap `[Why this matters]` article links on recheck — downsides stay inline in **Still to do**.
+
+**Cadence:** Recommend re-auditing after material robots.txt changes and **at least quarterly** — AI operators launch new crawlers regularly; single-month traffic spikes are not reliable trends.
 
 Do **not** re-dump the full “What’s working” essay unless something regressed (new required gap).
 

@@ -38,9 +38,14 @@ Optimize robots.txt **per user-agent**, not as one “AI” bucket. Each token m
 | `Google-Extended` | n/a (robots.txt token only) | **Block** if training reuse unwanted | `Googlebot` |
 | `bingbot` | **Allow** for Bing indexing | n/a | — |
 | `OAI-SearchBot` | **Allow** for ChatGPT search/citation | n/a | `GPTBot` |
+| `Claude-SearchBot` | **Allow** for Claude search/citation | n/a | `ClaudeBot` |
 | `GPTBot` | n/a | **Block** if training reuse unwanted | `OAI-SearchBot` |
+| `ClaudeBot` | n/a | **Block** if training reuse unwanted | `Claude-SearchBot` |
 | `PerplexityBot` | **Allow** for Perplexity discovery | n/a | `Perplexity-User` |
 | `CCBot` | n/a | **Block** if Common Crawl inclusion unwanted | — |
+| `Bytespider` | n/a | **Block** (optional gap on origin) | — |
+| `Meta-ExternalAgent` | n/a | **Block** (optional gap on origin) | — |
+| `Amazonbot` | n/a | **Block** (optional gap on origin) | — |
 | `Applebot` | **Allow** for Apple search/assistant | n/a | `Applebot-Extended` |
 | `Applebot-Extended` | n/a | **Block** if Apple FM training unwanted | `Applebot` |
 | `ChatGPT-User` | User-triggered fetch | n/a | May not respect robots like crawlers |
@@ -56,7 +61,7 @@ Optimize robots.txt **per user-agent**, not as one “AI” bucket. Each token m
 
 Full registry: `scripts/crawler-registry.mjs` (verify against provider docs before production).
 
-**Discovery crawlers for R5 cornerstone checks:** `Googlebot`, `OAI-SearchBot`, `PerplexityBot`
+**Discovery crawlers for R5 cornerstone checks:** `Googlebot`, `OAI-SearchBot`, `Claude-SearchBot`, `PerplexityBot`
 
 ## Crawl policy presets
 
@@ -89,12 +94,15 @@ Optional input: `content_signals_preset` — defaults from `crawl_policy` when C
 | MD_GPTBot | `GPTBot` blocked at `/` |
 | MD_Google_Extended | `Google-Extended` blocked at `/` |
 | MD_CCBot | `CCBot` blocked at `/` |
+| MD_ClaudeBot | `ClaudeBot` blocked at `/` |
 | MD_OAI_SearchBot | `OAI-SearchBot` allowed at `/` |
+| MD_Claude_SearchBot | `Claude-SearchBot` allowed at `/` |
 | MD_PerplexityBot | `PerplexityBot` allowed at `/` |
 | MD_Googlebot | `Googlebot` allowed at `/` |
 | MD_bingbot | `bingbot` allowed at `/` |
 | MD_GOOGLE_PAIRING | Not: Googlebot blocked + Google-Extended allowed |
 | MD_OPENAI_PAIRING | Not: OAI-SearchBot blocked + GPTBot allowed |
+| MD_ANTHROPIC_PAIRING | Not: Claude-SearchBot blocked + ClaudeBot allowed |
 | MD_PATH_* | `*` blocks `/admin/` **or** `/wp-admin/`, plus `/cart/`, `/checkout/` |
 | MD_SITEMAP_PRESENT | At least one `Sitemap:` line |
 | MD_SITEMAP_VALID | Sitemap fails `validateSitemaps()` with **fail**-severity issues (SM4 off-host alone is warn) |
@@ -146,7 +154,13 @@ Disallow: /
 User-agent: CCBot
 Disallow: /
 
+User-agent: ClaudeBot
+Disallow: /
+
 User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-SearchBot
 Allow: /
 
 User-agent: PerplexityBot
@@ -184,6 +198,10 @@ Content-Signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
 
 User-agent: OAI-SearchBot
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+Allow: /
+
+User-agent: Claude-SearchBot
 Content-Signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
 

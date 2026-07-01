@@ -72,7 +72,8 @@ export function buildWorkingList(assessment, domain) {
   const reversed = matrix.some(
     (r) =>
       (r.token === "Googlebot" && r.indexing_crawl === "blocked") ||
-      (r.token === "OAI-SearchBot" && r.indexing_crawl === "blocked")
+      (r.token === "OAI-SearchBot" && r.indexing_crawl === "blocked") ||
+      (r.token === "Claude-SearchBot" && r.indexing_crawl === "blocked")
   );
   if (!reversed && (!pc || !pc.violations?.some((v) => v.id.includes("PAIRING")))) {
     if (!items.some((i) => i.includes("Google, Bing"))) {
@@ -541,7 +542,7 @@ export function buildDetailReportMarkdown({
   const handoff = {
     handoff_version: "1.0",
     skill: "robots-txt-audit",
-    skill_version: "1.4.6",
+    skill_version: "1.5.0",
     mode,
     inputs: { domain, crawl_policy: crawlPolicy, robots_deployment: "auto" },
     discovery: {

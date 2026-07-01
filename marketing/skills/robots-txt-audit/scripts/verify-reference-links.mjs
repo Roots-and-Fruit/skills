@@ -61,6 +61,7 @@ ok("RL5", summary.includes("Why this matters"));
 ok("RL5b", summary.includes("#sitemap-declaration"));
 ok("RL6", buildLearnMoreFooter().includes(ROOTS_AND_FRUIT_URL));
 ok("RL6b", summary.includes("Growth marketing consulting"));
+ok("RL6c", buildLearnMoreFooter().includes("technologychecker.io"));
 
 for (const id of Object.keys(GAP_REGISTRY)) {
   const link = formatLearnMoreLink(id);
