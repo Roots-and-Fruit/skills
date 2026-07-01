@@ -4,6 +4,9 @@
 .DS_Store
 Thumbs.db
 
+# Private repo hygiene gate (local only — do not publish)
+/scripts/
+
 # Local research corpus (scraped site content; never publish)
 research/
 

@@ -24,7 +24,6 @@ A skill wrangles **predictability** out of a stochastic system: same *process* e
 - Meta skills → `utilities/{name}/`
 - Project-local → `.cursor/skills/{name}/` when appropriate
 - Fictional examples only (`example.com`) — no secrets or client PII
-- **Public hygiene:** before commit or PR, run from repo root: `node scripts/verify-public-hygiene.mjs` (see [`CONTRIBUTING.md`](../../CONTRIBUTING.md) and `scripts/banned-patterns.json`). CI blocks internal workspace paths, client slugs, internal roadmaps, and non-fictional fixture domains.
 - **Do not default to Tier C.** Earn files with the tier decision in Step 1.
 
 ## Step 0 — Intake (ask once if missing)
@@ -115,7 +114,6 @@ Extract **deterministic** transforms to `scripts/*.mjs` when agents re-derive th
 ## Step 4 — Index and closeout
 
 - Update `marketing/README.md` or `utilities/README.md` when shipping publicly
-- Run **public hygiene** from repo root: `node scripts/verify-public-hygiene.mjs`
 - Bump `version` when schema, scorecard, or behaviour changes
 - **Completion criterion for closeout:** changed paths listed; tier stated; run package verifier when tier A/B/C layout changed:
 

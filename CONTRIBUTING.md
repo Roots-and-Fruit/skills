@@ -2,21 +2,7 @@
 
 This repo is **public**. Client work, internal orchestrator paths, and live scraped corpora belong in private workspaces — not here.
 
-## Before you commit or open a PR
-
-```bash
-node scripts/verify-public-hygiene.mjs
-```
-
-CI runs the same check on every push and pull request to `master`.
-
 **Skill names:** frontmatter `name` must be a single token (hyphens, no spaces) so `/slash` invocation works — see [`utilities/write-a-skill/REFERENCE.md`](utilities/write-a-skill/REFERENCE.md) § Name (slash invocation).
-
-Optional local hook (run once per clone):
-
-```bash
-git config core.hooksPath .githooks
-```
 
 ## Public vs private
 
@@ -33,19 +19,14 @@ git config core.hooksPath .githooks
 1. Finish the skill or playbook in your private workspace.
 2. **Anonymize** — replace real domains, client names, and live handoffs with fictional fixtures.
 3. Copy only the public package into `marketing/` or `utilities/`.
-4. Run `node scripts/verify-public-hygiene.mjs`.
-5. For Tier C skills, run the skill’s own `scripts/verify-*.mjs` ship bar.
-6. Open a PR; wait for **Public hygiene** CI.
+4. For Tier C skills, run the skill’s own `scripts/verify-*.mjs` ship bar.
+5. Open a PR.
 
 ## Fixtures and live runs
 
 - Checked-in handoffs under `examples/` must include `.fixture.` in the filename.
 - Live agent handoffs (`live-run-*.handoff.json`) are gitignored — promote to a fictional fixture manually after review.
 - `research/` is gitignored for local scrape corpora; never `git add -f research/`.
-
-## Extending the gate
-
-Banned patterns live in [`scripts/banned-patterns.json`](scripts/banned-patterns.json). Add client slugs or internal path tokens there when you discover new leak vectors — then run the verifier locally before pushing.
 
 ## Questions
 

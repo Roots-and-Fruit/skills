@@ -136,7 +136,7 @@ Frontmatter `name` is the **slash-command token** in Cursor, Claude Code, and si
 
 Folder slug (`fan-out-coverage-analysis`) and handoff `skill` field stay kebab-case. **`name`** is the user-facing invocation id and may use Title-Case-With-Hyphens when that reads better in `/` menus.
 
-**Verifier:** `N1` in `scripts/verify-public-hygiene.mjs` (repo-wide); fails if `name:` contains whitespace.
+**Check before ship:** grep `SKILL.md` frontmatter — `name:` must not contain whitespace.
 
 ### Body duplication vs trigger vocabulary
 

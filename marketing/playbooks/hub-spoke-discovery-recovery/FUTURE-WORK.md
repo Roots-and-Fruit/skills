@@ -160,7 +160,6 @@ Private client proof runs — optional, not a public-repo gate
 ## Skill authoring closeout (every change)
 
 ```bash
-node scripts/verify-public-hygiene.mjs
 cd utilities/write-a-skill
 node scripts/verify-skill-package.mjs --path ../../marketing/skills/analytics-and-searchconsole-performance-audit --tier C --public --run-verifiers
 ```
