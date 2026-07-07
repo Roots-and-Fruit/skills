@@ -25,6 +25,18 @@ const POLICIES = new Set([
   "audit_only"
 ]);
 
+/** Policies that populate `policy_compliance` and P-layer gates (G13–G24, G29, G33). */
+const POLICY_COMPLIANCE_PRESETS = new Set([
+  "max_discovery",
+  "block_training_allow_answers",
+  "restrictive"
+]);
+
+/** @param {string | undefined} crawlPolicy */
+function requiresDiscoveryCompliance(crawlPolicy) {
+  return POLICY_COMPLIANCE_PRESETS.has(crawlPolicy ?? "");
+}
+
 /** Apex + www robots.txt URLs per SKILL Step 1 */
 export function canonicalDiscoveryUrls(domain) {
   const bare = String(domain)
@@ -180,10 +192,10 @@ function runChecks(data) {
       if (parsed.groupCount < 1 || parsed.ruleCount < 1) {
         return false;
       }
-      if (data.inputs?.crawl_policy === "max_discovery") {
+      if (requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
         const { assessment } = assessRobotsTxtContent(
           data.draft_robots_txt,
-          "max_discovery",
+          data.inputs.crawl_policy,
           data.inputs.domain
         );
         return assessment.policy_compliance?.compliant === true;
@@ -219,13 +231,14 @@ function runChecks(data) {
   checks.push({
     id: "G16",
     pass: () => {
-      if (data.inputs?.crawl_policy !== "max_discovery") {
+      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       const pc = data.policy_compliance;
+      const policy = data.inputs.crawl_policy;
       return (
         pc &&
-        pc.policy === "max_discovery" &&
+        pc.policy === policy &&
         typeof pc.compliant === "boolean" &&
         Array.isArray(pc.violations)
       );
@@ -303,18 +316,18 @@ function runChecks(data) {
   checks.push({
     id: "G21",
     pass: () => {
-      if (data.inputs?.crawl_policy !== "max_discovery") {
+      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       const pc = data.policy_compliance;
-      return pc && pc.policy === "max_discovery" && typeof pc.compliant === "boolean";
+      return pc && pc.policy === data.inputs.crawl_policy && typeof pc.compliant === "boolean";
     }
   });
 
   checks.push({
     id: "G22",
     pass: () => {
-      if (data.inputs?.crawl_policy !== "max_discovery") {
+      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       if (data.policy_compliance?.compliant === true) {
@@ -327,7 +340,7 @@ function runChecks(data) {
   checks.push({
     id: "G23",
     pass: () => {
-      if (data.inputs?.crawl_policy !== "max_discovery") {
+      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       if (data.policy_compliance?.compliant !== false) {
@@ -340,7 +353,7 @@ function runChecks(data) {
   checks.push({
     id: "G24",
     pass: () => {
-      if (data.inputs?.crawl_policy !== "max_discovery") {
+      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       if (data.policy_compliance?.compliant !== false) {
@@ -422,7 +435,7 @@ function runChecks(data) {
     pass: () => {
       if (
         data.deployment?.model !== "cloudflare_managed" ||
-        data.inputs?.crawl_policy !== "max_discovery"
+        !requiresDiscoveryCompliance(data.inputs?.crawl_policy)
       ) {
         return true;
       }
@@ -472,15 +485,24 @@ function runChecks(data) {
     pass: () => {
       if (
         data.deployment?.model !== "cloudflare_managed" ||
-        data.inputs?.crawl_policy !== "max_discovery"
+        !requiresDiscoveryCompliance(data.inputs?.crawl_policy)
       ) {
         return data.origin_append_template == null;
+      }
+      const policy = data.inputs?.crawl_policy;
+      const expectedPreset =
+        policy === "restrictive" ? "most_restrictive" : "search_and_ai_input";
+      if (policy === "restrictive") {
+        return (
+          typeof data.origin_append_template === "string" &&
+          data.content_signals?.preset === expectedPreset
+        );
       }
       return (
         typeof data.origin_append_template === "string" &&
         data.origin_append_template.includes("Content-Signal:") &&
         data.origin_append_template.includes("ai-input=yes") &&
-        data.content_signals?.preset === "search_and_ai_input"
+        data.content_signals?.preset === expectedPreset
       );
     }
   });

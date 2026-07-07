@@ -36,13 +36,13 @@ const cfFixture = readFileSync(
   "utf8"
 );
 
-const partialFixed = `${cfFixture.trim()}\n\nUser-agent: *\nDisallow: /wp-admin/\nDisallow: /cart/\nDisallow: /checkout/\nSitemap: https://example.com/sitemap.xml\n`;
+const partialFixed = `${cfFixture.trim()}\n\nUser-agent: *\nDisallow: /wp-admin/\nSitemap: https://example.com/sitemap.xml\n`;
 
 console.log("verify-reaudit.mjs\n");
 
 const baseline = assessRobotsTxtContent(cfFixture, "max_discovery", "example.com");
 const baselineGaps = collectGapsFromAssessment(baseline.assessment);
-ok("RA1", baselineGaps.required.length >= 3);
+ok("RA1", baselineGaps.required.length >= 2);
 
 const snap = buildAuditSnapshot("example.com", baseline.assessment, {
   crawl_policy: "max_discovery"

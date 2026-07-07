@@ -122,17 +122,78 @@ export const CRAWLER_REGISTRY = {
   }
 };
 
-/** Tokens the max_discovery policy template explicitly configures */
-export const MAX_DISCOVERY_REQUIRED_TOKENS = [
+/** Discovery bots that must be allowed under max_discovery / block_training_allow_answers */
+export const DISCOVERY_PRESET_ALLOW_TOKENS = [
+  "Googlebot",
+  "bingbot",
+  "OAI-SearchBot",
+  "Claude-SearchBot",
+  "PerplexityBot"
+];
+
+/** Training bots that must be blocked only under block_training_allow_answers */
+export const TRAINING_BLOCK_REQUIRED_TOKENS = [
   "GPTBot",
   "Google-Extended",
   "CCBot",
-  "ClaudeBot",
+  "ClaudeBot"
+];
+
+/** Search bots that must stay allowed under restrictive */
+export const RESTRICTIVE_ALLOW_TOKENS = ["Googlebot", "bingbot"];
+
+/** AI answer bots that must be blocked under restrictive (GEO/citation tradeoff) */
+export const RESTRICTIVE_BLOCK_ANSWER_TOKENS = [
   "OAI-SearchBot",
   "Claude-SearchBot",
-  "PerplexityBot",
-  "Googlebot",
-  "bingbot"
+  "PerplexityBot"
+];
+
+/**
+ * Expected site access at `/` for a token under a crawl policy.
+ * @param {string} token
+ * @param {string} crawlPolicy
+ * @returns {"allow" | "block" | "block_if_block_training_policy" | "na"}
+ */
+export function getPolicyExpectation(token, crawlPolicy) {
+  const def = CRAWLER_REGISTRY[token];
+  if (!def) {
+    return "na";
+  }
+  if (crawlPolicy === "restrictive") {
+    if (RESTRICTIVE_ALLOW_TOKENS.includes(token)) {
+      return "allow";
+    }
+    if (
+      RESTRICTIVE_BLOCK_ANSWER_TOKENS.includes(token) ||
+      TRAINING_BLOCK_REQUIRED_TOKENS.includes(token)
+    ) {
+      return "block";
+    }
+    if (def.roles.includes("ai_training")) {
+      return "block";
+    }
+    return def.max_discovery_site_access;
+  }
+  if (
+    crawlPolicy === "block_training_allow_answers" &&
+    TRAINING_BLOCK_REQUIRED_TOKENS.includes(token)
+  ) {
+    return "block";
+  }
+  if (DISCOVERY_PRESET_ALLOW_TOKENS.includes(token)) {
+    return "allow";
+  }
+  if (TRAINING_BLOCK_REQUIRED_TOKENS.includes(token)) {
+    return "block_if_block_training_policy";
+  }
+  return def.max_discovery_site_access;
+}
+
+/** Tokens the discovery preset explicitly configures (allow + optional training block set) */
+export const MAX_DISCOVERY_REQUIRED_TOKENS = [
+  ...TRAINING_BLOCK_REQUIRED_TOKENS,
+  ...DISCOVERY_PRESET_ALLOW_TOKENS
 ];
 
 /**
@@ -146,12 +207,20 @@ export const MAX_DISCOVERY_OPTIONAL_TRAINING_BLOCKS = [
   "Applebot-Extended"
 ];
 
-/** Paths that should be blocked for User-agent: * under max_discovery */
-export const MAX_DISCOVERY_RESTRICTED_PATHS = ["/admin/", "/cart/", "/checkout/"];
+/** Paths that should be Disallow'd in robots.txt under discovery presets (crawl hygiene) */
+export const ROBOTS_DISALLOW_PATHS = ["/admin/"];
 
 /**
- * Alternate paths that satisfy a restricted-path check (e.g. WP uses /wp-admin/ not /admin/).
- * Key is the canonical template path from MAX_DISCOVERY_RESTRICTED_PATHS.
+ * Transactional paths where indexing control belongs on-page (noindex), not robots Disallow.
+ * @see https://developers.google.com/search/docs/crawling-indexing/block-indexing
+ */
+export const INDEX_CONTROL_PATHS = ["/cart/", "/checkout/"];
+
+/** @deprecated Use ROBOTS_DISALLOW_PATHS — kept for import compatibility */
+export const MAX_DISCOVERY_RESTRICTED_PATHS = ROBOTS_DISALLOW_PATHS;
+
+/**
+ * Alternate paths that satisfy a robots Disallow check (e.g. WP uses /wp-admin/ not /admin/).
  */
 export const MAX_DISCOVERY_PATH_ALTERNATIVES = {
   "/admin/": ["/admin/", "/wp-admin/"]

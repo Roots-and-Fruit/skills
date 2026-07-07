@@ -7,7 +7,7 @@ description: >
   OAI-SearchBot, and Google-Extended. Audits selective crawler rules per bot
   (training vs indexing crawl), validates Sitemap directives, and drafts
   policy-aligned robots.txt.
-version: 1.5.0
+version: 1.7.0
 ---
 
 # robots.txt Audit
@@ -20,7 +20,7 @@ Audit `/robots.txt` as the **authoritative crawl-permission file** for search an
 
 **Reference:** [robots.txt audit reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) (public SSOT) · `REFERENCE.md` (handoff + rubric) · **Requirements:** `REQUIREMENTS.md` · **Examples:** `EXAMPLES.md` · **Layperson output:** `LAYPERSON-OUTPUT.md` · **Re-audit:** `RECHECK.md` · **Maintainers:** `AGENTS.md` · **Skill repo:** [GitHub](https://github.com/Roots-and-Fruit/skills/tree/master/marketing/skills/robots-txt-audit)
 
-**SSOT scripts:** `parse-robots-txt.mjs` · `crawler-registry.mjs` · `assess-policy.mjs` · `crawler-registry-cloudflare.mjs` · `content-signals-presets.mjs` · `build-layperson-summary.mjs` · `build-reaudit.mjs` · `audit-gap-registry.mjs` · `reference-links.mjs`
+**SSOT scripts:** `parse-robots-txt.mjs` · `crawler-registry.mjs` · `assess-policy.mjs` · `syntax-validation.mjs` · `crawler-registry-cloudflare.mjs` · `content-signals-presets.mjs` · `build-layperson-summary.mjs` · `build-reaudit.mjs` · `audit-gap-registry.mjs` · `reference-links.mjs`
 
 **Cloudflare companion:** `CLOUDFLARE-MANAGED.md` (invoked when managed markers detected — not a separate installable skill)
 
@@ -28,7 +28,7 @@ Audit `/robots.txt` as the **authoritative crawl-permission file** for search an
 
 1. **Domain** — e.g. `example.com` (from user only)
 2. **Key pages** (optional) — cornerstone or priority URLs to check for crawlability
-3. **Crawl policy** (optional) — `max_discovery` | `block_training_allow_answers` | `restrictive` | `audit_only` (default: `audit_only` if missing). **`max_discovery` is an opt-in preset**, not an industry default — use only when the client chooses GEO + training blocks.
+3. **Crawl policy** (optional) — `max_discovery` | `block_training_allow_answers` | `restrictive` | `audit_only` (default: `audit_only` if missing). **`max_discovery` is discovery-only** (search + AI answer bots, pairings, sitemap, admin path hygiene). Use **`block_training_allow_answers`** when the client also wants common training bots blocked — that is a separate opt-in choice, not part of max discovery.
 4. **`robots_deployment`** (optional) — `auto` | `origin_only` | `cloudflare_managed` (default: `auto`). Use `auto` unless the user overrides.
 
 If domain is missing, ask once:
@@ -108,7 +108,8 @@ When the user says they **updated** robots.txt or asks to **check again**:
 1. Parse with `scripts/parse-robots-txt.mjs` (`parseRobotsTxtLayers()` when CF managed).
 2. Run `assessRobotsTxtContent(content, crawl_policy, domain, options)` from `scripts/assess-policy.mjs`.
 3. **WebFetch each declared sitemap URL** and pass results as `options.sitemap_fetch_results` (e.g. `{ url, status }`). This powers **SM7 / R7e** endpoint health checks.
-4. Populate handoff: `crawler_matrix`, `sitemap_validation`, and `policy_compliance` (when `crawl_policy` is `max_discovery`).
+4. **WebFetch cart/checkout probe URLs** when auditing transactional paths and pass as `options.index_control_results` (e.g. `{ path: "/cart/", url, status, body }`). Powers **R6b** index-control checks — see `assessIndexControlPaths()`.
+5. Populate handoff: `crawler_matrix`, `sitemap_validation`, `syntax_validation`, `index_control_validation`, and `policy_compliance` (when `crawl_policy` is a compliance preset). **Read `syntax_validation` from script output — do not re-lint in prose.**
 
 ### Per-bot matrix (detail report only — not in chat)
 
@@ -140,10 +141,12 @@ See `REFERENCE.md` **Training vs indexing crawl** for what each bot controls.
 |-------|------------------|
 | **R1 File accessible** | 200 at canonical host with robots.txt body (not HTML error page) |
 | **R2 Syntax / structure** | Valid groups; no accidental global `Disallow: /` on search bots |
+| **R2b Syntax lint (local)** | `syntax_validation` from `validateRobotsTxtSyntax()` — unknown directives, malformed lines; confirm in GSC when needed |
 | **R3 Search crawlers** | `Googlebot`, `bingbot` can reach `/` and cornerstone paths |
 | **R4 AI bot differentiation** | Training and answer bots not lumped into one wrong block |
 | **R5 Cornerstone crawlability** | Each `key_pages` path allowed for discovery crawlers; `na` when no key_pages |
-| **R6 Low-value path hygiene** | `/admin` or `/wp-admin`, `/cart`, `/checkout`, etc. restricted where applicable |
+| **R6 Low-value path hygiene** | `/admin` or `/wp-admin` restricted in robots.txt where applicable |
+| **R6b Index control (cart/checkout)** | When probed: `noindex` on-page passes; crawlable without `noindex` → warn; robots Disallow without `noindex` → warn ([Google noindex docs](https://developers.google.com/search/docs/crawling-indexing/block-indexing)) |
 | **R7 Sitemap declaration** | See R7a–R7e below |
 | **R8 Google token hygiene** | Training restriction uses `Google-Extended` not `Googlebot` |
 | **R9 Wildcard vs specific** | `User-agent: *` rules do not silently block intentional AI allows |
@@ -176,14 +179,18 @@ Populate `audit_findings[]` from `buildAuditFindings()` / `assessment.audit_find
 
 Do **not** fail `audit_only` audits solely because training bots inherit `User-agent: *` allow.
 
-### max_discovery compliance
+### Discovery preset compliance (`max_discovery`, `block_training_allow_answers`, `restrictive`)
 
-When `crawl_policy` is `max_discovery`, run `assessMaxDiscovery()` / `assessMaxDiscoveryLayered()` — populate `policy_compliance` in handoff:
+When `crawl_policy` is `max_discovery`, `block_training_allow_answers`, or `restrictive`, run the matching assessor — populate `policy_compliance` in handoff:
 
-- `compliant: true` only when all MD checks pass **and** sitemap validation passes
+- **`max_discovery`:** discovery bots allowed, pairings correct, admin paths blocked in robots.txt, sitemap valid. Training bot blocks are **not** required.
+- **`block_training_allow_answers`:** all `max_discovery` checks **plus** `GPTBot`, `Google-Extended`, `CCBot`, `ClaudeBot` blocked.
+- **`restrictive`:** allow `Googlebot` / `bingbot`; block AI answer bots (`OAI-SearchBot`, `Claude-SearchBot`, `PerplexityBot`) and training bots; same pairing, admin path, and sitemap rules as discovery presets. Document GEO/citation tradeoff.
+- Cart/checkout: use `index_control_validation` (noindex-first). Do **not** fail compliance solely because `/cart/` or `/checkout/` are not in robots.txt Disallow.
+- `compliant: true` only when all policy checks pass **and** sitemap validation passes (index-control warnings alone do not fail compliance).
 - List each violation with token, expected, actual, path, message, and **`layer`** (`cloudflare` · `origin` · `effective`) when `deployment.model` is `cloudflare_managed`
 
-**Completion criterion:** every rubric row in `audit_checks[]`; `policy_compliance` when policy is `max_discovery`.
+**Completion criterion:** every rubric row in `audit_checks[]`; `policy_compliance` when policy is `max_discovery`, `block_training_allow_answers`, or `restrictive`.
 
 ## Step 3 — Recommend
 
@@ -207,11 +214,12 @@ Set `mode: "recommend"` when primary deliverable is policy change guidance.
 
 When file not found or user requests a draft, build from `REFERENCE.md` policy template matching `crawl_policy`:
 
-- **`max_discovery`:** allow search + answer bots; block `GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`; restrict admin/cart/checkout; declare sitemap
+- **`max_discovery`:** allow search + answer bots; restrict admin in robots.txt; declare sitemap. Do **not** add training blocks or cart/checkout Disallow by default.
+- **`block_training_allow_answers`:** max_discovery rules + block `GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`
 - Include comments explaining each blocked agent
 - `Sitemap: https://{domain}/sitemap.xml` unless user provides another canonical sitemap URL
 
-Run `assessRobotsTxtContent(draft, crawl_policy, domain)` before handoff — `policy_compliance.compliant` must be `true` for `max_discovery`.
+Run `assessRobotsTxtContent(draft, crawl_policy, domain)` before handoff — `policy_compliance.compliant` must be `true` for `max_discovery` or `block_training_allow_answers`.
 
 **Completion criterion:** `mode` is `generate`; `draft_robots_txt` passes P-layer checks; `deployment_note` names root URL and verification steps.
 
@@ -294,10 +302,10 @@ That placeholder fails **G26** and breaks downstream playbooks. If the human tab
 - [ ] Per-bot matrix in **detail file** and full `crawler_matrix` **array** in handoff (never a string placeholder)
 - [ ] R7a–R7e reflected in `sitemap_validation`, `endpoint_fetch`, and `audit_checks`
 - [ ] No key_pages → `fully_crawlable: null`, R5 `na`
-- [ ] `max_discovery` → `policy_compliance.compliant` matches `assessMaxDiscovery()` output
+- [ ] `max_discovery`, `block_training_allow_answers`, or `restrictive` → `policy_compliance` matches live `assessRobotsTxtContent()` output (G16, G21–G24)
 - [ ] Cloudflare managed → read `CLOUDFLARE-MANAGED.md`; `layer_assessment` + `recommendations_split` (G28–G30)
-- [ ] Cloudflare managed + `max_discovery` → `origin_append_template` + `content_signals` in handoff (G33)
-- [ ] `generate` draft passes P-layer when policy is `max_discovery`
+- [ ] Cloudflare managed + discovery preset → `origin_append_template` + `content_signals` in handoff (G33)
+- [ ] `generate` draft passes P-layer when policy is `max_discovery` or `block_training_allow_answers` (G13)
 - [ ] `deployment_note` present; no deployment performed
 
 **Ship bar (Tier C):**
@@ -307,6 +315,9 @@ cd marketing/skills/robots-txt-audit
 node scripts/verify-robots-structure.mjs
 node scripts/verify-max-discovery.mjs
 node scripts/verify-max-discovery-contract.mjs
+node scripts/verify-schemamap.mjs
+node scripts/verify-syntax.mjs
+node scripts/verify-restrictive.mjs
 node scripts/verify-handoff.mjs
 node scripts/verify-v1_3-changes.mjs
 node scripts/verify-cloudflare-layers.mjs

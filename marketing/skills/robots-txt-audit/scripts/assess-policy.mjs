@@ -6,9 +6,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   CRAWLER_REGISTRY,
+  DISCOVERY_PRESET_ALLOW_TOKENS,
+  INDEX_CONTROL_PATHS,
   MAX_DISCOVERY_PATH_ALTERNATIVES,
-  MAX_DISCOVERY_REQUIRED_TOKENS,
-  MAX_DISCOVERY_RESTRICTED_PATHS
+  RESTRICTIVE_ALLOW_TOKENS,
+  RESTRICTIVE_BLOCK_ANSWER_TOKENS,
+  ROBOTS_DISALLOW_PATHS,
+  getPolicyExpectation,
+  TRAINING_BLOCK_REQUIRED_TOKENS
 } from "./crawler-registry.mjs";
 import {
   CLOUDFLARE_COMPANION_MODULE
@@ -27,6 +32,12 @@ import {
   parseRobotsTxt,
   parseRobotsTxtLayers
 } from "./parse-robots-txt.mjs";
+import {
+  detectSitemapDirectiveTypos,
+  mergeSitemapTyposIntoValidation,
+  sitemapTypoIssuesForMerge,
+  validateRobotsTxtSyntax
+} from "./syntax-validation.mjs";
 
 export function normalizeDomain(domain) {
   return domain
@@ -176,6 +187,142 @@ export function isRobotsTxtFetchSuspect(content) {
   return trimmed.startsWith("<!doctype html") || trimmed.startsWith("<html");
 }
 
+export function requiresDiscoveryCompliance(crawlPolicy) {
+  return crawlPolicy === "max_discovery" || crawlPolicy === "block_training_allow_answers";
+}
+
+export function requiresPolicyCompliance(crawlPolicy) {
+  return requiresDiscoveryCompliance(crawlPolicy) || crawlPolicy === "restrictive";
+}
+
+export function requiresTrainingBlockCompliance(crawlPolicy) {
+  return crawlPolicy === "block_training_allow_answers";
+}
+
+/**
+ * Detect noindex in HTML body or header string passed via probe.
+ * @param {string} content
+ */
+export function detectNoindexInContent(content) {
+  if (!content || typeof content !== "string") {
+    return false;
+  }
+  return (
+    /<meta[^>]*name\s*=\s*["']robots["'][^>]*content\s*=\s*["'][^"']*noindex/i.test(
+      content
+    ) ||
+    /<meta[^>]*content\s*=\s*["'][^"']*noindex[^"']*["'][^>]*name\s*=\s*["']robots["']/i.test(
+      content
+    ) ||
+    /x-robots-tag:\s*[^;\n]*noindex/i.test(content)
+  );
+}
+
+/**
+ * Assess cart/checkout index control (noindex-first; robots Disallow is not required).
+ * Warnings do not fail discovery preset compliance.
+ *
+ * @param {unknown[]} groups
+ * @param {Array<{ path: string, url?: string, status?: number | null, noindex?: boolean, body?: string }>} [indexControlResults]
+ */
+export function assessIndexControlPaths(groups, indexControlResults = []) {
+  /** @type {Array<{ path: string, status: string, noindex_detected?: boolean, crawl_allowed?: boolean, robots_blocked?: boolean, url?: string }>} */
+  const paths = [];
+  /** @type {Array<{ id: string, tier: "warn", path: string, message: string }>} */
+  const warnings = [];
+
+  for (const indexPath of INDEX_CONTROL_PATHS) {
+    const crawlAllowed = isPathAllowedForAgent(groups, "*", indexPath);
+    const probe = indexControlResults.find((r) => r.path === indexPath);
+
+    if (!probe) {
+      paths.push({
+        path: indexPath,
+        status: "not_probed",
+        crawl_allowed: crawlAllowed
+      });
+      continue;
+    }
+
+    const status = probe.status ?? null;
+    if (status === 404 || (status !== null && status >= 300 && status < 400)) {
+      paths.push({
+        path: indexPath,
+        status: "na",
+        crawl_allowed: crawlAllowed,
+        url: probe.url
+      });
+      continue;
+    }
+
+    const noindex =
+      probe.noindex === true ||
+      (probe.body ? detectNoindexInContent(probe.body) : false);
+
+    if (noindex) {
+      paths.push({
+        path: indexPath,
+        status: "pass",
+        noindex_detected: true,
+        crawl_allowed: crawlAllowed,
+        url: probe.url
+      });
+      if (!crawlAllowed) {
+        warnings.push({
+          id: `MD_INDEX_ROBOTS_CONFLICT_${indexPath.replace(/\//g, "_")}`,
+          tier: "warn",
+          path: indexPath,
+          message: `${indexPath} has noindex but is blocked in robots.txt — crawlers cannot read noindex when blocked ([Google](https://developers.google.com/search/docs/crawling-indexing/block-indexing))`
+        });
+      }
+      continue;
+    }
+
+    if (status !== null && status >= 200 && status < 300) {
+      if (crawlAllowed) {
+        warnings.push({
+          id: `MD_INDEX_${indexPath.replace(/\//g, "_")}`,
+          tier: "warn",
+          path: indexPath,
+          message: `${indexPath} is crawlable without noindex — add noindex meta or X-Robots-Tag; do not use robots.txt Disallow for deindexing`
+        });
+        paths.push({
+          path: indexPath,
+          status: "warn",
+          noindex_detected: false,
+          crawl_allowed: true,
+          url: probe.url
+        });
+      } else {
+        warnings.push({
+          id: `MD_INDEX_ROBOTS_ONLY_${indexPath.replace(/\//g, "_")}`,
+          tier: "warn",
+          path: indexPath,
+          message: `${indexPath} is blocked in robots.txt without confirmed noindex — blocked URLs may still appear in search via inbound links`
+        });
+        paths.push({
+          path: indexPath,
+          status: "warn",
+          noindex_detected: false,
+          robots_blocked: true,
+          crawl_allowed: false,
+          url: probe.url
+        });
+      }
+    }
+  }
+
+  const overall =
+    paths.every((p) => p.status === "pass" || p.status === "na" || p.status === "not_probed") &&
+    warnings.length === 0
+      ? "pass"
+      : warnings.length > 0
+        ? "warn"
+        : "na";
+
+  return { status: overall, paths, warnings };
+}
+
 export function isRestrictedPathBlocked(groups, restrictedPath) {
   const candidates =
     MAX_DISCOVERY_PATH_ALTERNATIVES[restrictedPath] ?? [restrictedPath];
@@ -255,7 +402,7 @@ export function assessOriginLayer(layers) {
   const originGroups = layers.origin?.parsed?.groups ?? [];
   const sitemaps = layers.origin?.parsed?.sitemaps ?? [];
 
-  const path_hygiene_ok = MAX_DISCOVERY_RESTRICTED_PATHS.every((restrictedPath) =>
+  const path_hygiene_ok = ROBOTS_DISALLOW_PATHS.every((restrictedPath) =>
     isRestrictedPathBlocked(originGroups, restrictedPath)
   );
 
@@ -303,19 +450,29 @@ export function buildRecommendationsSplit(policyCompliance, cloudflareLayer, con
         originItems.push(
           `Add Disallow for ${violation.path}${alt} on origin User-agent: * group`
         );
+      } else if (violation.id.startsWith("MD_INDEX_")) {
+        originItems.push(violation.message);
       } else if (violation.id !== "MD_SITEMAP_VALID") {
         originItems.push(violation.message);
       }
     }
   }
 
-  if (cloudflareLayer && !cloudflareLayer.training_bots_blocked) {
+  if (
+    cloudflareLayer &&
+    !cloudflareLayer.training_bots_blocked &&
+    requiresTrainingBlockCompliance(context.crawl_policy ?? "")
+  ) {
     dashboardItems.push(
       "Confirm managed robots.txt toggle is ON — training bots should be blocked in CF layer"
     );
   }
 
-  if (context.domain && context.crawl_policy === "max_discovery") {
+  if (
+    context.domain &&
+    (context.crawl_policy === "max_discovery" ||
+      context.crawl_policy === "block_training_allow_answers")
+  ) {
     originItems.push(
       "Use origin_append_template in handoff (Search + AI input Content-Signal preset) — append below END marker; merge with any existing origin rules"
     );
@@ -329,47 +486,57 @@ export function buildRecommendationsSplit(policyCompliance, cloudflareLayer, con
 }
 
 /**
- * max_discovery compliance with layer attribution (Cloudflare managed).
- * @param {ReturnType<typeof parseRobotsTxtLayers>} layers
+ * Shared discovery-preset violations (search + answer bots, pairings, admin paths).
+ * @param {unknown[]} effectiveGroups
+ * @param {unknown[]} pathCheckGroups
+ * @param {{ layer?: string, pathLayer?: string, crawlPolicy?: string, cfParsed?: { groups: unknown[] } | null }} [options]
  */
-export function assessMaxDiscoveryLayered(layers) {
-  const effectiveGroups = layers.effective.groups;
-  const originGroups = layers.origin?.parsed?.groups ?? [];
-  const cfGroups = layers.cloudflare?.parsed?.groups ?? [];
+function buildDiscoveryPresetViolations(
+  effectiveGroups,
+  pathCheckGroups,
+  options = {}
+) {
   const violations = [];
+  const layer = options.layer ?? "effective";
+  const pathLayer = options.pathLayer ?? layer;
+  const crawlPolicy = options.crawlPolicy ?? "max_discovery";
 
-  for (const token of MAX_DISCOVERY_REQUIRED_TOKENS) {
-    const expected = CRAWLER_REGISTRY[token].max_discovery_site_access;
+  for (const token of DISCOVERY_PRESET_ALLOW_TOKENS) {
     const actual = getSiteAccess(effectiveGroups, token, "/");
     const id = `MD_${token.replace(/[^a-zA-Z0-9]/g, "_")}`;
 
-    if (expected === "allow" && actual !== "allowed") {
+    if (actual !== "allowed") {
       violations.push({
         id,
         token,
-        expected,
+        expected: "allow",
         actual,
         path: "/",
-        layer: "effective",
-        message: `${token} should be allowed for max_discovery (indexing/answer crawl)`
+        layer,
+        message: `${token} should be allowed for discovery (indexing/answer crawl)`
       });
     }
+  }
 
-    if (expected === "block" && actual === "allowed") {
-      const cfBlocked = isTrainingBlockedInCloudflareLayer(
-        token,
-        layers.cloudflare?.parsed
-      );
-      if (!cfBlocked) {
-        violations.push({
-          id,
-          token,
-          expected,
-          actual,
-          path: "/",
-          layer: cfGroups.length > 0 ? "cloudflare" : "effective",
-          message: `${token} should be blocked for max_discovery (training crawl)`
-        });
+  if (requiresTrainingBlockCompliance(crawlPolicy)) {
+    for (const token of TRAINING_BLOCK_REQUIRED_TOKENS) {
+      const actual = getSiteAccess(effectiveGroups, token, "/");
+      const id = `MD_${token.replace(/[^a-zA-Z0-9]/g, "_")}`;
+      if (actual === "allowed") {
+        const cfBlocked =
+          options.cfParsed &&
+          isTrainingBlockedInCloudflareLayer(token, options.cfParsed);
+        if (!cfBlocked) {
+          violations.push({
+            id,
+            token,
+            expected: "block",
+            actual,
+            path: "/",
+            layer: options.cfParsed?.groups?.length ? "cloudflare" : layer,
+            message: `${token} should be blocked under block_training_allow_answers`
+          });
+        }
       }
     }
   }
@@ -384,7 +551,7 @@ export function assessMaxDiscoveryLayered(layers) {
       expected: "allow",
       actual: "blocked",
       path: "/",
-      layer: "effective",
+      layer,
       message:
         "Googlebot blocked while Google-Extended allowed — likely reversed intent"
     });
@@ -400,7 +567,7 @@ export function assessMaxDiscoveryLayered(layers) {
       expected: "allow",
       actual: "blocked",
       path: "/",
-      layer: "effective",
+      layer,
       message:
         "OAI-SearchBot blocked while GPTBot allowed — training/discovery reversed"
     });
@@ -416,14 +583,14 @@ export function assessMaxDiscoveryLayered(layers) {
       expected: "allow",
       actual: "blocked",
       path: "/",
-      layer: "effective",
+      layer,
       message:
         "Claude-SearchBot blocked while ClaudeBot allowed — training/discovery reversed"
     });
   }
 
-  for (const restrictedPath of MAX_DISCOVERY_RESTRICTED_PATHS) {
-    if (!isRestrictedPathBlocked(originGroups, restrictedPath)) {
+  for (const restrictedPath of ROBOTS_DISALLOW_PATHS) {
+    if (!isRestrictedPathBlocked(pathCheckGroups, restrictedPath)) {
       const alts = MAX_DISCOVERY_PATH_ALTERNATIVES[restrictedPath];
       const pathNote = alts
         ? `${restrictedPath} (or ${alts.filter((p) => p !== restrictedPath).join(", ")})`
@@ -434,14 +601,37 @@ export function assessMaxDiscoveryLayered(layers) {
         expected: "block",
         actual: "allowed",
         path: restrictedPath,
-        layer: "origin",
-        message: `Origin User-agent: * should restrict low-value path ${pathNote}`
+        layer: pathLayer,
+        message: `User-agent: * should restrict admin path ${pathNote}`
       });
     }
   }
 
+  return violations;
+}
+
+/**
+ * Discovery preset compliance with layer attribution (Cloudflare managed).
+ * @param {ReturnType<typeof parseRobotsTxtLayers>} layers
+ * @param {string} crawlPolicy
+ */
+export function assessMaxDiscoveryLayered(layers, crawlPolicy = "max_discovery") {
+  const effectiveGroups = layers.effective.groups;
+  const originGroups = layers.origin?.parsed?.groups ?? [];
+
+  const violations = buildDiscoveryPresetViolations(
+    effectiveGroups,
+    originGroups,
+    {
+      layer: "effective",
+      pathLayer: "origin",
+      crawlPolicy,
+      cfParsed: layers.cloudflare?.parsed ?? null
+    }
+  );
+
   return {
-    policy: "max_discovery",
+    policy: crawlPolicy,
     compliant: violations.length === 0,
     violations,
     layered: true
@@ -449,15 +639,194 @@ export function assessMaxDiscoveryLayered(layers) {
 }
 
 /**
+ * Restrictive preset violations — search allowed; answer + training bots blocked.
+ * @param {unknown[]} effectiveGroups
+ * @param {unknown[]} pathCheckGroups
+ * @param {{ layer?: string, pathLayer?: string, cfParsed?: { groups: unknown[] } | null }} [options]
+ */
+function buildRestrictiveViolations(effectiveGroups, pathCheckGroups, options = {}) {
+  const violations = [];
+  const layer = options.layer ?? "effective";
+  const pathLayer = options.pathLayer ?? layer;
+
+  for (const token of RESTRICTIVE_ALLOW_TOKENS) {
+    const actual = getSiteAccess(effectiveGroups, token, "/");
+    if (actual !== "allowed") {
+      violations.push({
+        id: `MD_${token.replace(/[^a-zA-Z0-9]/g, "_")}`,
+        token,
+        expected: "allow",
+        actual,
+        path: "/",
+        layer,
+        message: `${token} should be allowed for search indexing under restrictive`
+      });
+    }
+  }
+
+  for (const token of RESTRICTIVE_BLOCK_ANSWER_TOKENS) {
+    const actual = getSiteAccess(effectiveGroups, token, "/");
+    if (actual !== "blocked") {
+      violations.push({
+        id: `MD_RESTRICT_${token.replace(/[^a-zA-Z0-9]/g, "_")}`,
+        token,
+        expected: "block",
+        actual,
+        path: "/",
+        layer,
+        message: `${token} should be blocked under restrictive (AI answer/citation tradeoff)`
+      });
+    }
+  }
+
+  for (const token of TRAINING_BLOCK_REQUIRED_TOKENS) {
+    const actual = getSiteAccess(effectiveGroups, token, "/");
+    if (actual === "allowed") {
+      const cfBlocked =
+        options.cfParsed &&
+        isTrainingBlockedInCloudflareLayer(token, options.cfParsed);
+      if (!cfBlocked) {
+        violations.push({
+          id: `MD_${token.replace(/[^a-zA-Z0-9]/g, "_")}`,
+          token,
+          expected: "block",
+          actual,
+          path: "/",
+          layer: options.cfParsed?.groups?.length ? "cloudflare" : layer,
+          message: `${token} should be blocked under restrictive`
+        });
+      }
+    }
+  }
+
+  if (
+    getSiteAccess(effectiveGroups, "Googlebot", "/") === "blocked" &&
+    getSiteAccess(effectiveGroups, "Google-Extended", "/") === "allowed"
+  ) {
+    violations.push({
+      id: "MD_GOOGLE_PAIRING",
+      token: "Googlebot",
+      expected: "allow",
+      actual: "blocked",
+      path: "/",
+      layer,
+      message:
+        "Googlebot blocked while Google-Extended allowed — likely reversed intent"
+    });
+  }
+
+  if (
+    getSiteAccess(effectiveGroups, "GPTBot", "/") === "allowed" &&
+    getSiteAccess(effectiveGroups, "OAI-SearchBot", "/") === "blocked"
+  ) {
+    violations.push({
+      id: "MD_OPENAI_PAIRING",
+      token: "OAI-SearchBot",
+      expected: "allow",
+      actual: "blocked",
+      path: "/",
+      layer,
+      message:
+        "OAI-SearchBot blocked while GPTBot allowed — training/discovery reversed"
+    });
+  }
+
+  if (
+    getSiteAccess(effectiveGroups, "ClaudeBot", "/") === "allowed" &&
+    getSiteAccess(effectiveGroups, "Claude-SearchBot", "/") === "blocked"
+  ) {
+    violations.push({
+      id: "MD_ANTHROPIC_PAIRING",
+      token: "Claude-SearchBot",
+      expected: "allow",
+      actual: "blocked",
+      path: "/",
+      layer,
+      message:
+        "Claude-SearchBot blocked while ClaudeBot allowed — training/discovery reversed"
+    });
+  }
+
+  for (const restrictedPath of ROBOTS_DISALLOW_PATHS) {
+    if (!isRestrictedPathBlocked(pathCheckGroups, restrictedPath)) {
+      const alts = MAX_DISCOVERY_PATH_ALTERNATIVES[restrictedPath];
+      const pathNote = alts
+        ? `${restrictedPath} (or ${alts.filter((p) => p !== restrictedPath).join(", ")})`
+        : restrictedPath;
+      violations.push({
+        id: `MD_PATH_${restrictedPath.replace(/\//g, "_")}`,
+        token: "*",
+        expected: "block",
+        actual: "allowed",
+        path: restrictedPath,
+        layer: pathLayer,
+        message: `User-agent: * should restrict admin path ${pathNote}`
+      });
+    }
+  }
+
+  return violations;
+}
+
+/**
+ * Restrictive preset compliance with layer attribution (Cloudflare managed).
+ * @param {ReturnType<typeof parseRobotsTxtLayers>} layers
+ */
+export function assessRestrictiveLayered(layers) {
+  const effectiveGroups = layers.effective.groups;
+  const originGroups = layers.origin?.parsed?.groups ?? [];
+
+  const violations = buildRestrictiveViolations(effectiveGroups, originGroups, {
+    layer: "effective",
+    pathLayer: "origin",
+    cfParsed: layers.cloudflare?.parsed ?? null
+  });
+
+  return {
+    policy: "restrictive",
+    compliant: violations.length === 0,
+    violations,
+    layered: true
+  };
+}
+
+/**
+ * Restrictive preset compliance (P-layer).
+ * @param {unknown[]} groups
+ * @param {string} domain
+ * @param {{ layers?: ReturnType<typeof parseRobotsTxtLayers>, deployment_model?: string }} [options]
+ */
+export function assessRestrictive(groups, domain, options = {}) {
+  if (options.layers?.detected && options.deployment_model === "cloudflare_managed") {
+    return assessRestrictiveLayered(options.layers);
+  }
+
+  const violations = buildRestrictiveViolations(groups, groups, {});
+
+  return {
+    policy: "restrictive",
+    compliant: violations.length === 0,
+    violations
+  };
+}
+
+/**
  * Per-bot matrix for human output and handoff.
  */
-export function buildCrawlerMatrix(groups) {
+export function buildCrawlerMatrix(groups, crawlPolicy = "max_discovery") {
   return Object.entries(CRAWLER_REGISTRY).map(([token, def]) => {
     const indexingProbe =
       def.roles.includes("indexing") || def.roles.includes("ai_answer");
     const trainingProbe = def.roles.includes("ai_training");
 
     const explicit = hasExplicitUserAgentGroup(groups, token);
+
+    let discoveryExpectation = def.max_discovery_site_access;
+    if (TRAINING_BLOCK_REQUIRED_TOKENS.includes(token)) {
+      discoveryExpectation = "block_if_block_training_policy";
+    }
+
+    const policyExpectation = getPolicyExpectation(token, crawlPolicy);
 
     return {
       token,
@@ -468,110 +837,32 @@ export function buildCrawlerMatrix(groups) {
       rule_source: explicit ? "explicit" : "inherits_user_agent_star",
       indexing_crawl: indexingProbe ? getSiteAccess(groups, token, "/") : "na",
       training_crawl: trainingProbe ? getSiteAccess(groups, token, "/") : "na",
-      max_discovery_expectation: def.max_discovery_site_access,
+      max_discovery_expectation: discoveryExpectation,
+      policy_expectation: policyExpectation,
       note: def.note ?? null
     };
   });
 }
 
 /**
- * max_discovery compliance checks (P-layer).
+ * Discovery preset compliance checks (P-layer).
  * @param {unknown[]} groups
  * @param {string} domain
- * @param {{ layers?: ReturnType<typeof parseRobotsTxtLayers>, deployment_model?: string }} [options]
+ * @param {{ layers?: ReturnType<typeof parseRobotsTxtLayers>, deployment_model?: string, crawl_policy?: string }} [options]
  */
 export function assessMaxDiscovery(groups, domain, options = {}) {
+  const crawlPolicy = options.crawl_policy ?? "max_discovery";
+
   if (options.layers?.detected && options.deployment_model === "cloudflare_managed") {
-    return assessMaxDiscoveryLayered(options.layers);
+    return assessMaxDiscoveryLayered(options.layers, crawlPolicy);
   }
 
-  const violations = [];
-
-  for (const token of MAX_DISCOVERY_REQUIRED_TOKENS) {
-    const expected = CRAWLER_REGISTRY[token].max_discovery_site_access;
-    const actual = getSiteAccess(groups, token, "/");
-    const id = `MD_${token.replace(/[^a-zA-Z0-9]/g, "_")}`;
-
-    if (expected === "allow" && actual !== "allowed") {
-      violations.push({
-        id,
-        token,
-        expected,
-        actual,
-        path: "/",
-        message: `${token} should be allowed for max_discovery (indexing/answer crawl)`
-      });
-    }
-
-    if (expected === "block" && actual === "allowed") {
-      violations.push({
-        id,
-        token,
-        expected,
-        actual,
-        path: "/",
-        message: `${token} should be blocked for max_discovery (training crawl)`
-      });
-    }
-  }
-
-  if (getSiteAccess(groups, "Googlebot", "/") === "blocked" &&
-      getSiteAccess(groups, "Google-Extended", "/") === "allowed") {
-    violations.push({
-      id: "MD_GOOGLE_PAIRING",
-      token: "Googlebot",
-      expected: "allow",
-      actual: "blocked",
-      path: "/",
-      message: "Googlebot blocked while Google-Extended allowed — likely reversed intent"
-    });
-  }
-
-  if (getSiteAccess(groups, "GPTBot", "/") === "allowed" &&
-      getSiteAccess(groups, "OAI-SearchBot", "/") === "blocked") {
-    violations.push({
-      id: "MD_OPENAI_PAIRING",
-      token: "OAI-SearchBot",
-      expected: "allow",
-      actual: "blocked",
-      path: "/",
-      message: "OAI-SearchBot blocked while GPTBot allowed — training/discovery reversed"
-    });
-  }
-
-  if (
-    getSiteAccess(groups, "ClaudeBot", "/") === "allowed" &&
-    getSiteAccess(groups, "Claude-SearchBot", "/") === "blocked"
-  ) {
-    violations.push({
-      id: "MD_ANTHROPIC_PAIRING",
-      token: "Claude-SearchBot",
-      expected: "allow",
-      actual: "blocked",
-      path: "/",
-      message:
-        "Claude-SearchBot blocked while ClaudeBot allowed — training/discovery reversed"
-    });
-  }
-
-  for (const restrictedPath of MAX_DISCOVERY_RESTRICTED_PATHS) {
-    if (!isRestrictedPathBlocked(groups, restrictedPath)) {
-      const alts = MAX_DISCOVERY_PATH_ALTERNATIVES[restrictedPath];
-      const pathNote = alts ? `${restrictedPath} (or ${alts.filter((p) => p !== restrictedPath).join(", ")})` : restrictedPath;
-      violations.push({
-        id: `MD_PATH_${restrictedPath.replace(/\//g, "_")}`,
-        token: "*",
-        expected: "block",
-        actual: "allowed",
-        path: restrictedPath,
-        layer: "effective",
-        message: `Wildcard should restrict low-value path ${pathNote}`
-      });
-    }
-  }
+  const violations = buildDiscoveryPresetViolations(groups, groups, {
+    crawlPolicy
+  });
 
   return {
-    policy: "max_discovery",
+    policy: crawlPolicy,
     compliant: violations.length === 0,
     violations
   };
@@ -602,6 +893,18 @@ export function buildAuditFindings(assessment, crawlPolicy, discovery = {}) {
       id: `AF_${issue.id}`,
       tier: issue.severity === "fail" ? "fail" : "warn",
       rubric: "R7",
+      message: issue.message
+    });
+  }
+
+  for (const issue of assessment.syntax_validation?.issues ?? []) {
+    if (issue.id === "SM8") {
+      continue;
+    }
+    findings.push({
+      id: `AF_${issue.id}`,
+      tier: issue.severity === "fail" ? "fail" : "warn",
+      rubric: "R2b",
       message: issue.message
     });
   }
@@ -668,15 +971,27 @@ export function buildAuditFindings(assessment, crawlPolicy, discovery = {}) {
     }
   }
 
-  if (crawlPolicy === "max_discovery" && assessment.policy_compliance?.violations?.length) {
+  for (const warning of assessment.index_control_validation?.warnings ?? []) {
+    findings.push({
+      id: `AF_${warning.id}`,
+      tier: "warn",
+      rubric: "R6",
+      message: warning.message
+    });
+  }
+
+  if (
+    requiresDiscoveryCompliance(crawlPolicy) &&
+    assessment.policy_compliance?.violations?.length
+  ) {
     const originOnly = assessment.deployment?.model === "cloudflare_managed";
     findings.push({
       id: "AF_POLICY_GAP",
       tier: "warn",
       rubric: "policy",
       message: originOnly
-        ? `${assessment.policy_compliance.violations.length} max_discovery violation(s) — see policy_compliance (check layer field: origin vs cloudflare).`
-        : `${assessment.policy_compliance.violations.length} max_discovery violation(s) — see policy_compliance.`
+        ? `${assessment.policy_compliance.violations.length} ${crawlPolicy} violation(s) — see policy_compliance (check layer field: origin vs cloudflare).`
+        : `${assessment.policy_compliance.violations.length} ${crawlPolicy} violation(s) — see policy_compliance.`
     });
   }
 
@@ -706,6 +1021,39 @@ export function buildAuditFindings(assessment, crawlPolicy, discovery = {}) {
   return findings;
 }
 
+function applySitemapRequirementsToPolicy(policyCompliance, sitemap, isCfManaged, crawlPolicy) {
+  if (!policyCompliance) {
+    return;
+  }
+
+  if (!sitemap.present) {
+    policyCompliance.violations.push({
+      id: "MD_SITEMAP_PRESENT",
+      token: "Sitemap",
+      expected: "declared",
+      actual: "missing",
+      path: "n/a",
+      layer: isCfManaged ? "origin" : "effective",
+      message: isCfManaged
+        ? `${crawlPolicy} requires Sitemap: in origin robots.txt (Cloudflare does not inject sitemaps)`
+        : `${crawlPolicy} requires at least one Sitemap: directive`
+    });
+    policyCompliance.compliant = false;
+  }
+  if (sitemap.status === "fail") {
+    policyCompliance.violations.push({
+      id: "MD_SITEMAP_VALID",
+      token: "Sitemap",
+      expected: "valid absolute URL on site host",
+      actual: "invalid",
+      path: "n/a",
+      layer: isCfManaged ? "origin" : "effective",
+      message: sitemap.issues.map((i) => i.message).join("; ")
+    });
+    policyCompliance.compliant = false;
+  }
+}
+
 export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}) {
   const deploymentModel =
     options.deployment_model ?? resolveDeploymentModel(options.raw_content ?? "", options);
@@ -717,8 +1065,16 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
     ? (layers.origin?.parsed?.sitemaps ?? [])
     : parsed.sitemaps;
 
-  const sitemap = validateSitemaps(sitemapSource, domain, options);
-  const matrix = buildCrawlerMatrix(parsed.groups);
+  let sitemap = validateSitemaps(sitemapSource, domain, options);
+  const rawContent = options.raw_content ?? "";
+  const syntaxValidation = rawContent
+    ? validateRobotsTxtSyntax(rawContent)
+    : { status: "pass", issues: [], issue_count: 0 };
+  if (rawContent) {
+    const typos = sitemapTypoIssuesForMerge(syntaxValidation.issues);
+    sitemap = mergeSitemapTyposIntoValidation(sitemap, typos);
+  }
+  const matrix = buildCrawlerMatrix(parsed.groups, crawlPolicy);
 
   let policyCompliance = null;
   let layerAssessment = null;
@@ -731,39 +1087,30 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
     detected_markers: isCfManaged ? [layers.markers?.begin, layers.markers?.end].filter(Boolean) : []
   };
 
-  if (crawlPolicy === "max_discovery") {
-    policyCompliance = assessMaxDiscovery(parsed.groups, domain, {
-      layers,
-      deployment_model: deploymentModel
-    });
-
-    if (!sitemap.present) {
-      policyCompliance.violations.push({
-        id: "MD_SITEMAP_PRESENT",
-        token: "Sitemap",
-        expected: "declared",
-        actual: "missing",
-        path: "n/a",
-        layer: isCfManaged ? "origin" : "effective",
-        message: isCfManaged
-          ? "max_discovery requires Sitemap: in origin robots.txt (Cloudflare does not inject sitemaps)"
-          : "max_discovery requires at least one Sitemap: directive"
-      });
-      policyCompliance.compliant = false;
-    }
-    if (sitemap.status === "fail") {
-      policyCompliance.violations.push({
-        id: "MD_SITEMAP_VALID",
-        token: "Sitemap",
-        expected: "valid absolute URL on site host",
-        actual: "invalid",
-        path: "n/a",
-        layer: isCfManaged ? "origin" : "effective",
-        message: sitemap.issues.map((i) => i.message).join("; ")
-      });
-      policyCompliance.compliant = false;
-    }
+  if (requiresPolicyCompliance(crawlPolicy)) {
+    policyCompliance =
+      crawlPolicy === "restrictive"
+        ? assessRestrictive(parsed.groups, domain, {
+            layers,
+            deployment_model: deploymentModel
+          })
+        : assessMaxDiscovery(parsed.groups, domain, {
+            layers,
+            deployment_model: deploymentModel,
+            crawl_policy: crawlPolicy
+          });
+    applySitemapRequirementsToPolicy(
+      policyCompliance,
+      sitemap,
+      isCfManaged,
+      crawlPolicy
+    );
   }
+
+  const indexControlValidation = assessIndexControlPaths(
+    parsed.groups,
+    options.index_control_results ?? []
+  );
 
   if (isCfManaged && layers) {
     const cloudflare = assessCloudflareLayer(layers);
@@ -775,7 +1122,7 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
         policy_compliance: policyCompliance
       }
     };
-    if (crawlPolicy === "max_discovery") {
+    if (requiresPolicyCompliance(crawlPolicy)) {
       const presetId =
         options.content_signals_preset ??
         contentSignalsPresetForCrawlPolicy(crawlPolicy);
@@ -812,13 +1159,17 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
     origin_append_template: originAppendTemplate,
     content_signals: contentSignals,
     sitemap_validation: sitemap,
+    syntax_validation: syntaxValidation,
     crawler_matrix: matrix,
     policy_compliance: policyCompliance,
+    index_control_validation: indexControlValidation,
     audit_findings: buildAuditFindings(
       {
         sitemap_validation: sitemap,
+        syntax_validation: syntaxValidation,
         crawler_matrix: matrix,
         policy_compliance: policyCompliance,
+        index_control_validation: indexControlValidation,
         deployment,
         layer_assessment: layerAssessment,
         content_signals: contentSignals

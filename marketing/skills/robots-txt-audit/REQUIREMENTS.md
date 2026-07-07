@@ -24,7 +24,7 @@ Workflow for an AI agent. Does not deploy files or fetch data on its own.
 **Optional:**
 
 - **Key page URLs** — cornerstones or priority pages for crawlability check
-- **`crawl_policy`** — `max_discovery`, `block_training_allow_answers`, `restrictive`, or `audit_only`
+- **`crawl_policy`** — `max_discovery` (discovery-only), `block_training_allow_answers` (discovery + training blocks), `restrictive`, or `audit_only`
 - **`robots_deployment`** — `auto`, `origin_only`, or `cloudflare_managed` (default `auto` — detects Cloudflare managed markers)
 - **`content_signals_preset`** — `search_only` | `search_and_ai_input` | `most_restrictive` | `all_permitted` (default: derived from `crawl_policy` when CF managed)
 - **Site Content Catalog handoff** — sitemap cross-check in R7

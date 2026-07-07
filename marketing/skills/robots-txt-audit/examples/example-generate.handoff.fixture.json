@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.5.0",
+  "skill_version": "1.7.0",
   "mode": "generate",
   "inputs": {
     "domain": "example.com",
@@ -29,7 +29,7 @@
   "policy_summary": {
     "search_bots": "allowed",
     "ai_answer_bots": "allowed",
-    "ai_training_bots": "blocked"
+    "ai_training_bots": "allowed"
   },
   "crawlability": {
     "key_pages_provided": 3,
@@ -59,7 +59,7 @@
       "note": "Cannot verify until file published"
     }
   ],
-  "draft_robots_txt": "# Allow search and AI answer crawlers; block common training crawlers\n# Policy: max_discovery\n\nUser-agent: GPTBot\nDisallow: /\n\nUser-agent: Google-Extended\nDisallow: /\n\nUser-agent: CCBot\nDisallow: /\n\nUser-agent: ClaudeBot\nDisallow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: *\nDisallow: /admin/\nDisallow: /cart/\nDisallow: /checkout/\nAllow: /\n\nSitemap: https://example.com/sitemap.xml\n",
+  "draft_robots_txt": "# Recommended robots.txt — max_discovery (search + AI answer discovery)\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: *\nDisallow: /wp-admin/\nAllow: /\n\nSitemap: https://example.com/sitemap.xml\n",
   "sitemap_validation": {
     "present": true,
     "urls": [
@@ -102,6 +102,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Keep unblocked for SEO unless there is a precise non-search reason."
     },
     {
@@ -116,6 +117,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -131,6 +133,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -146,6 +149,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Allow for GEO; distinct from training crawler GPTBot."
     },
     {
@@ -161,6 +165,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Anthropic search crawler (2026+). Allow for GEO; distinct from training crawler ClaudeBot."
     },
     {
@@ -176,6 +181,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -186,10 +192,11 @@
       "role_label": "ai_training",
       "controls": "OpenAI model training crawl",
       "paired_token": "OAI-SearchBot",
-      "rule_source": "explicit",
+      "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
-      "training_crawl": "blocked",
-      "max_discovery_expectation": "block",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": "Blocking limits training reuse; does not block ChatGPT search bot."
     },
     {
@@ -200,10 +207,11 @@
       "role_label": "ai_training",
       "controls": "Google generative-AI product training token (robots.txt only)",
       "paired_token": "Googlebot",
-      "rule_source": "explicit",
+      "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
-      "training_crawl": "blocked",
-      "max_discovery_expectation": "block",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": "Does not affect Google Search when Googlebot remains allowed."
     },
     {
@@ -214,10 +222,11 @@
       "role_label": "ai_training",
       "controls": "Common Crawl corpus inclusion",
       "paired_token": null,
-      "rule_source": "explicit",
+      "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
-      "training_crawl": "blocked",
-      "max_discovery_expectation": "block",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": null
     },
     {
@@ -228,10 +237,11 @@
       "role_label": "ai_training",
       "controls": "Anthropic model training crawl",
       "paired_token": "Claude-SearchBot",
-      "rule_source": "explicit",
+      "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
-      "training_crawl": "blocked",
-      "max_discovery_expectation": "block",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": "Block training; allow Claude-SearchBot separately for Claude answer citations."
     },
     {
@@ -246,6 +256,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -260,6 +271,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -274,6 +286,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": "High crawl volume with no referral return — common training-block target."
     },
     {
@@ -288,6 +301,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": "Among the fastest-growing AI crawlers; may ignore robots.txt — pair blocks with CDN/WAF if needed."
     },
     {
@@ -302,6 +316,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -316,6 +331,7 @@
       "indexing_crawl": "na",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "May not obey robots.txt like automated crawlers; document only."
     },
     {
@@ -330,6 +346,7 @@
       "indexing_crawl": "na",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "May not obey robots.txt like automated crawlers; document only."
     }
   ],

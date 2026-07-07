@@ -1,0 +1,7 @@
+# Malformed Disallow line (missing colon)
+
+User-agent: *
+Disallow /admin/
+Allow: /
+
+Sitemap: https://example.com/sitemap.xml

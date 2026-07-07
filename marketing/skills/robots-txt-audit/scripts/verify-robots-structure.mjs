@@ -26,7 +26,7 @@ function defaultFixtures() {
     .sort();
 }
 
-function runStructureChecks(parsed, content) {
+function runStructureChecks(parsed, content, options = {}) {
   const checks = [];
 
   checks.push({
@@ -55,15 +55,20 @@ function runStructureChecks(parsed, content) {
   checks.push({
     id: "S5",
     pass: () => {
+      if (options.expectRestrictive) {
+        return !isPathAllowedForAgent(parsed.groups, "OAI-SearchBot", "/pricing");
+      }
       const searchBot = findGroupForAgent(parsed.groups, "OAI-SearchBot");
       return searchBot && isPathAllowedForAgent(parsed.groups, "OAI-SearchBot", "/pricing");
     }
   });
 
-  checks.push({
-    id: "S6",
-    pass: () => !isPathAllowedForAgent(parsed.groups, "GPTBot", "/")
-  });
+  if (options.expectTrainingBlocks) {
+    checks.push({
+      id: "S6",
+      pass: () => !isPathAllowedForAgent(parsed.groups, "GPTBot", "/")
+    });
+  }
 
   checks.push({
     id: "S7",
@@ -81,7 +86,12 @@ function runStructureChecks(parsed, content) {
 function verifyFile(filePath) {
   const content = readFileSync(filePath, "utf8");
   const parsed = parseRobotsTxt(content);
-  const checks = runStructureChecks(parsed, content);
+  const expectTrainingBlocks = path.basename(filePath).includes("block-training");
+  const expectRestrictive = path.basename(filePath).includes("restrictive");
+  const checks = runStructureChecks(parsed, content, {
+    expectTrainingBlocks: expectTrainingBlocks || expectRestrictive,
+    expectRestrictive
+  });
   let failed = false;
 
   console.log(filePath);

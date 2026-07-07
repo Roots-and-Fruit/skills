@@ -31,7 +31,7 @@ const wpAssessMaxDiscovery = assessRobotsTxtContent(
 const auditOnly = {
   handoff_version: "1.0",
   skill: "robots-txt-audit",
-  skill_version: "1.3.0",
+  skill_version: "1.7.0",
   mode: "audit",
   inputs: {
     domain: "example.com",
@@ -127,8 +127,8 @@ writeFileSync(
 const maxDiscoveryRecommend = {
   handoff_version: "1.0",
   skill: "robots-txt-audit",
-  skill_version: "1.3.0",
-  mode: "recommend",
+  skill_version: "1.7.0",
+  mode: "audit",
   inputs: {
     domain: "example.com",
     key_pages: [],
@@ -172,8 +172,9 @@ const maxDiscoveryRecommend = {
     {
       id: "R4",
       name: "AI bot differentiation",
-      status: "fail",
-      note: "Training bots inherit allow from User-agent: * under max_discovery"
+      status: "pass",
+      note:
+        "Training bots inherit allow from User-agent: * — optional under max_discovery (use block_training_allow_answers to require blocks)"
     },
     {
       id: "R5",
@@ -185,7 +186,7 @@ const maxDiscoveryRecommend = {
       id: "R6",
       name: "Low-value path hygiene",
       status: "pass",
-      note: "WordPress /wp-admin/ satisfies admin intent; /cart/ and /checkout/ gaps in policy_compliance"
+      note: "WordPress /wp-admin/ satisfies admin intent under max_discovery"
     },
     {
       id: "R7",
@@ -213,9 +214,10 @@ const maxDiscoveryRecommend = {
   audit_findings: wpAssessMaxDiscovery.assessment.audit_findings,
   draft_robots_txt: null,
   deployment_note:
-    "Apply recommended training-crawler blocks; fix sitemap endpoint; re-test with verify-max-discovery-contract.mjs policy expectations.",
+    "No deployment needed for max_discovery compliance. Investigate sitemap endpoint HTTP 500; re-test after fix.",
   limitations: [
-    "Template path violations (/cart/, /checkout/) flagged; /wp-admin/ satisfies admin intent for WordPress"
+    "max_discovery compliant for WordPress open fixture; /wp-admin/ satisfies admin path intent",
+    "Sitemap URL returned HTTP 500 during fetch — fix endpoint or hosting"
   ]
 };
 
@@ -234,7 +236,7 @@ const goodAssess = assessRobotsTxtContent(good, "max_discovery", "example.com", 
 const audit = JSON.parse(
   readFileSync("examples/example-audit.handoff.fixture.json", "utf8")
 );
-audit.skill_version = "1.3.0";
+audit.skill_version = "1.7.0";
 audit.crawler_matrix = goodAssess.assessment.crawler_matrix;
 audit.sitemap_validation = goodAssess.assessment.sitemap_validation;
 audit.audit_findings = goodAssess.assessment.audit_findings;
@@ -262,7 +264,7 @@ writeFileSync(
 const generate = JSON.parse(
   readFileSync("examples/example-generate.handoff.fixture.json", "utf8")
 );
-generate.skill_version = "1.3.0";
+generate.skill_version = "1.7.0";
 const draftAssess = assessRobotsTxtContent(
   generate.draft_robots_txt,
   "max_discovery",
@@ -285,7 +287,7 @@ writeFileSync(
 const recommend = JSON.parse(
   readFileSync("examples/example-recommend.handoff.fixture.json", "utf8")
 );
-recommend.skill_version = "1.3.0";
+recommend.skill_version = "1.7.0";
 const recContent = `User-agent: GPTBot\nDisallow: /\n\nUser-agent: *\nAllow: /`;
 const recAssess = assessRobotsTxtContent(
   recContent,
@@ -293,23 +295,26 @@ const recAssess = assessRobotsTxtContent(
   recommend.inputs.domain
 );
 recommend.crawler_matrix = recAssess.assessment.crawler_matrix;
+recommend.policy_compliance = recAssess.assessment.policy_compliance;
 recommend.audit_findings = recAssess.assessment.audit_findings;
-recommend.sitemap_validation = {
-  present: false,
-  urls: [],
-  valid_urls: [],
-  host_match: false,
-  absolute_urls: false,
-  endpoint_fetch: [],
-  issues: [
-    {
-      id: "SM1",
-      severity: "fail",
-      message: "No Sitemap: directive found"
-    }
-  ],
-  status: "fail"
-};
+recommend.index_control_validation = recAssess.assessment.index_control_validation;
+const recCompliant = recAssess.assessment.policy_compliance?.compliant === true;
+const recR4 = recommend.audit_checks.find((row) => row.id === "R4");
+const recR4Note = recCompliant
+  ? "Training bots blocked; answer bots allowed"
+  : "Training blocks or pairings incomplete under block_training_allow_answers";
+if (recR4) {
+  recR4.status = recCompliant ? "pass" : "fail";
+  recR4.note = recR4Note;
+} else {
+  recommend.audit_checks.push({
+    id: "R4",
+    name: "AI bot differentiation",
+    status: recCompliant ? "pass" : "fail",
+    note: recR4Note
+  });
+}
+recommend.sitemap_validation = recAssess.assessment.sitemap_validation;
 writeFileSync(
   "examples/example-recommend.handoff.fixture.json",
   `${JSON.stringify(recommend, null, 2)}\n`

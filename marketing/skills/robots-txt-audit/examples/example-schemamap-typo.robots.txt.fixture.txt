@@ -1,0 +1,6 @@
+# Yoast-style Schemamap typo — crawlers ignore this; GSC reports syntax not understood
+
+User-agent: *
+Allow: /
+
+Schemamap: https://example.com/wp-json/yoast/v1/schema-aggregator/get-xml

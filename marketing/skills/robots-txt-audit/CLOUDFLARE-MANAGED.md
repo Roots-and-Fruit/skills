@@ -70,7 +70,8 @@ Run `assessRobotsTxtContent()` — it splits layers automatically when markers a
 ### Origin layer (your edits below END marker)
 
 - `Sitemap: https://{domain}/sitemap.xml` (absolute URL — CF does not inject sitemaps)
-- Low-value path hygiene on `User-agent: *`: `/wp-admin/` or `/admin/`, `/cart/`, `/checkout/` when applicable
+- Admin path hygiene on `User-agent: *`: `/wp-admin/` or `/admin/` when applicable
+- Cart/checkout: verify **noindex** on-page when probed — do **not** default to robots.txt Disallow ([Google noindex](https://developers.google.com/search/docs/crawling-indexing/block-indexing))
 - Site-specific rules (e.g. `Disallow: /wp-content/uploads/*.html`)
 
 ### Do not recommend for CF-managed sites
@@ -81,9 +82,9 @@ Run `assessRobotsTxtContent()` — it splits layers automatically when markers a
 
 ---
 
-## max_discovery compliance under CF
+## max_discovery / block_training compliance under CF
 
-`assessMaxDiscoveryLayered()` credits the **cloudflare** layer for training-bot blocks. Violations include a `layer` field:
+`assessMaxDiscoveryLayered()` credits the **cloudflare** layer for training-bot blocks when `crawl_policy` is `block_training_allow_answers`. Under `max_discovery` alone, training blocks are **not** compliance requirements. Violations include a `layer` field:
 
 | `layer` | Meaning |
 |---------|---------|
@@ -150,8 +151,8 @@ When `crawl_policy` is `max_discovery` and `deployment.model` is `cloudflare_man
 
 The template:
 
-1. Sets **Search + AI input** Content-Signal on `Googlebot`, `bingbot`, `OAI-SearchBot`, `PerplexityBot`
-2. Adds `User-agent: *` path hygiene (`/wp-admin/`, `/cart/`, `/checkout/`) + `Allow: /`
+1. Sets **Search + AI input** Content-Signal on `Googlebot`, `bingbot`, `OAI-SearchBot`, `Claude-SearchBot`, `PerplexityBot`
+2. Adds `User-agent: *` admin path hygiene (`/wp-admin/`) + `Allow: /`
 3. Declares `Sitemap: https://{domain}/sitemap.xml` (override with catalog URL when known)
 
 Handoff also includes **`content_signals`** (`preset`, `cf_managed_star`, `origin_target`, `limitations[]`).

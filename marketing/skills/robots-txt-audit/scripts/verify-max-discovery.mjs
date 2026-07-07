@@ -50,14 +50,6 @@ function runPositiveFixture() {
   checks.push({
     id: "P4",
     pass: () => {
-      const gpt = assessment.crawler_matrix?.find((r) => r.token === "GPTBot");
-      return gpt?.training_crawl === "blocked";
-    }
-  });
-
-  checks.push({
-    id: "P5",
-    pass: () => {
       const search = assessment.crawler_matrix?.find(
         (r) => r.token === "OAI-SearchBot"
       );
@@ -66,7 +58,7 @@ function runPositiveFixture() {
   });
 
   checks.push({
-    id: "P6",
+    id: "P5",
     pass: () => {
       const google = assessment.crawler_matrix?.find(
         (r) => r.token === "Googlebot"
@@ -76,7 +68,42 @@ function runPositiveFixture() {
   });
 
   checks.push({
-    id: "P7",
+    id: "P6",
+    pass: () => assessment.policy_compliance?.violations?.length === 0
+  });
+
+  return { label: "example-good.robots.txt.fixture.txt", checks };
+}
+
+function runBlockTrainingFixture() {
+  const content = loadFixture("example-good-block-training.robots.txt.fixture.txt");
+  const { assessment } = assessRobotsTxtContent(
+    content,
+    "block_training_allow_answers",
+    DOMAIN,
+    {
+      sitemap_fetch_results: [
+        { url: "https://example.com/sitemap.xml", status: 200 }
+      ]
+    }
+  );
+  const checks = [];
+
+  checks.push({
+    id: "P4b",
+    pass: () => assessment.policy_compliance?.compliant === true
+  });
+
+  checks.push({
+    id: "P5b",
+    pass: () => {
+      const gpt = assessment.crawler_matrix?.find((r) => r.token === "GPTBot");
+      return gpt?.training_crawl === "blocked";
+    }
+  });
+
+  checks.push({
+    id: "P6b",
     pass: () => {
       const ext = assessment.crawler_matrix?.find(
         (r) => r.token === "Google-Extended"
@@ -85,12 +112,7 @@ function runPositiveFixture() {
     }
   });
 
-  checks.push({
-    id: "P8",
-    pass: () => assessment.policy_compliance?.violations?.length === 0
-  });
-
-  return { label: "example-good.robots.txt.fixture.txt", checks };
+  return { label: "example-good-block-training.robots.txt.fixture.txt", checks };
 }
 
 function runNegativeFixture() {
@@ -114,7 +136,9 @@ function runNegativeFixture() {
   checks.push({
     id: "P11",
     pass: () =>
-      assessment.policy_compliance?.violations?.some((v) => v.token === "GPTBot")
+      assessment.policy_compliance?.violations?.some(
+        (v) => v.id === "MD_OPENAI_PAIRING"
+      )
   });
 
   checks.push({
@@ -243,6 +267,7 @@ function verifySuite(suite) {
 function main() {
   const suites = [
     runPositiveFixture(),
+    runBlockTrainingFixture(),
     runNegativeFixture(),
     runBadSitemapFixture(),
     runSitemapFetchSuite()

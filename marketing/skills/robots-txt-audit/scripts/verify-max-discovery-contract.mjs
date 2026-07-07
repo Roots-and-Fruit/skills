@@ -17,7 +17,7 @@ import {
   includesNone,
   violationIds
 } from "./max-discovery-expectations.mjs";
-import { MAX_DISCOVERY_REQUIRED_TOKENS } from "./crawler-registry.mjs";
+import { DISCOVERY_PRESET_ALLOW_TOKENS } from "./crawler-registry.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -30,7 +30,9 @@ function loadFixture(name) {
 
 function assessFixture(name, options = {}) {
   const content = loadFixture(name);
-  return assessRobotsTxtContent(content, "max_discovery", DOMAIN, options).assessment;
+  const expected = FIXTURE_EXPECTATIONS[name] ?? {};
+  const policy = expected.policy ?? "max_discovery";
+  return assessRobotsTxtContent(content, policy, DOMAIN, options).assessment;
 }
 
 function runExpectationFixture(name) {
@@ -41,7 +43,10 @@ function runExpectationFixture(name) {
 
   checks.push({
     id: `PC1_${name}`,
-    pass: () => assessment.policy_compliance?.policy === "max_discovery"
+    pass: () => {
+      const expectedPolicy = FIXTURE_EXPECTATIONS[name]?.policy ?? "max_discovery";
+      return assessment.policy_compliance?.policy === expectedPolicy;
+    }
   });
 
   checks.push({
@@ -153,7 +158,7 @@ function runExpectationFixture(name) {
 }
 
 function runViolationShapeSuite() {
-  const assessment = assessFixture("example-wp-open.robots.txt.fixture.txt");
+  const assessment = assessFixture("example-bad-max-discovery.robots.txt.fixture.txt");
   const violations = assessment.policy_compliance?.violations ?? [];
   const checks = [];
 
@@ -172,12 +177,7 @@ function runViolationShapeSuite() {
 
   checks.push({
     id: "PC15",
-    pass: () => {
-      const trainingBlocks = violations.filter(
-        (v) => v.expected === "block" && v.actual === "allowed"
-      );
-      return trainingBlocks.length >= 3;
-    }
+    pass: () => violations.some((v) => v.id === "MD_OPENAI_PAIRING")
   });
 
   return { label: "violation shape", checks };
@@ -196,14 +196,14 @@ function runAuditOnlySplitSuite() {
 
   checks.push({
     id: "PC17",
-    pass: () => maxDiscovery.policy_compliance?.compliant === false
+    pass: () => maxDiscovery.policy_compliance?.compliant === true
   });
 
   checks.push({
     id: "PC18",
     pass: () =>
-      (maxDiscovery.policy_compliance?.violations?.length ?? 0) >
-      (auditOnly.policy_compliance?.violations?.length ?? 0)
+      (maxDiscovery.policy_compliance?.violations?.length ?? 0) >= 0 &&
+      auditOnly.policy_compliance === null
   });
 
   return { label: "audit_only vs max_discovery split", checks };
@@ -211,10 +211,15 @@ function runAuditOnlySplitSuite() {
 
 function runRequiredTokenCoverageSuite() {
   const assessment = assessFixture("example-wp-open.robots.txt.fixture.txt");
-  const violations = assessment.policy_compliance?.violations ?? [];
+  const blockTraining = assessRobotsTxtContent(
+    loadFixture("example-wp-open.robots.txt.fixture.txt"),
+    "block_training_allow_answers",
+    DOMAIN
+  ).assessment;
+  const violations = blockTraining.policy_compliance?.violations ?? [];
   const checks = [];
 
-  for (const token of MAX_DISCOVERY_REQUIRED_TOKENS) {
+  for (const token of DISCOVERY_PRESET_ALLOW_TOKENS) {
     const row = assessment.crawler_matrix?.find((r) => r.token === token);
     checks.push({
       id: `PC19_${token}`,
@@ -224,7 +229,7 @@ function runRequiredTokenCoverageSuite() {
 
   checks.push({
     id: "PC20",
-    pass: () => assessment.crawler_matrix?.length >= MAX_DISCOVERY_REQUIRED_TOKENS.length
+    pass: () => assessment.crawler_matrix?.length >= DISCOVERY_PRESET_ALLOW_TOKENS.length
   });
 
   checks.push({
@@ -274,7 +279,16 @@ function runHandoffDriftSuite() {
 
   checks.push({
     id: "PC25",
-    pass: () => handoff.mode === "recommend"
+    pass: () => {
+      const compliant = handoff.policy_compliance?.compliant;
+      if (compliant === true) {
+        return handoff.mode === "audit";
+      }
+      if (compliant === false) {
+        return handoff.mode === "recommend";
+      }
+      return true;
+    }
   });
 
   return { label: "max_discovery handoff drift", checks };
@@ -297,6 +311,7 @@ function verifySuite(suite) {
 function main() {
   const suites = [
     runExpectationFixture("example-good.robots.txt.fixture.txt"),
+    runExpectationFixture("example-good-block-training.robots.txt.fixture.txt"),
     runExpectationFixture("example-bad-max-discovery.robots.txt.fixture.txt"),
     runExpectationFixture("example-wp-open.robots.txt.fixture.txt"),
     runViolationShapeSuite(),

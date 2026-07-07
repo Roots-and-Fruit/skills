@@ -100,8 +100,8 @@ function main() {
   failed =
     !check(
       "CF10",
-      originViolations.length >= 3,
-      `expected origin path violations, got ${originViolations.length}`
+      originViolations.length >= 1,
+      `expected origin violations, got ${originViolations.length}`
     ) || failed;
   failed =
     !check("CF11", md.compliant === false, "fixture should not be fully compliant") ||
@@ -162,11 +162,17 @@ function main() {
     !check("CF20", append.includes("User-agent: OAI-SearchBot"), "missing OAI-SearchBot group") ||
     failed;
   failed =
-    !check("CF21", append.includes("Sitemap: https://example.com/sitemap.xml"), "missing sitemap") ||
+    !check("CF20b", append.includes("Sitemap: https://example.com/sitemap.xml"), "missing sitemap") ||
+    failed;
+  failed =
+    !check("CF21", !append.includes("Disallow: /cart/"), "origin append should not Disallow cart") ||
+    failed;
+  failed =
+    !check("CF22", !append.includes("Disallow: /checkout/"), "origin append should not Disallow checkout") ||
     failed;
   failed =
     !check(
-      "CF22",
+      "CF23",
       contentSignalsPresetForCrawlPolicy("max_discovery") === "search_and_ai_input",
       "preset mapping"
     ) || failed;
@@ -174,13 +180,13 @@ function main() {
   const fullTemplate = assessRobotsTxtContent(cfFixture, "max_discovery", "example.com");
   failed =
     !check(
-      "CF23",
+      "CF24",
       fullTemplate.assessment.origin_append_template?.includes("Content-Signal:") === true,
       "assessment missing origin_append_template"
     ) || failed;
   failed =
     !check(
-      "CF24",
+      "CF25",
       fullTemplate.assessment.content_signals?.preset === "search_and_ai_input",
       "content_signals metadata missing"
     ) || failed;
@@ -191,7 +197,7 @@ function main() {
     process.exit(1);
   }
 
-  console.log("All CF1–CF24 passed.");
+  console.log("All CF1–CF25 passed.");
 }
 
 main();

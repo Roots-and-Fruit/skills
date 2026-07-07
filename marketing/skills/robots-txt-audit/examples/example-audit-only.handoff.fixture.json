@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.3.0",
+  "skill_version": "1.7.0",
   "mode": "audit",
   "inputs": {
     "domain": "example.com",
@@ -116,6 +116,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Keep unblocked for SEO unless there is a precise non-search reason."
     },
     {
@@ -130,6 +131,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -140,11 +142,12 @@
       ],
       "role_label": "indexing, ai_answer",
       "controls": "Apple Search, Siri, and Spotlight discovery",
-      "paired_token": null,
+      "paired_token": "Applebot-Extended",
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -160,7 +163,24 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Allow for GEO; distinct from training crawler GPTBot."
+    },
+    {
+      "token": "Claude-SearchBot",
+      "roles": [
+        "ai_answer",
+        "indexing"
+      ],
+      "role_label": "ai_answer, indexing",
+      "controls": "Claude web search retrieval and citation discovery",
+      "paired_token": "ClaudeBot",
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "allowed",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
+      "note": "Anthropic search crawler (2026+). Allow for GEO; distinct from training crawler ClaudeBot."
     },
     {
       "token": "PerplexityBot",
@@ -175,6 +195,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -188,7 +209,8 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": "Blocking limits training reuse; does not block ChatGPT search bot."
     },
     {
@@ -202,7 +224,8 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": "Does not affect Google Search when Googlebot remains allowed."
     },
     {
@@ -216,23 +239,24 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": null
     },
     {
       "token": "ClaudeBot",
       "roles": [
-        "ai_training",
-        "ai_answer"
+        "ai_training"
       ],
-      "role_label": "ai_training, ai_answer",
-      "controls": "Anthropic crawl — verify current docs for training vs fetch behavior",
-      "paired_token": null,
+      "role_label": "ai_training",
+      "controls": "Anthropic model training crawl",
+      "paired_token": "Claude-SearchBot",
       "rule_source": "inherits_user_agent_star",
-      "indexing_crawl": "allowed",
+      "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
-      "note": "Registry default blocks training posture; confirm against live Anthropic policy."
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
+      "note": "Block training; allow Claude-SearchBot separately for Claude answer citations."
     },
     {
       "token": "anthropic-ai",
@@ -246,6 +270,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -260,6 +285,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -274,6 +300,37 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
+      "note": "High crawl volume with no referral return — common training-block target."
+    },
+    {
+      "token": "Bytespider",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "ByteDance AI training crawl",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "policy_expectation": "block",
+      "note": "Among the fastest-growing AI crawlers; may ignore robots.txt — pair blocks with CDN/WAF if needed."
+    },
+    {
+      "token": "Amazonbot",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "Amazon Alexa and product/AI feature crawl",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -288,6 +345,7 @@
       "indexing_crawl": "na",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "May not obey robots.txt like automated crawlers; document only."
     },
     {
@@ -302,6 +360,7 @@
       "indexing_crawl": "na",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "May not obey robots.txt like automated crawlers; document only."
     }
   ],
@@ -343,7 +402,7 @@
       "id": "AF_R4_INHERITED_TRAINING",
       "tier": "warn",
       "rubric": "R4",
-      "message": "Training bots inherit allow from User-agent: * (GPTBot, Google-Extended, CCBot, ClaudeBot, anthropic-ai, Applebot-Extended, Meta-ExternalAgent) — informational unless client opts into training blocks."
+      "message": "Training bots inherit allow from User-agent: * (GPTBot, Google-Extended, CCBot, ClaudeBot, anthropic-ai, Applebot-Extended, Meta-ExternalAgent, Bytespider, Amazonbot) — informational unless client opts into training blocks."
     }
   ],
   "draft_robots_txt": null,

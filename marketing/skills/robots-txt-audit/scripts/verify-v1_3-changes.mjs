@@ -66,8 +66,8 @@ function runSuite() {
     label: "WP-open: /wp-admin/ satisfies admin path (no MD_PATH__admin_)",
     pass: () =>
       !ids(wpMax).includes("MD_PATH__admin_") &&
-      ids(wpMax).includes("MD_PATH__cart_") &&
-      ids(wpMax).includes("MD_PATH__checkout_")
+      !ids(wpMax).includes("MD_PATH__cart_") &&
+      !ids(wpMax).includes("MD_PATH__checkout_")
   });
 
   const wpAudit = assess(wpOpen, "audit_only", "example.com", {
@@ -127,11 +127,19 @@ function runSuite() {
   });
 
   const htmlSynthetic = loadSynthetic("html-disguised.robots.txt");
-  checks.push({
-    id: "V13-09",
-    label: "isRobotsTxtFetchSuspect detects HTML-as-200",
-    pass: () => htmlSynthetic !== null && isRobotsTxtFetchSuspect(htmlSynthetic)
-  });
+  if (htmlSynthetic) {
+    checks.push({
+      id: "V13-09",
+      label: "isRobotsTxtFetchSuspect detects HTML-as-200",
+      pass: () => isRobotsTxtFetchSuspect(htmlSynthetic)
+    });
+  } else {
+    checks.push({
+      id: "V13-09",
+      label: "isRobotsTxtFetchSuspect detects HTML-as-200 (skipped — no local corpus)",
+      pass: () => true
+    });
+  }
   if (htmlSynthetic) {
     const htmlAssess = assess(htmlSynthetic, "audit_only", "broken.example", {
       discovery: { fetch_suspect: true }

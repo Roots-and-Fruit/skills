@@ -21,6 +21,38 @@ export const GAP_REGISTRY = {
     category: "required",
     learn_more_anchor: "sitemap-declaration"
   },
+  MD_SITEMAP_TYPO: {
+    label: "Invalid sitemap directive spelling (e.g. Schemamap: instead of Sitemap:)",
+    short: "Sitemap directive spelling",
+    downside:
+      "Crawlers ignore unknown directives — Google Search Console reports syntax not understood. Your sitemap URL is never registered.",
+    category: "optional",
+    learn_more_anchor: "sitemap-declaration"
+  },
+  SY_SYNTAX_UNKNOWN: {
+    label: "Unrecognized robots.txt directive (GSC: syntax not understood)",
+    short: "Valid directive spelling",
+    downside:
+      "Google Search Console may flag the line; crawlers ignore unknown directives, so intent may not apply.",
+    category: "optional",
+    learn_more_anchor: "syntax-validation"
+  },
+  SY_MALFORMED_LINE: {
+    label: "Malformed robots.txt line (missing ':' separator)",
+    short: "Valid line syntax",
+    downside:
+      "Search engines may skip the line or report a syntax warning in Google Search Console.",
+    category: "optional",
+    learn_more_anchor: "syntax-validation"
+  },
+  SY_EMPTY_DIRECTIVE: {
+    label: "Empty directive name in robots.txt",
+    short: "Valid directive names",
+    downside:
+      "Lines without a directive name are ignored and may trigger GSC syntax warnings.",
+    category: "optional",
+    learn_more_anchor: "syntax-validation"
+  },
   MD_PATH__admin_: {
     label: "Admin area (/wp-admin/) not blocked from crawlers",
     short: "Admin area blocked",
@@ -29,20 +61,68 @@ export const GAP_REGISTRY = {
     category: "required",
     learn_more_anchor: "path-hygiene"
   },
+  MD_INDEX__cart_: {
+    label: "Cart pages lack noindex (index control)",
+    short: "Cart noindex set",
+    downside:
+      "Empty or session-specific cart URLs can get indexed and clutter search results — use noindex on-page, not robots.txt Disallow.",
+    category: "optional",
+    learn_more_anchor: "path-hygiene"
+  },
+  MD_INDEX__checkout_: {
+    label: "Checkout pages lack noindex (index control)",
+    short: "Checkout noindex set",
+    downside:
+      "Checkout URLs may surface in search with thin transactional content — use noindex meta or X-Robots-Tag instead of robots.txt Disallow.",
+    category: "optional",
+    learn_more_anchor: "path-hygiene"
+  },
+  MD_INDEX_ROBOTS_CONFLICT__cart_: {
+    label: "Cart has noindex but is blocked in robots.txt",
+    short: "Cart crawl/noindex aligned",
+    downside:
+      "Google cannot read noindex when the URL is blocked in robots.txt — the page may stay in search results via inbound links.",
+    category: "optional",
+    learn_more_anchor: "path-hygiene"
+  },
+  MD_INDEX_ROBOTS_CONFLICT__checkout_: {
+    label: "Checkout has noindex but is blocked in robots.txt",
+    short: "Checkout crawl/noindex aligned",
+    downside:
+      "Google cannot read noindex when the URL is blocked in robots.txt — the page may stay in search results via inbound links.",
+    category: "optional",
+    learn_more_anchor: "path-hygiene"
+  },
+  MD_INDEX_ROBOTS_ONLY__cart_: {
+    label: "Cart blocked in robots.txt without confirmed noindex",
+    short: "Cart index control verified",
+    downside:
+      "robots.txt Disallow alone does not remove URLs from search — crawlers never see a noindex signal when blocked.",
+    category: "optional",
+    learn_more_anchor: "path-hygiene"
+  },
+  MD_INDEX_ROBOTS_ONLY__checkout_: {
+    label: "Checkout blocked in robots.txt without confirmed noindex",
+    short: "Checkout index control verified",
+    downside:
+      "robots.txt Disallow alone does not remove URLs from search — crawlers never see a noindex signal when blocked.",
+    category: "optional",
+    learn_more_anchor: "path-hygiene"
+  },
   MD_PATH__cart_: {
     label: "Cart pages not blocked from crawlers",
     short: "Cart pages blocked",
     downside:
-      "Empty or session-specific cart URLs can get indexed and clutter search results with thin, low-value pages.",
-    category: "required",
+      "Deprecated check — prefer noindex for cart URLs. robots.txt Disallow is not required when noindex is set.",
+    category: "optional",
     learn_more_anchor: "path-hygiene"
   },
   MD_PATH__checkout_: {
     label: "Checkout pages not blocked from crawlers",
     short: "Checkout pages blocked",
     downside:
-      "Checkout URLs may surface in search with duplicate or transactional content that does not help visitors or conversions.",
-    category: "required",
+      "Deprecated check — prefer noindex for checkout URLs. robots.txt Disallow is not required when noindex is set.",
+    category: "optional",
     learn_more_anchor: "path-hygiene"
   },
   MD_GPTBot: {
@@ -50,7 +130,7 @@ export const GAP_REGISTRY = {
     short: "GPTBot blocked",
     downside:
       "Your public content may be collected for model training unless you block training crawlers or use enforcement.",
-    category: "required",
+    category: "optional",
     learn_more_anchor: "training-vs-search-and-answer-bots"
   },
   MD_Google_Extended: {
@@ -58,7 +138,7 @@ export const GAP_REGISTRY = {
     short: "Google-Extended blocked",
     downside:
       "Google may use crawled content for AI training products separate from normal search indexing.",
-    category: "required",
+    category: "optional",
     learn_more_anchor: "training-vs-search-and-answer-bots"
   },
   MD_CCBot: {
@@ -66,6 +146,30 @@ export const GAP_REGISTRY = {
     short: "CCBot blocked",
     downside:
       "Your pages may enter open training datasets used by many AI tools downstream.",
+    category: "optional",
+    learn_more_anchor: "training-vs-search-and-answer-bots"
+  },
+  MD_RESTRICT_OAI_SearchBot: {
+    label: "ChatGPT search/citation bot is still allowed (should be blocked under restrictive)",
+    short: "ChatGPT search blocked",
+    downside:
+      "Under restrictive policy, AI answer bots should be blocked — you trade GEO citations for tighter crawl control.",
+    category: "required",
+    learn_more_anchor: "training-vs-search-and-answer-bots"
+  },
+  MD_RESTRICT_Claude_SearchBot: {
+    label: "Claude search/citation bot is still allowed (should be blocked under restrictive)",
+    short: "Claude search blocked",
+    downside:
+      "Restrictive policy blocks AI answer crawlers — Claude may still cite your pages if left allowed.",
+    category: "required",
+    learn_more_anchor: "anthropic-search-pairing"
+  },
+  MD_RESTRICT_PerplexityBot: {
+    label: "Perplexity discovery bot is still allowed (should be blocked under restrictive)",
+    short: "Perplexity blocked",
+    downside:
+      "Restrictive policy expects answer bots blocked — Perplexity may still reference your content.",
     category: "required",
     learn_more_anchor: "training-vs-search-and-answer-bots"
   },
@@ -122,7 +226,7 @@ export const GAP_REGISTRY = {
     short: "ClaudeBot blocked",
     downside:
       "Your public content may be collected for Anthropic model training unless you block training crawlers.",
-    category: "required",
+    category: "optional",
     learn_more_anchor: "anthropic-search-pairing"
   },
   MD_Claude_SearchBot: {
@@ -217,7 +321,17 @@ export function collectGapsFromAssessment(assessment) {
   const optional = [];
   const seen = new Set();
   const violations = assessment.policy_compliance?.violations ?? [];
+  const crawlPolicy = assessment.crawl_policy ?? "audit_only";
+  const trainingRequired =
+    crawlPolicy === "block_training_allow_answers" || crawlPolicy === "restrictive";
   const hasSitemapPresent = violations.some((v) => v.id === "MD_SITEMAP_PRESENT");
+
+  const trainingGapIds = new Set([
+    "MD_GPTBot",
+    "MD_Google_Extended",
+    "MD_CCBot",
+    "MD_ClaudeBot"
+  ]);
 
   for (const v of violations) {
     if (v.id === "MD_SITEMAP_VALID" && hasSitemapPresent) {
@@ -226,12 +340,26 @@ export function collectGapsFromAssessment(assessment) {
     const gap = gapFromViolation(v);
     if (!seen.has(gap.id)) {
       seen.add(gap.id);
-      if (gap.category === "optional") {
-        optional.push(gap);
+      const category = trainingGapIds.has(gap.id)
+        ? trainingRequired
+          ? "required"
+          : "optional"
+        : gap.category;
+      if (category === "optional") {
+        optional.push({ ...gap, category });
       } else {
-        required.push(gap);
+        required.push({ ...gap, category });
       }
     }
+  }
+
+  for (const warning of assessment.index_control_validation?.warnings ?? []) {
+    if (seen.has(warning.id)) {
+      continue;
+    }
+    const gap = gapFromViolation(warning);
+    seen.add(gap.id);
+    optional.push({ ...gap, category: "optional" });
   }
 
   if (
@@ -245,6 +373,32 @@ export function collectGapsFromAssessment(assessment) {
     seen.add("MD_SITEMAP_PRESENT");
   }
 
+  const hasSitemapTypo = (assessment.sitemap_validation?.issues ?? []).some(
+    (i) => i.id === "SM8"
+  );
+  if (hasSitemapTypo && !seen.has("MD_SITEMAP_TYPO")) {
+    const gap = GAP_REGISTRY.MD_SITEMAP_TYPO;
+    optional.push({ id: "MD_SITEMAP_TYPO", ...gap });
+    seen.add("MD_SITEMAP_TYPO");
+  }
+
+  const syntaxGapById = {
+    SY1: "SY_SYNTAX_UNKNOWN",
+    SY2: "SY_MALFORMED_LINE",
+    SY3: "SY_EMPTY_DIRECTIVE"
+  };
+  for (const issue of assessment.syntax_validation?.issues ?? []) {
+    const gapId = syntaxGapById[issue.id];
+    if (!gapId || seen.has(gapId)) {
+      continue;
+    }
+    const gap = GAP_REGISTRY[gapId];
+    if (gap) {
+      optional.push({ id: gapId, ...gap });
+      seen.add(gapId);
+    }
+  }
+
   const matrix = assessment.crawler_matrix ?? [];
   const anthropic = matrix.find((r) => r.token === "anthropic-ai");
   if (anthropic?.training_crawl === "allowed" && !seen.has("OPT_ANTHROPIC_AI")) {
@@ -253,7 +407,7 @@ export function collectGapsFromAssessment(assessment) {
   }
 
   const policy = assessment.crawl_policy ?? "audit_only";
-  if (policy === "max_discovery" || policy === "block_training_allow_answers") {
+  if (policy === "block_training_allow_answers") {
     for (const token of MAX_DISCOVERY_OPTIONAL_TRAINING_BLOCKS) {
       const gapId = `OPT_${token.replace(/[^a-zA-Z0-9]/g, "_")}`;
       const entry = GAP_REGISTRY[gapId];

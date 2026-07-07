@@ -26,6 +26,29 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, "..");
 
+/** @param {string} crawlPolicy */
+function policyLabel(crawlPolicy) {
+  switch (crawlPolicy) {
+    case "block_training_allow_answers":
+      return "block training while allowing answers";
+    case "max_discovery":
+      return "max discovery";
+    case "audit_only":
+      return "audit";
+    case "restrictive":
+      return "restrictive crawl policy";
+    default:
+      return "requested policy";
+  }
+}
+
+/** @param {string} crawlPolicy */
+function policyExpectsTrainingBlocks(crawlPolicy) {
+  return (
+    crawlPolicy === "block_training_allow_answers" || crawlPolicy === "restrictive"
+  );
+}
+
 /** @param {{ id: string, path?: string, layer?: string, message: string }} violation */
 export function violationToLayperson(violation) {
   const gap = gapFromViolation(violation);
@@ -41,22 +64,44 @@ export function buildWorkingList(assessment, domain) {
   const pc = assessment.policy_compliance;
   const cf = assessment.layer_assessment?.cloudflare;
   const deployment = assessment.deployment?.model;
+  const crawlPolicy = assessment.crawl_policy ?? "max_discovery";
+  const trainingPolicyExpected = policyExpectsTrainingBlocks(crawlPolicy);
 
   items.push("robots.txt file is online and readable");
 
   if (deployment === "cloudflare_managed") {
-    items.push("Cloudflare is managing AI training blocks for you (GPTBot, Google-Extended, etc.)");
+    items.push(
+      "Cloudflare prepends managed AI bot rules at the edge (you still edit a small origin file)"
+    );
     if (cf?.training_bots_blocked) {
-      items.push("Major AI training crawlers are blocked");
+      if (trainingPolicyExpected) {
+        items.push("Major AI training crawlers are blocked at the Cloudflare edge");
+      } else if (crawlPolicy === "max_discovery") {
+        items.push(
+          "Cloudflare's edge layer also blocks some AI training crawlers (optional — not required for max discovery)"
+        );
+      }
     }
     if (cf?.content_signals_ok) {
-      items.push("Your site signals “okay to index for search, not for AI training”");
+      if (trainingPolicyExpected) {
+        items.push("Your site signals “okay to index for search, not for AI training”");
+      } else {
+        items.push("Content-Signals at the edge declare search vs AI-use preferences");
+      }
     }
   }
 
   if (!pc || pc.compliant) {
     if (pc?.compliant) {
-      items.push("Setup matches your max discovery goal");
+      items.push(`Setup matches your ${policyLabel(crawlPolicy)} goal`);
+      if (trainingPolicyExpected && deployment !== "cloudflare_managed") {
+        const trainingBlocked = (assessment.crawler_matrix ?? []).some(
+          (r) => r.training_crawl === "blocked"
+        );
+        if (trainingBlocked) {
+          items.push("AI training bots are blocked");
+        }
+      }
     }
   } else {
     const effectiveOk = (pc.violations ?? []).filter(
@@ -64,6 +109,8 @@ export function buildWorkingList(assessment, domain) {
     );
     if (effectiveOk.length === 0) {
       items.push("Google, Bing, and AI answer bots can reach your public pages");
+    }
+    if (trainingPolicyExpected && effectiveOk.length === 0) {
       items.push("AI training bots are blocked");
     }
   }
@@ -86,7 +133,7 @@ export function buildWorkingList(assessment, domain) {
     items.push("Sitemap is declared in robots.txt");
   }
   if (origin?.path_hygiene_ok) {
-    items.push("Low-value paths (admin, cart, checkout) are restricted");
+    items.push("Admin paths are restricted in robots.txt");
   }
 
   if (deployment !== "cloudflare_managed" && pc?.compliant) {
@@ -542,7 +589,7 @@ export function buildDetailReportMarkdown({
   const handoff = {
     handoff_version: "1.0",
     skill: "robots-txt-audit",
-    skill_version: "1.5.0",
+    skill_version: "1.7.0",
     mode,
     inputs: { domain, crawl_policy: crawlPolicy, robots_deployment: "auto" },
     discovery: {
@@ -563,6 +610,7 @@ export function buildDetailReportMarkdown({
     },
     crawler_matrix: assessment.crawler_matrix,
     sitemap_validation: assessment.sitemap_validation,
+    syntax_validation: assessment.syntax_validation,
     policy_compliance: assessment.policy_compliance,
     audit_findings: assessment.audit_findings,
     deployment_note: "See layperson summary for action steps. Do not deploy from this file without review."

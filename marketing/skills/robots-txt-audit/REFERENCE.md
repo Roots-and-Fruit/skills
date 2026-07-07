@@ -8,12 +8,12 @@ Plain text at the domain root (e.g. `https://example.com/robots.txt`) that tells
 
 | robots.txt does | robots.txt does not |
 |-----------------|---------------------|
-| Allow or block **crawling** per user-agent | Guarantee **indexing** (use `noindex` meta/header) |
+| Allow or block **crawling** per user-agent | Guarantee **indexing** (use `noindex` meta/header on cart/checkout) |
 | Separate **training** vs **discovery** bots | Secure private content |
 | Point crawlers to sitemaps via `Sitemap:` | Remove content already collected |
-| Restrict low-value paths | Guarantee AI citations |
+| Restrict admin paths (crawl hygiene) | Guarantee AI citations |
 
-**Crawl ≠ index:** A crawler must be allowed to fetch a URL to read a `noindex` tag. Blocking in robots.txt can prevent deindexing signals from being seen.
+**Crawl ≠ index:** A crawler must be allowed to fetch a URL to read a `noindex` tag. Blocking cart/checkout in robots.txt can prevent deindexing signals from being seen ([Google: Block Search indexing with noindex](https://developers.google.com/search/docs/crawling-indexing/block-indexing)).
 
 Also check `https://www.{domain}/robots.txt` when bare domain fails.
 
@@ -67,9 +67,9 @@ Full registry: `scripts/crawler-registry.mjs` (verify against provider docs befo
 
 | `crawl_policy` | Intent |
 |----------------|--------|
-| `max_discovery` | **Opt-in preset:** allow search + answer bots; block common training bots; restrict admin/cart/checkout; valid on-host sitemap preferred |
-| `block_training_allow_answers` | Same operational rules as max_discovery |
-| `restrictive` | Block training bots; document tradeoff on AI citations |
+| `max_discovery` | **Discovery-only preset:** allow search + answer bots; correct token pairings; restrict admin in robots.txt; valid on-host sitemap preferred. Training blocks are **not** required. |
+| `block_training_allow_answers` | `max_discovery` **plus** block common training bots (`GPTBot`, `Google-Extended`, `CCBot`, `ClaudeBot`) — explicit opt-in |
+| `restrictive` | Block AI answer + training bots; keep `Googlebot` / `bingbot` for search. Document GEO/citation tradeoff. |
 | `audit_only` | Report current state; recommend only on clear risks — **no** max_discovery compliance gate |
 
 ### ContentSignals.org preset equivalence
@@ -85,16 +85,14 @@ Generator: [contentsignals.org](https://contentsignals.org/). SSOT mapping: `scr
 
 Optional input: `content_signals_preset` — defaults from `crawl_policy` when CF managed + `max_discovery`.
 
-## max_discovery compliance (P-layer)
+## max_discovery / block_training_allow_answers compliance (P-layer)
 
 `assessMaxDiscovery()` checks (automated in `verify-max-discovery.mjs` and `verify-max-discovery-contract.mjs`):
 
+### Discovery checks (both presets)
+
 | ID | Requirement |
 |----|-------------|
-| MD_GPTBot | `GPTBot` blocked at `/` |
-| MD_Google_Extended | `Google-Extended` blocked at `/` |
-| MD_CCBot | `CCBot` blocked at `/` |
-| MD_ClaudeBot | `ClaudeBot` blocked at `/` |
 | MD_OAI_SearchBot | `OAI-SearchBot` allowed at `/` |
 | MD_Claude_SearchBot | `Claude-SearchBot` allowed at `/` |
 | MD_PerplexityBot | `PerplexityBot` allowed at `/` |
@@ -103,9 +101,67 @@ Optional input: `content_signals_preset` — defaults from `crawl_policy` when C
 | MD_GOOGLE_PAIRING | Not: Googlebot blocked + Google-Extended allowed |
 | MD_OPENAI_PAIRING | Not: OAI-SearchBot blocked + GPTBot allowed |
 | MD_ANTHROPIC_PAIRING | Not: Claude-SearchBot blocked + ClaudeBot allowed |
-| MD_PATH_* | `*` blocks `/admin/` **or** `/wp-admin/`, plus `/cart/`, `/checkout/` |
+| MD_PATH_* | `*` blocks `/admin/` **or** `/wp-admin/` |
 | MD_SITEMAP_PRESENT | At least one `Sitemap:` line |
 | MD_SITEMAP_VALID | Sitemap fails `validateSitemaps()` with **fail**-severity issues (SM4 off-host alone is warn) |
+
+### Training blocks (`block_training_allow_answers` only)
+
+| ID | Requirement |
+|----|-------------|
+| MD_GPTBot | `GPTBot` blocked at `/` |
+| MD_Google_Extended | `Google-Extended` blocked at `/` |
+| MD_CCBot | `CCBot` blocked at `/` |
+| MD_ClaudeBot | `ClaudeBot` blocked at `/` |
+
+### Index control (cart/checkout — warn only, R6b)
+
+Probe with WebFetch; pass `options.index_control_results`. Use `assessIndexControlPaths()`.
+
+| ID | When | Tier |
+|----|------|------|
+| MD_INDEX__cart_ / MD_INDEX__checkout_ | Path returns 200, crawlable, no `noindex` | warn |
+| MD_INDEX_ROBOTS_CONFLICT_* | `noindex` present but path blocked in robots.txt | warn |
+| MD_INDEX_ROBOTS_ONLY_* | robots Disallow without confirmed `noindex` | warn |
+
+**Do not** require robots.txt `Disallow` for `/cart/` or `/checkout/` when those URLs carry `noindex`. Training tokens are separate user-agents from answer bots ([Google-Extended](https://developers.google.com/search/docs/crawling-indexing/google-extended), [OpenAI GPTBot](https://platform.openai.com/docs/gptbot)) — blocking training does not improve discovery.
+
+### Restrictive checks (`restrictive` only)
+
+`assessRestrictive()` in `assess-policy.mjs`:
+
+| ID | Requirement |
+|----|-------------|
+| MD_Googlebot / MD_bingbot | Search bots allowed at `/` |
+| MD_RESTRICT_OAI_SearchBot | `OAI-SearchBot` blocked at `/` |
+| MD_RESTRICT_Claude_SearchBot | `Claude-SearchBot` blocked at `/` |
+| MD_RESTRICT_PerplexityBot | `PerplexityBot` blocked at `/` |
+| MD_GPTBot … MD_ClaudeBot | Training bots blocked at `/` (same tokens as `block_training_allow_answers`) |
+| MD_GOOGLE_PAIRING / MD_OPENAI_PAIRING / MD_ANTHROPIC_PAIRING | Same reversed-intent checks as discovery presets |
+| MD_PATH_* / MD_SITEMAP_* | Same admin path + sitemap rules as discovery presets |
+
+**Tradeoff:** blocking answer bots reduces AI citation/GEO visibility while keeping traditional search crawl open.
+
+## Syntax validation (R2b)
+
+`validateRobotsTxtSyntax(content)` in `syntax-validation.mjs` — local GSC-style lint (no Search Console API). Populates `syntax_validation` on every `assessRobotsTxtContent()` result:
+
+```json
+{
+  "status": "pass | warn | fail",
+  "issue_count": 0,
+  "issues": [{ "id": "SY1", "severity": "warn", "line": 4, "directive": "Host", "message": "..." }]
+}
+```
+
+| ID | Rule |
+|----|------|
+| SY1 | Unknown directive (not User-agent, Allow, Disallow, Sitemap, Crawl-delay, Content-Signal) |
+| SY2 | Non-comment line without `:` separator |
+| SY3 | Empty directive name before `:` |
+| SM8 | Invalid sitemap directive spelling (see sitemap rules) — also merged into `sitemap_validation` |
+
+**Agent rule:** Read `syntax_validation` from script output — do not re-lint line-by-line in chat (token savings). Use GSC URL Inspection for authoritative confirmation.
 
 ## Sitemap declaration rules (R7)
 
@@ -120,6 +176,9 @@ Optional input: `content_signals_preset` — defaults from `crawl_policy` when C
 | SM5 | Path contains `sitemap` or ends in `.xml` (warn if unusual) |
 | SM6 | Optional: expected URL from user/catalog not declared (warn) |
 | SM7 | WebFetch declared URL; warn on HTTP 4xx/5xx |
+| SM8 | Invalid sitemap directive spelling (`Schemamap:`, `Sitemaps:`, etc.) — crawlers ignore unknown directives; GSC reports syntax not understood |
+
+**SM8 note:** Yoast SEO ≤27.4 emitted `Schemamap:` for schema-aggregator XML. It is not RFC 9309 / Google-valid; use `Sitemap:` instead. Detection: `detectSitemapDirectiveTypos()` in `syntax-validation.mjs`.
 
 Populate `endpoint_fetch[]` in handoff: `{ url, status, ok }` per declared sitemap.
 
@@ -142,8 +201,38 @@ Do not list sitemap URLs that point at another domain. Do not use relative paths
 Replace `example.com` with live domain. Test before publishing.
 
 ```text
-# Allow search and AI answer crawlers; block common training crawlers
+# Discovery preset: allow search and AI answer crawlers
 # Policy: max_discovery
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
+User-agent: *
+Disallow: /admin/
+Allow: /
+
+Sitemap: https://example.com/sitemap.xml
+```
+
+## Policy template — block_training_allow_answers
+
+Adds training-bot blocks on top of max_discovery. Use only when the client opts in.
+
+```text
+# Discovery + training blocks
+# Policy: block_training_allow_answers
 
 User-agent: GPTBot
 Disallow: /
@@ -174,8 +263,6 @@ Allow: /
 
 User-agent: *
 Disallow: /admin/
-Disallow: /cart/
-Disallow: /checkout/
 Allow: /
 
 Sitemap: https://example.com/sitemap.xml
@@ -211,8 +298,6 @@ Allow: /
 
 User-agent: *
 Disallow: /wp-admin/
-Disallow: /cart/
-Disallow: /checkout/
 Allow: /
 
 Sitemap: https://example.com/sitemap.xml
@@ -231,7 +316,8 @@ Emit one row per check in `audit_checks[]`:
 | R3 | Search crawlers | `Googlebot`, `bingbot` reach `/` and key paths | Site-wide block on search bots |
 | R4 | AI bot differentiation | Training vs answer bots handled distinctly | Single blunt AI block or contradictory rules |
 | R5 | Cornerstone crawlability | All `key_pages` allowed for discovery crawlers | Any cornerstone blocked — list in `crawlability` |
-| R6 | Low-value path hygiene | Admin/cart/checkout restricted for `*` where applicable | Obvious noise paths wide open (warn if N/A) |
+| R6 | Low-value path hygiene | Admin (`/admin/` or `/wp-admin/`) restricted for `*` where applicable | Admin paths wide open (warn if N/A) |
+| R6b | Index control (cart/checkout) | `noindex` verified when probed; warn if crawlable without `noindex` | robots Disallow used for deindexing without `noindex` |
 | R7 | Sitemap declaration | R7a–R7d pass via `validateSitemaps()` | Missing, relative, or wrong-host sitemap |
 | R7a | Sitemap present | ≥1 `Sitemap:` line | SM1 fail |
 | R7b | Absolute URL | Full `https://` URL | SM2 fail |
@@ -274,7 +360,7 @@ When file not found:
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.4.0",
+  "skill_version": "1.7.0",
   "mode": "audit",
   "inputs": {
     "domain": "example.com",
@@ -353,7 +439,8 @@ When file not found:
 | `crawler_matrix` | Required when `discovery.found` and mode is `audit` or `recommend` — full JSON array from `buildCrawlerMatrix()` / `assessRobotsTxtContent()`. **Never** a string pointer to the human table (fails G26). |
 | `crawlability.fully_crawlable` | `null` when `key_pages_provided` is 0; otherwise non-negative integer |
 | `sitemap_validation` | Required when `discovery.found`; include `endpoint_fetch[]` after WebFetch |
-| `policy_compliance` | Required when `crawl_policy` is `max_discovery` — from `assessMaxDiscovery()` |
+| `policy_compliance` | Required when `crawl_policy` is `max_discovery` or `block_training_allow_answers` — from `assessMaxDiscovery()` |
+| `index_control_validation` | Recommended when cart/checkout probed — from `assessIndexControlPaths()` |
 | `audit_findings` | Recommended on all modes — from `buildAuditFindings()` / `assessment.audit_findings` (`tier`: `fail` · `warn` · `info`) |
 | `discovery.urls_checked` | Always both `https://{domain}/robots.txt` and `https://www.{domain}/robots.txt` (apex first) — fails **G27** if either is missing |
 | `limitations[]` | CDN unverified, stale crawler registry, no catalog for sitemap cross-check |

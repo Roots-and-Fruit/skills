@@ -117,8 +117,6 @@ export function buildCloudflareOriginAppend(domain, options = {}) {
   lines.push("User-agent: *");
   if (presetId !== "most_restrictive") {
     lines.push("Disallow: /wp-admin/");
-    lines.push("Disallow: /cart/");
-    lines.push("Disallow: /checkout/");
     lines.push("Allow: /");
     lines.push("");
   }

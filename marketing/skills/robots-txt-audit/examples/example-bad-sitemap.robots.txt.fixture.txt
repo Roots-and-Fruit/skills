@@ -1,3 +1,5 @@
+# SM4 off-host sitemap regression only — not a max_discovery policy template
+
 # Good bot rules but invalid sitemap host for example.com
 
 User-agent: GPTBot

@@ -30,7 +30,7 @@ export const CLOUDFLARE_MANAGED_TRAINING_BLOCKS = [
 /** What CF managed robots.txt does not inject — origin responsibility */
 export const CLOUDFLARE_ORIGIN_RESPONSIBILITIES = [
   "Sitemap: directive",
-  "Low-value path Disallow rules (/wp-admin/, /cart/, /checkout/)",
+  "Low-value path Disallow rules (/wp-admin/ or /admin/)",
   "Site-specific path rules",
   "Explicit Allow groups for answer bots when wildcard rules are complex"
 ];

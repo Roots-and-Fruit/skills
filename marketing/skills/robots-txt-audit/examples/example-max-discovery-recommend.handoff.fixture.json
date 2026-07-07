@@ -1,8 +1,8 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.5.0",
-  "mode": "recommend",
+  "skill_version": "1.7.0",
+  "mode": "audit",
   "inputs": {
     "domain": "example.com",
     "key_pages": [],
@@ -69,8 +69,8 @@
     {
       "id": "R4",
       "name": "AI bot differentiation",
-      "status": "fail",
-      "note": "Training bots inherit allow from User-agent: * under max_discovery"
+      "status": "pass",
+      "note": "Training bots inherit allow from User-agent: * — optional under max_discovery (use block_training_allow_answers to require blocks)"
     },
     {
       "id": "R5",
@@ -82,7 +82,7 @@
       "id": "R6",
       "name": "Low-value path hygiene",
       "status": "pass",
-      "note": "WordPress /wp-admin/ satisfies admin intent; /cart/ and /checkout/ gaps in policy_compliance"
+      "note": "WordPress /wp-admin/ satisfies admin intent under max_discovery"
     },
     {
       "id": "R7",
@@ -152,6 +152,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Keep unblocked for SEO unless there is a precise non-search reason."
     },
     {
@@ -166,6 +167,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -181,6 +183,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -196,6 +199,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Allow for GEO; distinct from training crawler GPTBot."
     },
     {
@@ -211,6 +215,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Anthropic search crawler (2026+). Allow for GEO; distinct from training crawler ClaudeBot."
     },
     {
@@ -226,6 +231,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -239,7 +245,8 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": "Blocking limits training reuse; does not block ChatGPT search bot."
     },
     {
@@ -253,7 +260,8 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": "Does not affect Google Search when Googlebot remains allowed."
     },
     {
@@ -267,7 +275,8 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": null
     },
     {
@@ -281,7 +290,8 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block_if_block_training_policy",
       "note": "Block training; allow Claude-SearchBot separately for Claude answer citations."
     },
     {
@@ -296,6 +306,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -310,6 +321,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -324,6 +336,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": "High crawl volume with no referral return — common training-block target."
     },
     {
@@ -338,6 +351,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": "Among the fastest-growing AI crawlers; may ignore robots.txt — pair blocks with CDN/WAF if needed."
     },
     {
@@ -352,6 +366,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -366,6 +381,7 @@
       "indexing_crawl": "na",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "May not obey robots.txt like automated crawlers; document only."
     },
     {
@@ -380,6 +396,7 @@
       "indexing_crawl": "na",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "May not obey robots.txt like automated crawlers; document only."
     }
   ],
@@ -411,59 +428,8 @@
   },
   "policy_compliance": {
     "policy": "max_discovery",
-    "compliant": false,
-    "violations": [
-      {
-        "id": "MD_GPTBot",
-        "token": "GPTBot",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/",
-        "message": "GPTBot should be blocked for max_discovery (training crawl)"
-      },
-      {
-        "id": "MD_Google_Extended",
-        "token": "Google-Extended",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/",
-        "message": "Google-Extended should be blocked for max_discovery (training crawl)"
-      },
-      {
-        "id": "MD_CCBot",
-        "token": "CCBot",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/",
-        "message": "CCBot should be blocked for max_discovery (training crawl)"
-      },
-      {
-        "id": "MD_ClaudeBot",
-        "token": "ClaudeBot",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/",
-        "message": "ClaudeBot should be blocked for max_discovery (training crawl)"
-      },
-      {
-        "id": "MD_PATH__cart_",
-        "token": "*",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/cart/",
-        "layer": "effective",
-        "message": "Wildcard should restrict low-value path /cart/"
-      },
-      {
-        "id": "MD_PATH__checkout_",
-        "token": "*",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/checkout/",
-        "layer": "effective",
-        "message": "Wildcard should restrict low-value path /checkout/"
-      }
-    ]
+    "compliant": true,
+    "violations": []
   },
   "audit_findings": [
     {
@@ -471,17 +437,12 @@
       "tier": "warn",
       "rubric": "R7",
       "message": "Sitemap URL returned HTTP 500: https://www.example.com/sitemap_index.xml"
-    },
-    {
-      "id": "AF_POLICY_GAP",
-      "tier": "warn",
-      "rubric": "policy",
-      "message": "5 max_discovery violation(s) — see policy_compliance."
     }
   ],
   "draft_robots_txt": null,
-  "deployment_note": "Apply recommended training-crawler blocks; fix sitemap endpoint; re-test with verify-max-discovery-contract.mjs policy expectations.",
+  "deployment_note": "No deployment needed for max_discovery compliance. Investigate sitemap endpoint HTTP 500; re-test after fix.",
   "limitations": [
-    "Template path violations (/cart/, /checkout/) flagged; /wp-admin/ satisfies admin intent for WordPress"
+    "max_discovery compliant for WordPress open fixture; /wp-admin/ satisfies admin path intent",
+    "Sitemap URL returned HTTP 500 during fetch — fix endpoint or hosting"
   ]
 }

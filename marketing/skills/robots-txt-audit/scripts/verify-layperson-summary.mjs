@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /**
- * Verify layperson summary builder (LP1–LP8).
+ * Verify layperson summary builder (LP1–LP20b).
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   buildLaypersonSummaryMarkdown,
+  buildMissingGapItems,
   buildMissingList,
   buildWorkingList,
   violationToLayperson,
@@ -92,6 +93,54 @@ const merged = injectPreservedDisallows(
   ["/wp-content/uploads/*.html"]
 );
 ok("LP16", merged.includes("User-agent: *\nDisallow: /wp-admin/\nDisallow: /wp-content/uploads/*.html"));
+
+const goodFixture = readFileSync(
+  path.join(root, "examples/example-good.robots.txt.fixture.txt"),
+  "utf8"
+);
+const goodAssess = assessRobotsTxtContent(goodFixture, "max_discovery", "example.com", {
+  sitemap_fetch_results: [{ url: "https://example.com/sitemap.xml", status: 200 }]
+}).assessment;
+const goodRequired = buildMissingGapItems(goodAssess, { includeOptional: false });
+ok(
+  "LP18",
+  !goodRequired.some((g) => /training/i.test(g.label)),
+  goodRequired.map((g) => g.id).join(", ")
+);
+ok(
+  "LP19",
+  !summary.includes("Major AI training crawlers are blocked"),
+  "CF max_discovery summary must not claim training blocks as required wins"
+);
+ok(
+  "LP19b",
+  summary.includes("optional") && summary.includes("max discovery"),
+  "CF max_discovery should label edge training blocks as optional"
+);
+
+const blockTrainingFixture = readFileSync(
+  path.join(root, "examples/example-good-block-training.robots.txt.fixture.txt"),
+  "utf8"
+);
+const blockTrainingAssess = assessRobotsTxtContent(
+  blockTrainingFixture,
+  "block_training_allow_answers",
+  "example.com",
+  {
+    sitemap_fetch_results: [{ url: "https://example.com/sitemap.xml", status: 200 }]
+  }
+).assessment;
+const blockTrainingWorking = buildWorkingList(blockTrainingAssess, "example.com");
+ok(
+  "LP20",
+  blockTrainingWorking.some((line) => line.includes("AI training bots are blocked")),
+  blockTrainingWorking.join(" | ")
+);
+ok(
+  "LP20b",
+  blockTrainingWorking.some((line) => line.includes("block training while allowing answers")),
+  blockTrainingWorking.join(" | ")
+);
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

@@ -1,0 +1,8 @@
+# Unknown Host directive — not in RFC 9309 / Google allowlist
+
+User-agent: *
+Allow: /
+
+Host: https://example.com
+
+Sitemap: https://example.com/sitemap.xml

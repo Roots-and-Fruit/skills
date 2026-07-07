@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.3.0",
+  "skill_version": "1.7.0",
   "mode": "recommend",
   "inputs": {
     "domain": "example.com",
@@ -64,8 +64,8 @@
     {
       "id": "R4",
       "name": "AI bot differentiation",
-      "status": "warn",
-      "note": "GPTBot blocked but OAI-SearchBot not explicit"
+      "status": "fail",
+      "note": "Training blocks or pairings incomplete under block_training_allow_answers"
     },
     {
       "id": "R7",
@@ -92,6 +92,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Keep unblocked for SEO unless there is a precise non-search reason."
     },
     {
@@ -106,6 +107,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -116,11 +118,12 @@
       ],
       "role_label": "indexing, ai_answer",
       "controls": "Apple Search, Siri, and Spotlight discovery",
-      "paired_token": null,
+      "paired_token": "Applebot-Extended",
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -136,7 +139,24 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "Allow for GEO; distinct from training crawler GPTBot."
+    },
+    {
+      "token": "Claude-SearchBot",
+      "roles": [
+        "ai_answer",
+        "indexing"
+      ],
+      "role_label": "ai_answer, indexing",
+      "controls": "Claude web search retrieval and citation discovery",
+      "paired_token": "ClaudeBot",
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "allowed",
+      "training_crawl": "na",
+      "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
+      "note": "Anthropic search crawler (2026+). Allow for GEO; distinct from training crawler ClaudeBot."
     },
     {
       "token": "PerplexityBot",
@@ -151,6 +171,7 @@
       "indexing_crawl": "allowed",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": null
     },
     {
@@ -164,7 +185,8 @@
       "rule_source": "explicit",
       "indexing_crawl": "na",
       "training_crawl": "blocked",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block",
       "note": "Blocking limits training reuse; does not block ChatGPT search bot."
     },
     {
@@ -178,7 +200,8 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block",
       "note": "Does not affect Google Search when Googlebot remains allowed."
     },
     {
@@ -192,23 +215,24 @@
       "rule_source": "inherits_user_agent_star",
       "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block",
       "note": null
     },
     {
       "token": "ClaudeBot",
       "roles": [
-        "ai_training",
-        "ai_answer"
+        "ai_training"
       ],
-      "role_label": "ai_training, ai_answer",
-      "controls": "Anthropic crawl — verify current docs for training vs fetch behavior",
-      "paired_token": null,
+      "role_label": "ai_training",
+      "controls": "Anthropic model training crawl",
+      "paired_token": "Claude-SearchBot",
       "rule_source": "inherits_user_agent_star",
-      "indexing_crawl": "allowed",
+      "indexing_crawl": "na",
       "training_crawl": "allowed",
-      "max_discovery_expectation": "block",
-      "note": "Registry default blocks training posture; confirm against live Anthropic policy."
+      "max_discovery_expectation": "block_if_block_training_policy",
+      "policy_expectation": "block",
+      "note": "Block training; allow Claude-SearchBot separately for Claude answer citations."
     },
     {
       "token": "anthropic-ai",
@@ -222,6 +246,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -236,6 +261,7 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -250,6 +276,37 @@
       "indexing_crawl": "na",
       "training_crawl": "allowed",
       "max_discovery_expectation": "block",
+      "policy_expectation": "block",
+      "note": "High crawl volume with no referral return — common training-block target."
+    },
+    {
+      "token": "Bytespider",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "ByteDance AI training crawl",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "policy_expectation": "block",
+      "note": "Among the fastest-growing AI crawlers; may ignore robots.txt — pair blocks with CDN/WAF if needed."
+    },
+    {
+      "token": "Amazonbot",
+      "roles": [
+        "ai_training"
+      ],
+      "role_label": "ai_training",
+      "controls": "Amazon Alexa and product/AI feature crawl",
+      "paired_token": null,
+      "rule_source": "inherits_user_agent_star",
+      "indexing_crawl": "na",
+      "training_crawl": "allowed",
+      "max_discovery_expectation": "block",
+      "policy_expectation": "block",
       "note": null
     },
     {
@@ -264,6 +321,7 @@
       "indexing_crawl": "na",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "May not obey robots.txt like automated crawlers; document only."
     },
     {
@@ -278,6 +336,7 @@
       "indexing_crawl": "na",
       "training_crawl": "na",
       "max_discovery_expectation": "allow",
+      "policy_expectation": "allow",
       "note": "May not obey robots.txt like automated crawlers; document only."
     }
   ],
@@ -303,6 +362,88 @@
       "tier": "fail",
       "rubric": "R7",
       "message": "No Sitemap: directive found"
+    },
+    {
+      "id": "AF_POLICY_GAP",
+      "tier": "warn",
+      "rubric": "policy",
+      "message": "6 block_training_allow_answers violation(s) — see policy_compliance."
     }
-  ]
+  ],
+  "policy_compliance": {
+    "policy": "block_training_allow_answers",
+    "compliant": false,
+    "violations": [
+      {
+        "id": "MD_Google_Extended",
+        "token": "Google-Extended",
+        "expected": "block",
+        "actual": "allowed",
+        "path": "/",
+        "layer": "effective",
+        "message": "Google-Extended should be blocked under block_training_allow_answers"
+      },
+      {
+        "id": "MD_CCBot",
+        "token": "CCBot",
+        "expected": "block",
+        "actual": "allowed",
+        "path": "/",
+        "layer": "effective",
+        "message": "CCBot should be blocked under block_training_allow_answers"
+      },
+      {
+        "id": "MD_ClaudeBot",
+        "token": "ClaudeBot",
+        "expected": "block",
+        "actual": "allowed",
+        "path": "/",
+        "layer": "effective",
+        "message": "ClaudeBot should be blocked under block_training_allow_answers"
+      },
+      {
+        "id": "MD_PATH__admin_",
+        "token": "*",
+        "expected": "block",
+        "actual": "allowed",
+        "path": "/admin/",
+        "layer": "effective",
+        "message": "User-agent: * should restrict admin path /admin/ (or /wp-admin/)"
+      },
+      {
+        "id": "MD_SITEMAP_PRESENT",
+        "token": "Sitemap",
+        "expected": "declared",
+        "actual": "missing",
+        "path": "n/a",
+        "layer": "effective",
+        "message": "block_training_allow_answers requires at least one Sitemap: directive"
+      },
+      {
+        "id": "MD_SITEMAP_VALID",
+        "token": "Sitemap",
+        "expected": "valid absolute URL on site host",
+        "actual": "invalid",
+        "path": "n/a",
+        "layer": "effective",
+        "message": "No Sitemap: directive found"
+      }
+    ]
+  },
+  "index_control_validation": {
+    "status": "pass",
+    "paths": [
+      {
+        "path": "/cart/",
+        "status": "not_probed",
+        "crawl_allowed": true
+      },
+      {
+        "path": "/checkout/",
+        "status": "not_probed",
+        "crawl_allowed": true
+      }
+    ],
+    "warnings": []
+  }
 }

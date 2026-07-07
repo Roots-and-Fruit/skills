@@ -10,9 +10,11 @@
 
 ---
 
-## Sample layperson chat output (v1.5.0+)
+## Sample layperson chat output (v1.7.0+)
 
 **User sees only this in chat.** Bot tables, handoff JSON, and robots.txt copy go to `reports/{domain}-{date}-detail.md`. Each gap links to the [public reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/).
+
+**Policy:** `max_discovery` + Cloudflare-managed. Training blocks at the edge are noted as **optional** — not a max-discovery requirement.
 
 ```markdown
 # robots.txt check — example.com
@@ -23,26 +25,27 @@
 
 • No sitemap URL in robots.txt (search engines use this to find your pages) — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#sitemap-declaration)
 • Admin area (/wp-admin/) not blocked from crawlers — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#path-hygiene)
-• Cart pages not blocked from crawlers — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#path-hygiene)
 
 ## What's working
 
 - robots.txt file is online and readable
-- Cloudflare is managing AI training blocks for you (GPTBot, Google-Extended, etc.)
-- Major AI training crawlers are blocked
-- Search and AI answer crawlers are not accidentally blocked
+- Cloudflare prepends managed AI bot rules at the edge (you still edit a small origin file)
+- Cloudflare's edge layer also blocks some AI training crawlers (optional — not required for max discovery)
+- Google, Bing, and AI answer bots can reach your public pages
 
 ## What still needs attention
 
 - No sitemap URL in robots.txt (search engines use this to find your pages) — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#sitemap-declaration)
 - Admin area (/wp-admin/) not blocked from crawlers — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#path-hygiene)
-- Cart pages not blocked from crawlers — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#path-hygiene)
+
+_Optional:_
+- AI “answer” permission (ai-input signal) not declared at origin — optional for GEO alignment — [Why this matters](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/#content-signal-alignment)
 
 ## What to do next
 
-1. **You (Cloudflare dashboard)** — Leave “Instruct AI bot traffic with robots.txt” turned ON…
-2. **You (website host / origin robots.txt)** — Paste the origin robots.txt block from the detail report…
-3. **You (verification)** — Open https://example.com/robots.txt in a private browser window…
+1. **Cloudflare + your host** — See **How to update (Cloudflare-managed)** below — dashboard toggle stays ON; edit the small origin file via SFTP/host (not the public merged file).
+2. **You (website host / origin robots.txt)** — Paste the **origin-only** block below into your server file (SFTP/host).
+3. **You (verification)** — Open https://example.com/robots.txt in a private window — you should see Cloudflare’s block, then your origin rules after END Cloudflare Managed Content.
 
 ---
 
@@ -52,6 +55,8 @@ Technical details (bot-by-bot tables, rubric scores, handoff JSON, robots.txt co
 **Industry context (mid-2026):** [What AI crawlers want](https://technologychecker.io/blog/ai-crawler-statistics) · [Who gets blocked in robots.txt](https://technologychecker.io/blog/robots-txt-ai-crawlers-blocking-report)
 **Need a hand?** [Growth marketing consulting](https://rootsandfruit.com) — Roots & Fruit helps WordPress and SaaS teams with crawl policy, GEO, and content operations.
 ```
+
+For `block_training_allow_answers`, “AI training crawlers are blocked” may appear under **What's working** when the file or Cloudflare edge satisfies that policy.
 
 See `LAYPERSON-OUTPUT.md` for the full contract.
 
@@ -85,7 +90,9 @@ See `LAYPERSON-OUTPUT.md` for the full contract.
 
 | File | Purpose |
 |------|---------|
-| `example-good.robots.txt.fixture.txt` | Golden robots.txt for S-layer |
+| `example-good.robots.txt.fixture.txt` | Golden max_discovery robots.txt (discovery-only) |
+| `example-good-block-training.robots.txt.fixture.txt` | Golden block_training_allow_answers robots.txt |
+| `example-good-restrictive.robots.txt.fixture.txt` | Golden restrictive robots.txt (search only) |
 | `example-audit.handoff.fixture.json` | Audit handoff G-layer |
 | `example-recommend.handoff.fixture.json` | Recommend mode handoff |
 | `example-generate.handoff.fixture.json` | Generate mode with `draft_robots_txt` |
@@ -98,7 +105,7 @@ See `examples/SCORECARD-example-saas.md` for regression IDs (S, P, G layers).
 |------|---------|
 | `example-bad-max-discovery.robots.txt.fixture.txt` | Reversed Google/OpenAI pairing, no sitemap |
 | `example-audit-only.handoff.fixture.json` | `audit_only`, no key_pages, SM7 warn on sitemap 500 |
-| `example-max-discovery-recommend.handoff.fixture.json` | WP open file + `max_discovery` + `recommend` — canonical `crawler_matrix` shape |
+| `example-max-discovery-recommend.handoff.fixture.json` | WP open + `max_discovery` + `audit` when compliant — canonical `crawler_matrix` shape; SM7 warn drives hygiene note |
 | `example-cloudflare-managed-origin-append.robots.txt.fixture.txt` | CF managed prepend + origin append (fictional `example.com`) |
 | `example-cloudflare-managed-origin-append.handoff.fixture.json` | CF `recommend` handoff with `layer_assessment`, `origin_append_template`, `content_signals` |
 

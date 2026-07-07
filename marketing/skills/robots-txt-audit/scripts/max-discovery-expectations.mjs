@@ -1,8 +1,11 @@
 /**
- * SSOT expected outcomes for max_discovery regression (P-layer).
+ * SSOT expected outcomes for discovery preset regression (P-layer).
  * Update when assessMaxDiscovery() rules change.
  */
-import { MAX_DISCOVERY_REQUIRED_TOKENS } from "./crawler-registry.mjs";
+import {
+  DISCOVERY_PRESET_ALLOW_TOKENS,
+  TRAINING_BLOCK_REQUIRED_TOKENS
+} from "./crawler-registry.mjs";
 
 export const FIXTURE_EXPECTATIONS = {
   "example-good.robots.txt.fixture.txt": {
@@ -17,6 +20,28 @@ export const FIXTURE_EXPECTATIONS = {
       "MD_GOOGLE_PAIRING",
       "MD_OPENAI_PAIRING",
       "MD_ANTHROPIC_PAIRING",
+      "MD_SITEMAP_PRESENT",
+      "MD_PATH__cart_",
+      "MD_PATH__checkout_"
+    ],
+    sitemapStatusWith200: "pass",
+    discoveryTokensAllowed: [
+      "Googlebot",
+      "bingbot",
+      "OAI-SearchBot",
+      "Claude-SearchBot",
+      "PerplexityBot"
+    ]
+  },
+  "example-good-block-training.robots.txt.fixture.txt": {
+    policy: "block_training_allow_answers",
+    compliant: true,
+    requiredViolationIds: [],
+    forbiddenViolationIds: [
+      "MD_GPTBot",
+      "MD_Google_Extended",
+      "MD_CCBot",
+      "MD_ClaudeBot",
       "MD_SITEMAP_PRESENT"
     ],
     sitemapStatusWith200: "pass",
@@ -32,30 +57,25 @@ export const FIXTURE_EXPECTATIONS = {
   "example-bad-max-discovery.robots.txt.fixture.txt": {
     compliant: false,
     requiredViolationIds: [
-      "MD_GPTBot",
-      "MD_Google_Extended",
-      "MD_CCBot",
-      "MD_ClaudeBot",
       "MD_Googlebot",
       "MD_OAI_SearchBot",
       "MD_OPENAI_PAIRING",
       "MD_SITEMAP_PRESENT"
     ],
-    forbiddenViolationIds: [],
+    forbiddenViolationIds: ["MD_GPTBot"],
     sitemapPresent: false
   },
   "example-wp-open.robots.txt.fixture.txt": {
-    compliant: false,
-    requiredViolationIds: [
+    compliant: true,
+    requiredViolationIds: [],
+    forbiddenViolationIds: [
+      "MD_PATH__admin_",
+      "MD_PATH__cart_",
+      "MD_PATH__checkout_",
       "MD_GPTBot",
       "MD_Google_Extended",
       "MD_CCBot",
       "MD_ClaudeBot",
-      "MD_PATH__cart_",
-      "MD_PATH__checkout_"
-    ],
-    forbiddenViolationIds: [
-      "MD_PATH__admin_",
       "MD_GOOGLE_PAIRING",
       "MD_OPENAI_PAIRING",
       "MD_ANTHROPIC_PAIRING"
@@ -65,9 +85,29 @@ export const FIXTURE_EXPECTATIONS = {
     ],
     sitemapStatusWith200: "pass",
     sitemapStatusWith500: "warn",
-    policyCompliantDespiteSitemap500: false,
+    policyCompliantDespiteSitemap500: true,
     trainingTokensAllowed: ["GPTBot", "Google-Extended", "CCBot"],
     ruleSource: { GPTBot: "inherits_user_agent_star" }
+  },
+  "example-good-restrictive.robots.txt.fixture.txt": {
+    policy: "restrictive",
+    compliant: true,
+    requiredViolationIds: [],
+    forbiddenViolationIds: [
+      "MD_RESTRICT_OAI_SearchBot",
+      "MD_RESTRICT_Claude_SearchBot",
+      "MD_RESTRICT_PerplexityBot",
+      "MD_GPTBot",
+      "MD_Google_Extended",
+      "MD_CCBot",
+      "MD_ClaudeBot",
+      "MD_GOOGLE_PAIRING",
+      "MD_SITEMAP_PRESENT"
+    ],
+    sitemapStatusWith200: "pass",
+    searchTokensAllowed: ["Googlebot", "bingbot"],
+    answerTokensBlocked: ["OAI-SearchBot", "Claude-SearchBot", "PerplexityBot"],
+    trainingTokensBlocked: ["GPTBot", "Google-Extended", "CCBot", "ClaudeBot"]
   }
 };
 
@@ -96,9 +136,9 @@ export function allRequiredTokensCovered(violations, expectedAccess) {
   const blocked = violations
     .filter((v) => v.expected === "block" && v.actual === "allowed")
     .map((v) => v.token);
-  return MAX_DISCOVERY_REQUIRED_TOKENS.filter(
+  return TRAINING_BLOCK_REQUIRED_TOKENS.filter(
     (token) => expectedAccess[token] === "block"
   ).every((token) => blocked.includes(token));
 }
 
-export const REQUIRED_TRAINING_BLOCKS = ["GPTBot", "Google-Extended", "CCBot", "ClaudeBot"];
+export const REQUIRED_TRAINING_BLOCKS = TRAINING_BLOCK_REQUIRED_TOKENS;

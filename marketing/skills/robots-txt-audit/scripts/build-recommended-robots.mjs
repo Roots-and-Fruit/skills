@@ -4,7 +4,7 @@
 import { buildCloudflareOriginAppend } from "./content-signals-presets.mjs";
 import { normalizeDomain } from "./assess-policy.mjs";
 
-const TEMPLATE_DISALLOWS = new Set(["/wp-admin/", "/cart/", "/checkout/"]);
+const TEMPLATE_DISALLOWS = new Set(["/wp-admin/", "/admin/"]);
 
 /**
  * Succinct Cloudflare-managed update guidance (SSOT for chat output).
@@ -111,14 +111,50 @@ export function injectPreservedDisallows(template, extras) {
 
 /**
  * @param {string} domain
- * @param {{ sitemap_url?: string, preserved_disallows?: string[], crawl_policy?: string }} [options]
+ * @param {{ sitemap_url?: string, preserved_disallows?: string[] }} [options]
  */
-export function buildStandaloneMaxDiscoveryDraft(domain, options = {}) {
+export function buildStandaloneDiscoveryDraft(domain, options = {}) {
   const bare = normalizeDomain(domain);
   const sitemapUrl = options.sitemap_url ?? `https://${bare}/sitemap.xml`;
   const extras = options.preserved_disallows ?? [];
   const lines = [
-    "# Recommended robots.txt — max_discovery",
+    "# Recommended robots.txt — max_discovery (search + AI answer discovery)",
+    "",
+    "User-agent: OAI-SearchBot",
+    "Allow: /",
+    "",
+    "User-agent: Claude-SearchBot",
+    "Allow: /",
+    "",
+    "User-agent: PerplexityBot",
+    "Allow: /",
+    "",
+    "User-agent: Googlebot",
+    "Allow: /",
+    "",
+    "User-agent: bingbot",
+    "Allow: /",
+    "",
+    "User-agent: *",
+    "Disallow: /wp-admin/"
+  ];
+  for (const rulePath of extras) {
+    lines.push(`Disallow: ${rulePath}`);
+  }
+  lines.push("Allow: /", "", `Sitemap: ${sitemapUrl}`);
+  return lines.join("\n");
+}
+
+/**
+ * @param {string} domain
+ * @param {{ sitemap_url?: string, preserved_disallows?: string[] }} [options]
+ */
+export function buildStandaloneBlockTrainingDraft(domain, options = {}) {
+  const bare = normalizeDomain(domain);
+  const sitemapUrl = options.sitemap_url ?? `https://${bare}/sitemap.xml`;
+  const extras = options.preserved_disallows ?? [];
+  const lines = [
+    "# Recommended robots.txt — block_training_allow_answers",
     "",
     "User-agent: GPTBot",
     "Disallow: /",
@@ -148,15 +184,21 @@ export function buildStandaloneMaxDiscoveryDraft(domain, options = {}) {
     "Allow: /",
     "",
     "User-agent: *",
-    "Disallow: /wp-admin/",
-    "Disallow: /cart/",
-    "Disallow: /checkout/"
+    "Disallow: /wp-admin/"
   ];
   for (const rulePath of extras) {
     lines.push(`Disallow: ${rulePath}`);
   }
   lines.push("Allow: /", "", `Sitemap: ${sitemapUrl}`);
   return lines.join("\n");
+}
+
+/** @deprecated Use buildStandaloneDiscoveryDraft or buildStandaloneBlockTrainingDraft */
+export function buildStandaloneMaxDiscoveryDraft(domain, options = {}) {
+  if (options.crawl_policy === "block_training_allow_answers") {
+    return buildStandaloneBlockTrainingDraft(domain, options);
+  }
+  return buildStandaloneDiscoveryDraft(domain, options);
 }
 
 /**
@@ -181,16 +223,22 @@ export function buildChangesList(assessment, domain, preservedDisallows = []) {
   if (pathIds.has("MD_PATH__admin_")) {
     pathBlocks.push("/wp-admin/");
   }
-  if (pathIds.has("MD_PATH__cart_")) {
-    pathBlocks.push("/cart/");
-  }
-  if (pathIds.has("MD_PATH__checkout_")) {
-    pathBlocks.push("/checkout/");
-  }
   if (pathBlocks.length === 1) {
-    changes.push(`Block ${pathBlocks[0]}`);
+    changes.push(`Block ${pathBlocks[0]} in robots.txt`);
   } else if (pathBlocks.length > 1) {
-    changes.push(`Block ${pathBlocks.slice(0, -1).join(", ")} and ${pathBlocks.at(-1)}`);
+    changes.push(`Block ${pathBlocks.slice(0, -1).join(", ")} and ${pathBlocks.at(-1)} in robots.txt`);
+  }
+
+  for (const warning of assessment.index_control_validation?.warnings ?? []) {
+    if (warning.id.startsWith("MD_INDEX_") && !warning.id.includes("ROBOTS_CONFLICT")) {
+      changes.push(`Add noindex on ${warning.path ?? "cart/checkout"} (do not use robots.txt Disallow for deindexing)`);
+    }
+    if (warning.id.includes("ROBOTS_CONFLICT")) {
+      changes.push(`Remove robots.txt Disallow for ${warning.path} — noindex requires crawl access`);
+    }
+    if (warning.id.includes("ROBOTS_ONLY")) {
+      changes.push(`Add noindex on ${warning.path ?? "path"} instead of relying on robots.txt Disallow alone`);
+    }
   }
 
   for (const rulePath of preservedDisallows) {
@@ -248,10 +296,22 @@ export function buildRecommendedRobotsTxt(robotsContent, result, domain) {
     };
   }
 
-  if (assessment.crawl_policy === "max_discovery" || assessment.crawl_policy === "block_training_allow_answers") {
-    const draft = buildStandaloneMaxDiscoveryDraft(domain, {
-      preserved_disallows: preserved,
-      crawl_policy: assessment.crawl_policy
+  if (assessment.crawl_policy === "block_training_allow_answers") {
+    const draft = buildStandaloneBlockTrainingDraft(domain, {
+      preserved_disallows: preserved
+    });
+    return {
+      text: draft,
+      originOnly: draft,
+      pasteNote,
+      preserved,
+      changes: buildChangesList(assessment, domain, preserved)
+    };
+  }
+
+  if (assessment.crawl_policy === "max_discovery") {
+    const draft = buildStandaloneDiscoveryDraft(domain, {
+      preserved_disallows: preserved
     });
     return {
       text: draft,

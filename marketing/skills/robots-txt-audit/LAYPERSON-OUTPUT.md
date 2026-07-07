@@ -58,16 +58,18 @@ Detail report may include the **merged edge preview** for verification; do not p
 
 ## Layperson phrasing guide
 
-| Technical | Say instead |
-|-----------|-------------|
-| GPTBot / Google-Extended blocked | AI training crawlers are blocked |
-| ClaudeBot blocked | Anthropic training crawler is blocked |
-| OAI-SearchBot / Claude-SearchBot allowed | AI answer/search bots can read your pages for citations |
-| MD_SITEMAP_PRESENT | No sitemap URL in robots.txt |
-| origin layer | The part of robots.txt you edit on your server (below Cloudflare’s section) |
-| Content-Signal ai-input=yes | Declared permission for AI answer tools to use your content |
-| policy_compliance.compliant false | Doesn’t fully match your max discovery goal yet |
-| inherits_user_agent_star | Uses the general “all crawlers” rule |
+| Technical | Say instead | Policy / context |
+|-----------|-------------|------------------|
+| GPTBot / Google-Extended blocked | AI training crawlers are blocked | `block_training_allow_answers`, or Cloudflare edge when that policy is requested |
+| CF edge training blocks under max_discovery | Cloudflare's edge layer also blocks some AI training crawlers (optional — not required for max discovery) | `max_discovery` + `cloudflare_managed` only |
+| ClaudeBot blocked | Anthropic training crawler is blocked | `block_training_allow_answers` |
+| OAI-SearchBot / Claude-SearchBot allowed | AI answer/search bots can read your pages for citations | `max_discovery`, `block_training_allow_answers` |
+| MD_SITEMAP_PRESENT | No sitemap URL in robots.txt | All discovery presets |
+| MD_GPTBot / training violations | Do **not** list as required missing under `max_discovery` — optional only | `max_discovery` vs `block_training_allow_answers` |
+| origin layer | The part of robots.txt you edit on your server (below Cloudflare’s section) | `cloudflare_managed` |
+| Content-Signal ai-input=yes | Declared permission for AI answer tools to use your content | Optional GEO alignment (`OPT_AI_INPUT_SIGNAL`) |
+| policy_compliance.compliant false | Doesn’t fully match your requested policy yet | Use `policyLabel(crawl_policy)` in copy |
+| inherits_user_agent_star | Uses the general “all crawlers” rule | Informational under `audit_only` / `max_discovery` |
 
 ## Generate mode
 

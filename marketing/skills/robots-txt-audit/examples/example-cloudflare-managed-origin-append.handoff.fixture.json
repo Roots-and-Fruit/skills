@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.4.1",
+  "skill_version": "1.7.0",
   "mode": "recommend",
   "inputs": {
     "domain": "example.com",
@@ -60,25 +60,7 @@
             "actual": "allowed",
             "path": "/admin/",
             "layer": "origin",
-            "message": "Origin User-agent: * should restrict low-value path /admin/ (or /wp-admin/)"
-          },
-          {
-            "id": "MD_PATH__cart_",
-            "token": "*",
-            "expected": "block",
-            "actual": "allowed",
-            "path": "/cart/",
-            "layer": "origin",
-            "message": "Origin User-agent: * should restrict low-value path /cart/"
-          },
-          {
-            "id": "MD_PATH__checkout_",
-            "token": "*",
-            "expected": "block",
-            "actual": "allowed",
-            "path": "/checkout/",
-            "layer": "origin",
-            "message": "Origin User-agent: * should restrict low-value path /checkout/"
+            "message": "User-agent: * should restrict admin path /admin/ (or /wp-admin/)"
           },
           {
             "id": "MD_SITEMAP_PRESENT",
@@ -111,13 +93,12 @@
     ],
     "origin_file": [
       "Add Disallow for /admin/ (or /wp-admin/ equivalent) on origin User-agent: * group",
-      "Add Disallow for /cart/ on origin User-agent: * group",
-      "Add Disallow for /checkout/ on origin User-agent: * group",
       "Add Sitemap: https://{domain}/sitemap.xml (or canonical sitemap URL) below the Cloudflare END marker in origin robots.txt",
       "Use origin_append_template in handoff (Search + AI input Content-Signal preset) — append below END marker; merge with any existing origin rules"
     ],
     "enforcement_optional": [
-      "Optional: enable AI Crawl Control if bots ignore robots.txt (preference vs enforcement)"
+      "robots.txt is a polite request — roughly 1 in 12 AI crawl requests get a hard 403 at the CDN/server (Cloudflare Radar, H1 2026). Use WAF or bot management when blocks must stick.",
+      "Optional: enable Cloudflare AI Crawl Control (or equivalent) if aggressive bots (e.g. Bytespider) ignore robots.txt or spike server load."
     ]
   },
   "parsed": {
@@ -474,25 +455,7 @@
         "actual": "allowed",
         "path": "/admin/",
         "layer": "origin",
-        "message": "Origin User-agent: * should restrict low-value path /admin/ (or /wp-admin/)"
-      },
-      {
-        "id": "MD_PATH__cart_",
-        "token": "*",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/cart/",
-        "layer": "origin",
-        "message": "Origin User-agent: * should restrict low-value path /cart/"
-      },
-      {
-        "id": "MD_PATH__checkout_",
-        "token": "*",
-        "expected": "block",
-        "actual": "allowed",
-        "path": "/checkout/",
-        "layer": "origin",
-        "message": "Origin User-agent: * should restrict low-value path /checkout/"
+        "message": "User-agent: * should restrict admin path /admin/ (or /wp-admin/)"
       },
       {
         "id": "MD_SITEMAP_PRESENT",
@@ -526,13 +489,19 @@
       "id": "AF_POLICY_GAP",
       "tier": "warn",
       "rubric": "policy",
-      "message": "5 max_discovery violation(s) — see policy_compliance (check layer field: origin vs cloudflare)."
+      "message": "3 max_discovery violation(s) — see policy_compliance (check layer field: origin vs cloudflare)."
     },
     {
       "id": "AF_CF_MANAGED",
       "tier": "info",
       "rubric": "R10",
       "message": "Cloudflare managed robots.txt detected — training blocks may be CF-maintained; origin edits go below the END marker only."
+    },
+    {
+      "id": "AF_R11_AI_INPUT_GAP",
+      "tier": "info",
+      "rubric": "R11",
+      "message": "CF managed layer omits ai-input signal — use origin_append_template (Search + AI input preset) for ContentSignals.org-aligned declaration; Allow/Disallow remains primary crawl control."
     }
   ],
   "draft_robots_txt": null,
@@ -541,7 +510,7 @@
     "Cloudflare managed bot list may change over time — re-audit periodically",
     "robots.txt expresses preference; use AI Crawl Control for enforcement if needed"
   ],
-  "origin_append_template": "# Origin robots.txt — append below \"# END Cloudflare Managed Content\"\n# Content-Signal preset: search_and_ai_input (Search + AI input (ContentSignals.org))\n# Allow/Disallow below are the operational crawl layer; signals are declarative preferences.\n# Verify merged edge file after publish. For enforcement use AI Crawl Control.\n\nUser-agent: Googlebot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: bingbot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: OAI-SearchBot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: PerplexityBot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: *\nDisallow: /wp-admin/\nDisallow: /cart/\nDisallow: /checkout/\nAllow: /\n\nSitemap: https://example.com/sitemap.xml",
+  "origin_append_template": "# Origin robots.txt — append below \"# END Cloudflare Managed Content\"\n# Content-Signal preset: search_and_ai_input (Search + AI input (ContentSignals.org))\n# Allow/Disallow below are the operational crawl layer; signals are declarative preferences.\n# Verify merged edge file after publish. For enforcement use AI Crawl Control.\n\nUser-agent: Googlebot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: bingbot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: OAI-SearchBot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: Claude-SearchBot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: PerplexityBot\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /\n\nUser-agent: *\nDisallow: /wp-admin/\nAllow: /\n\nSitemap: https://example.com/sitemap.xml",
   "content_signals": {
     "preset": "search_and_ai_input",
     "preset_label": "Search + AI input (ContentSignals.org)",
