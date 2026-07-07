@@ -5,7 +5,7 @@ description: >
   Use when analyzing fan-out coverage, sub-query coverage, topic coverage gaps,
   or keyword-only SERP fan-out without a domain. Simulates AI query fan-out and
   optional domain coverage checks for a keyword.
-version: 2.3.0
+version: 2.8.0
 ---
 
 # Fan-Out Coverage Analysis
@@ -14,9 +14,19 @@ version: 2.3.0
 
 Approximate query fan-out from SERP + Labs data. With a **user-supplied domain**, measure which sub-queries the site covers. **Without a domain**, run **keyword-only SERP fan-out** (no coverage checks).
 
-## Domain policy (non-negotiable)
+## Not this skill
 
-- **Never** infer a domain from examples, workspace context, project config, or prior runs.
+- **Keyword research / volume discovery** — use your SEO tool's keyword explorer; this skill maps fan-out from a seed you already chose.
+- **Full technical SEO audit** — use site-wide crawlers or technical audit workflows.
+- **Content differentiation scoring** — use [Information Gain Evaluator](../information-gain-evaluator/) on a specific URL after fan-out identifies gaps.
+- **Site page inventory** — use [Site Content Catalog](../site-content-catalog/) before hub/spoke mapping at scale.
+
+## Input policy (non-negotiable)
+
+- **Primary keyword** — from the user only.
+- **Domain** — from the user only. **Never** infer from examples, workspace context, project config, or prior runs.
+- **`content_context`** (optional) — site or brand name for report framing (e.g. “content angle for example.com”). **Does not** enable domain mode or coverage checks.
+- **Mode resolution:** If the user supplies a **domain** (or says “on example.com”), run **Mode A** (`domain_coverage`). If they name a site only for context, ask once whether to measure coverage on that domain or run keyword-only.
 - If the user did not supply a domain, **ask once**:
 
   > *Which domain should I check coverage for? (Optional: anchor URL. Or reply **keyword only** for SERP fan-out without a site.)*
@@ -26,17 +36,42 @@ Approximate query fan-out from SERP + Labs data. With a **user-supplied domain**
 ## Quick start
 
 1. Confirm **primary keyword** (required).
-2. Resolve **domain** per Domain policy.
+2. Resolve **domain** per Input policy.
 3. **Steps 0 → 0.5 → 1 → 1b** (both modes).
 4. **Mode A** (domain given): Steps 2–6.
 5. **Mode B** (no domain): Steps 5b–6b → stop.
 6. Offer to save report or pass handoff JSON downstream.
 
+6. **Layperson chat summary** per `LAYPERSON-OUTPUT.md` — **paste only** the stdout block from `run-fanout.mjs --write-reports` (or `build-layperson-summary.mjs`). Do not add tier tables, verifier lines, MCP logs, or handoff JSON in chat.
+
 **Reference:** `REFERENCE.md` — API params, relevance gates, handoff schema v1.1  
 **Requirements:** `REQUIREMENTS.md`  
 **Examples:** `EXAMPLES.md` — mixed-SERP case study + regression scorecard  
-**Regression:** `examples/SCORECARD-wordpress-plugin-marketing.md` · `node scripts/verify-scorecard.mjs`  
-**Script:** `scripts/normalize-fanout.mjs`
+**Layperson contract:** `LAYPERSON-OUTPUT.md`  
+**Ship bar:**
+
+```bash
+node scripts/verify-all.mjs
+```
+
+**Shell note (Windows):** Use `;` between commands in PowerShell — `&&` is not valid. Example:
+
+```powershell
+Set-Location marketing/skills/fan-out-coverage-analysis; node scripts/verify-all.mjs
+```
+
+**Pipeline (after MCP):**
+
+```bash
+node scripts/ingest-mcp-export.mjs --serp raw-serp.json --labs related-raw.json:related -o merged.json --intent-out intents.json
+node scripts/run-fanout.mjs --seed "..." --merged merged.json --ranked-file ranked.json --partial partial.json --output handoff.json --write-reports
+```
+
+**Merge MCP exports:** `scripts/ingest-mcp-export.mjs` (raw MCP JSON) or `scripts/merge-expansion-input.mjs` (pre-flattened)  
+**Coverage merge:** `scripts/apply-coverage.mjs` (or `--ranked-file` on `run-fanout.mjs`)  
+**Normalizer (required):** `scripts/normalize-fanout.mjs`  
+**Priority mapper (required after intent):** `scripts/apply-priority.mjs`  
+**Layperson summary:** `scripts/build-layperson-summary.mjs`
 
 ## Shared steps (both modes)
 
@@ -46,9 +81,11 @@ Approximate query fan-out from SERP + Labs data. With a **user-supplied domain**
 
 Record `ai_overview_present` from **live SERP** only. If Labs index disagrees, note in `limitations[]`.
 
+**Complete when:** `serp_context.people_also_ask` is deduped, `related_searches` captured, `ai_overview_present` + `ai_overview_source: live_serp` set, and top organic domains recorded.
+
 ### Step 0.5 — SERP lane classification
 
-Classify top 8–10 organic results into lanes (see `REFERENCE.md`). Set `serp_context.intent_lanes_detected` and `intent_split` (`single` | `mixed`).
+Classify top 8–10 organic results into lanes (see `REFERENCE.md`). Set `serp_context.intent_lanes_detected`, `intent_split` (`single` | `mixed`), and `lane_counts`.
 
 If **mixed**, ask once which lane to prioritize — unless the user already stated intent in the prompt:
 
@@ -56,19 +93,33 @@ If **mixed**, ask once which lane to prioritize — unless the user already stat
 
 Store chosen lane in `inputs.intent_lane` when provided.
 
+**Complete when:** every classified organic result has a lane label and `intent_split` is set; user prompted once if mixed and lane not yet chosen.
+
 ### Step 1 — Expand sub-queries
 
-Parallel Labs: `related_keywords`, `suggestions`, `keyword_ideas`. Merge with Step 0 seeds.
+Parallel Labs: `related_keywords`, `keyword_suggestions`. Add `keyword_ideas` **only when** `serp_context.serp_result_count` ≥ 200 (or unknown). On thin SERPs, skip ideas — note credit savings in `limitations[]`.
 
-Apply the **unified relevance gate** to **all** sources (not just ideas). Tag `relevance_tier` using **lane-aware rules** (`REFERENCE.md` v2.3): seed-SERP terms with facet drift are **not** `serp_native` unless `intent_lane` matches `inputs.intent_lane`. Optional: `normalize-fanout.mjs` with `--lane`.
+Merge Step 0 seeds into `{ "items": [ … ] }` via **`ingest-mcp-export.mjs`** (raw MCP JSON) or **`merge-expansion-input.mjs`** (pre-flattened):
 
-Target **25–30** accepted sub-queries after dedupe. Keep facet-drift terms **tagged**, not silently dropped, unless zero seed-token overlap.
+```bash
+node scripts/ingest-mcp-export.mjs --serp raw-serp.json --labs related-raw.json:related --labs suggestions-raw.json:suggestions -o merged.json --intent-out intents.json
+```
 
-### Step 1b — Search intent
+**Thin-seed fallback:** When Labs returns empty for the exact seed **and** `seed_volume` &lt; 50 (or missing), retry expansion on a **parent cluster** phrase (e.g. `go to market strategy` for `wordpress product go to market`). Re-merge with SERP seeds; re-run `normalize-fanout.mjs`; note parent cluster in `limitations[]`. Do not import unrelated vertical terms without seed token overlap.
 
-`dataforseo_labs_search_intent` on merged list. Attach `main_intent` to each sub-query.
+Run **`normalize-fanout.mjs`** with `--seed` and `--lane` (when `inputs.intent_lane` is set). Use script output as the authoritative tier list — do not re-tier in prose. **Do not** drop normalizer rejections (e.g. zero-overlap brands on `serp_related`) post-hoc.
 
-Assign **priority** using tier rules in `REFERENCE.md` — when `intent_split` is `mixed`, **SERP-native beats raw Labs volume**.
+Target **25–30** accepted sub-queries after dedupe on live runs. Keep facet-drift terms **tagged**, not silently dropped, unless zero seed-token overlap. Regression fixtures may use smaller subsets (see `limitations[]`).
+
+**Complete when:** merged input passed through `normalize-fanout.mjs`; each accepted row has `relevance_tier`, `dimension`, and `on_seed_serp`.
+
+### Step 1b — Search intent + priority
+
+`dataforseo_labs_search_intent` on the normalized keyword list. Attach `search_intent` to each row.
+
+Run **`apply-priority.mjs`** with `--intent-split` and `--lane` from handoff inputs. Merge into `sub_queries[]` and build `priority_sub_queries[]` from script output — do not assign `high|medium|low` manually.
+
+**Complete when:** every `sub_queries[]` row has `search_intent` and `priority`; `priority_sub_queries[]` (Mode B) matches `apply-priority.mjs` output.
 
 ## Mode A — Domain coverage (Steps 2–6)
 
@@ -78,26 +129,48 @@ Run only when a **domain** was supplied.
 
 `dataforseo_labs_google_ranked_keywords`: bulk `ilike` + spot-check gaps. Not `relevant_pages`.
 
+**Filter field:** use `keyword_data.keyword` (not `keyword`) in MCP filters — see `REFERENCE.md`.
+
+Save MCP export, then run coverage merge:
+
+```bash
+node scripts/apply-coverage.mjs handoff-partial.json ranked.json -o handoff.json
+# or in one pipeline pass:
+node scripts/run-fanout.mjs ... --ranked-file ranked.json --partial handoff-partial.json --output handoff.json
+```
+
+**Complete when:** each high-priority sub-query has `status`, `covering_url`, and `rank_group` from ranked_keywords or spot-check (via script — do not hand-patch).
+
 ### Step 3 — Map status
 
 Hub / spoke / broken spoke / gap. WebFetch for broken-spoke check when anchor URL set.
 
+**Complete when:** every sub-query with a ranking has hub/spoke/broken_spoke status; `hub_spoke_map[]` populated for hubs.
+
 ### Step 4 — Metrics
 
-Coverage rate and hub/spoke/broken/gap counts. If seed volume &lt; 50/mo or thin SERP, add **low confidence** note before interpreting %.
+Coverage rate and hub/spoke/broken/gap counts. Set `coverage_summary.labs_coverage_rate_pct` (and mirror `coverage_rate_pct` for compatibility). When live SERP shows `inputs.anchor_url` ranking for the seed but Labs has no row, set `serp_context.anchor_serp_rank` and `coverage_summary.coverage_story` in plain language — do not let **0%** stand alone without context. Use `status: hub_serp_only` when live rank exists but Labs index lags.
+
+**Complete when:** `coverage_summary` counts match `sub_queries[]`; Labs rate is mathematically consistent; live anchor rank recorded when known.
 
 ### Step 5 — Report (domain)
 
-Required sections:
+**Chat:** layperson summary only (`LAYPERSON-OUTPUT.md`). **Detail file:** technical sections below.
+
+Required sections in **detail report**:
 
 - **SERP intent note** (mandatory when `intent_split` is `mixed`)
 - **Coverage map** — include `Tier` column (`relevance_tier`)
 - **Priority gaps** — prefer `serp_native` / `core` in chosen lane; list `facet_drift` separately if mixed
-- **Limitations** — data confidence, AIO source, lane choice
+- **Limitations** — data confidence, AIO source, lane choice, Labs vs live SERP
+
+**Complete when:** detail report written; chat matches layperson contract; gap table matches handoff `gaps[]`.
 
 ### Step 6 — Handoff (domain)
 
-Emit `mode: "domain_coverage"`, `handoff_version: "1.1"` per `REFERENCE.md`.
+Emit `mode: "domain_coverage"`, `handoff_version: "1.1"`, `skill`, `skill_version` per `REFERENCE.md`.
+
+**Complete when:** `node scripts/verify-handoff.mjs <path>` exits 0.
 
 ## Mode B — Keyword-only (Steps 5b–6b)
 
@@ -105,7 +178,9 @@ Skip Steps 2–4.
 
 ### Step 5b — Report (keyword-only)
 
-Required sections:
+**Chat:** layperson summary only. **Detail file:** technical fan-out map.
+
+Required in detail report:
 
 - **SERP intent note** (mandatory when `intent_split` is `mixed`)
 - **Fan-out map** — group or sort by `relevance_tier`: SERP-native → core → facet_drift → adjacent
@@ -115,9 +190,13 @@ Required sections:
 
 Optional: `dataforseo_labs_google_serp_competitors` for market context.
 
+**Complete when:** fan-out map tier groups match handoff `sub_queries[]`; `priority_sub_queries[]` is tier-ordered.
+
 ### Step 6b — Handoff (keyword-only)
 
-Emit `mode: "keyword_only"`, `handoff_version: "1.1"`. `domain` is `null`.
+Emit `mode: "keyword_only"`, `handoff_version: "1.1"`, `skill`, `skill_version`. `domain` is `null`.
+
+**Complete when:** `node scripts/verify-handoff.mjs <path>` exits 0.
 
 ## Optional enrichments (domain mode)
 
@@ -133,19 +212,22 @@ Emit `mode: "keyword_only"`, `handoff_version: "1.1"`. `domain` is `null`.
 
 - [ ] Step 0 live SERP executed; PAA deduped
 - [ ] Step 0.5 lane classification recorded
-- [ ] Unified relevance gate applied to all expansion sources
+- [ ] `normalize-fanout.mjs` run on merged expansion input
+- [ ] `apply-priority.mjs` run after search intent (no manual priority labels)
 - [ ] Each sub-query has `relevance_tier`; facet drift tagged where applicable
 - [ ] Priority follows tier rules (SERP-native &gt; volume when mixed)
-- [ ] `handoff_version: "1.1"` with extended `serp_context`
+- [ ] Handoff includes `handoff_version: "1.1"`, `skill`, `skill_version`, extended `serp_context`
 - [ ] Low-confidence flag when seed volume &lt; 50/mo or thin SERP
-- [ ] ≥20 accepted sub-queries; limitations stated
+- [ ] ≥20 accepted sub-queries on live runs (25–30 target); limitations stated if fewer
+- [ ] `node scripts/verify-handoff.mjs` passes on emitted handoff
+- [ ] Chat = layperson summary only; detail report linked (`LAYPERSON-OUTPUT.md`)
 
-**Mode A additionally:** coverage via `ranked_keywords`; priority gaps respect chosen lane.
+**Mode A additionally:** coverage via `ranked_keywords`; priority gaps respect chosen lane; `coverage_summary` math consistent.
 
-**Mode B additionally:** no ranked_keywords; `priority_sub_queries[]` populated.
+**Mode B additionally:** no ranked_keywords; `priority_sub_queries[]` populated and tier-ordered.
 
 ## Notes
 
 - Fan-out approximates AI decomposition; not a literal trace.
 - Credits: `REFERENCE.md`.
-- **Maintainers:** after tiering/priority changes, run `node scripts/verify-scorecard.mjs` (S1–S8 in `examples/SCORECARD-wordpress-plugin-marketing.md`).
+- **Maintainers:** after substantive changes, run `node scripts/verify-all.mjs` (S1–S12, G/R, LP1–LP10). Re-run live SERP on mixed-intent golden seeds quarterly.

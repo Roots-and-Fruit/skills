@@ -12,6 +12,7 @@
     { "keyword": "wordpress email marketing plugin", "search_volume": 210, "source": "suggestions" },
     { "keyword": "wordpress affiliate marketing plugin", "search_volume": 320, "source": "suggestions" },
     { "keyword": "mailpoet", "search_volume": 1000, "source": "related" },
+    { "keyword": "mailpoet", "search_volume": 1000, "source": "serp_related" },
     { "keyword": "is wordpress outdated in 2026", "search_volume": 0, "source": "serp_paa" }
   ]
 }

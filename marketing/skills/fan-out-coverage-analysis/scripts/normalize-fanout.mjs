@@ -28,6 +28,28 @@ const PLATFORM_META_PAA =
 
 const SERP_SOURCES = new Set(["serp_paa", "serp_related", "related_searches"]);
 
+/** Expand acronyms before token overlap (GTM ↔ go-to-market). */
+const ACRONYM_EXPANSIONS = [
+  [/\bgtms\b/gi, "go to market"],
+  [/\bgtm\b/gi, "go to market"]
+];
+
+function expandAcronyms(text) {
+  let out = text;
+  for (const [pattern, replacement] of ACRONYM_EXPANSIONS) {
+    out = out.replace(pattern, replacement);
+  }
+  return out;
+}
+
+export function salientTokens(text) {
+  return expandAcronyms(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length > 1 && !STOPWORDS.has(t));
+}
+
 function parseArgs(argv) {
   let seed = "";
   let file = null;
@@ -51,14 +73,6 @@ function parseArgs(argv) {
   return { seed, file, lane };
 }
 
-function salientTokens(text) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter((t) => t.length > 1 && !STOPWORDS.has(t));
-}
-
 function normalizeKeyword(keyword) {
   return keyword.trim().toLowerCase().replace(/\s+/g, " ");
 }
@@ -79,25 +93,49 @@ function tokenOverlapCount(keyword, seedTokens) {
   return seedTokens.filter((t) => kwSet.has(t)).length;
 }
 
-function passesRelevanceGate(keyword, seedTokens, serpSeeds, source) {
+/** REFERENCE unified gate — zero overlap always rejects (incl. serp_related brands). */
+export function passesRelevanceGate(keyword, seedTokens, source) {
   if (source === "serp_paa" && isPlatformMetaPaa(keyword)) {
     return false;
   }
-  const normalized = normalizeKeyword(keyword);
-  if (serpSeeds.has(normalized)) {
-    return true;
-  }
-  if (SERP_SOURCES.has(source)) {
-    return true;
-  }
+
   const overlap = tokenOverlapCount(keyword, seedTokens);
   if (overlap === 0) {
     return false;
   }
+
+  if (source === "serp_paa") {
+    if (seedTokens.length >= 3 && overlap < 2) {
+      return false;
+    }
+    return true;
+  }
+
+  if (SERP_SOURCES.has(source)) {
+    if (seedTokens.length <= 2) {
+      return overlap >= 1;
+    }
+    return overlap >= 2;
+  }
+
   if (seedTokens.length >= 3 && overlap < 2) {
     return false;
   }
   return true;
+}
+
+function buildSerpSeeds(items, seedTokens) {
+  const seeds = new Set();
+  for (const item of items) {
+    const source = item.source ?? "unknown";
+    if (!SERP_SOURCES.has(source)) {
+      continue;
+    }
+    if (passesRelevanceGate(item.keyword, seedTokens, source)) {
+      seeds.add(normalizeKeyword(item.keyword));
+    }
+  }
+  return seeds;
 }
 
 function classifyDimension(keyword, seedTokens) {
@@ -211,26 +249,9 @@ function readStdin() {
   });
 }
 
-async function main() {
-  const { seed, file, lane } = parseArgs(process.argv);
-  if (!seed) {
-    console.error(
-      "Usage: node normalize-fanout.mjs --seed \"primary keyword\" [--lane primary_topic] [--file input.json]"
-    );
-    process.exit(1);
-  }
-
-  const items = await readInput(file);
+export async function normalizeFanoutItems(items, seed, lane = null) {
   const seedTokens = salientTokens(seed);
-  const serpSeeds = new Set(
-    items
-      .filter(
-        (item) =>
-          SERP_SOURCES.has(item.source) && !(item.source === "serp_paa" && isPlatformMetaPaa(item.keyword))
-      )
-      .map((item) => normalizeKeyword(item.keyword))
-  );
-
+  const serpSeeds = buildSerpSeeds(items, seedTokens);
   const byKeyword = new Map();
 
   for (const item of items) {
@@ -239,7 +260,7 @@ async function main() {
       continue;
     }
     const source = item.source ?? "unknown";
-    if (!passesRelevanceGate(keyword, seedTokens, serpSeeds, source)) {
+    if (!passesRelevanceGate(keyword, seedTokens, source)) {
       continue;
     }
 
@@ -258,7 +279,7 @@ async function main() {
     }
   }
 
-  const normalized = [...byKeyword.values()]
+  return [...byKeyword.values()]
     .map((entry) => {
       const primarySource = entry.sources.find((s) => SERP_SOURCES.has(s)) ?? entry.sources[0];
       const dimension = classifyDimension(entry.keyword, seedTokens);
@@ -286,7 +307,19 @@ async function main() {
     })
     .sort((a, b) => b.priority_score - a.priority_score)
     .slice(0, 30);
+}
 
+async function main() {
+  const { seed, file, lane } = parseArgs(process.argv);
+  if (!seed) {
+    console.error(
+      "Usage: node normalize-fanout.mjs --seed \"primary keyword\" [--lane primary_topic] [--file input.json]"
+    );
+    process.exit(1);
+  }
+
+  const items = await readInput(file);
+  const normalized = await normalizeFanoutItems(items, seed, lane);
   process.stdout.write(`${JSON.stringify(normalized, null, 2)}\n`);
 }
 

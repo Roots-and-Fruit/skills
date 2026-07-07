@@ -1,0 +1,26 @@
+{
+  "tasks": [
+    {
+      "result": [
+        {
+          "items": [
+            {
+              "keyword_data": {
+                "keyword": "what is a go to market strategy",
+                "keyword_info": { "search_volume": 1900 },
+                "search_intent_info": { "main_intent": "informational" }
+              }
+            },
+            {
+              "keyword_data": {
+                "keyword": "how to market a wordpress plugin",
+                "keyword_info": { "search_volume": 0 },
+                "search_intent_info": { "main_intent": "informational" }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

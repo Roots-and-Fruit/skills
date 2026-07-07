@@ -28,6 +28,13 @@
       "tier": "C",
       "public": false,
       "run_verifiers": true
+    },
+    {
+      "id": "M5",
+      "path": "../../marketing/skills/fan-out-coverage-analysis",
+      "tier": "C",
+      "public": true,
+      "run_verifiers": true
     }
   ]
 }

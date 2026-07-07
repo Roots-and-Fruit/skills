@@ -1,0 +1,26 @@
+{
+  "tasks": [
+    {
+      "result": [
+        {
+          "items": [
+            {
+              "type": "people_also_ask",
+              "items": [
+                { "title": "What is a go-to-market plan for a new product?" },
+                { "title": "What are the 5 pillars of GTM?" }
+              ]
+            },
+            {
+              "type": "related_searches",
+              "items": [
+                { "title": "Wordpress product go to market strategy" },
+                { "title": "Go-to-market strategy example" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 {
   "handoff_version": "1.1",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.4.0",
   "mode": "domain_coverage",
   "generated_at": "2026-06-24T12:00:00.000Z",
   "inputs": {

@@ -76,18 +76,28 @@ node skills/analytics-and-searchconsole-performance-audit/scripts/verify-scoreca
 ### SEO Cannibalization Audit
 
 **Path:** [`skills/seo-cannibalization-audit/`](skills/seo-cannibalization-audit/)  
-**Version:** 1.0.0 — same-domain keyword overlap, intent comparison, resolution recommendations
+**Version:** 2.0.2 — same-domain overlap, playbook tension detection, handoff JSON v1.0 (`recovery_phase` for Hub & Spoke Phase 5). **Step 0:** live URLs only. **Step 4b:** `healthy_relationships[]` when zero conflicts + hub/spoke pair.
 
-Detect when multiple pages compete for the same keywords; output conflicts, hub/spoke checks, and retire/differentiate/301 guidance.
+Detect when multiple pages compete for the same keywords; classify hub+spoke vs harmful overlap; output conflicts with resolution, redirect targets, and architecture conflicts for playbook recovery.
 
 **Data required:** DataForSEO MCP — see [`skills/seo-cannibalization-audit/REQUIREMENTS.md`](skills/seo-cannibalization-audit/REQUIREMENTS.md).
+
+**Regression:**
+
+```bash
+node skills/seo-cannibalization-audit/scripts/verify-handoff.mjs
+node skills/seo-cannibalization-audit/scripts/verify-handoff.mjs skills/seo-cannibalization-audit/examples/blog-vs-pricing.handoff.fixture.json --gold blog-vs-pricing
+```
+
+See [`skills/seo-cannibalization-audit/examples/SCORECARD-blog-vs-pricing.md`](skills/seo-cannibalization-audit/examples/SCORECARD-blog-vs-pricing.md).
 
 **Example prompts:**
 
 - *"Check cannibalization on **example.com** for **https://example.com/pricing**"*
 - *"Which pages on **example.com** compete for **enterprise SSO**?"*
+- *"Blog post outranking pricing — accidental hub vs intended hub on **example.com**"*
 
-**Pairs with:** [Cornerstone Content Audit](playbooks/cornerstone-content-audit/) (Phase 4a).
+**Pairs with:** [Hub & Spoke Discovery & Recovery](playbooks/hub-spoke-discovery-recovery/) (Phase 4a) · [Cornerstone Content Audit](playbooks/cornerstone-content-audit/) (Phase 4a)
 
 ---
 
@@ -111,7 +121,7 @@ Detect when multiple pages compete for the same keywords; output conflicts, hub/
 ### Fan-Out Coverage Analysis
 
 **Path:** [`skills/fan-out-coverage-analysis/`](skills/fan-out-coverage-analysis/)  
-**Version:** 2.3.0 — lane-aware `serp_native` tiering; regression scorecard (`verify-scorecard.mjs`)
+**Version:** 2.8.0 — MCP ingest; coverage merge; layperson contract; GTM synonyms; thin-seed fallback; `run-fanout.mjs`
 
 Teach your agent to **map how a search query fans out** into related sub-questions (like Google AI Overviews do), and optionally **check which sub-queries a site already ranks for**.
 
@@ -137,6 +147,13 @@ Or in Cursor: **Customize → Rules → Add Rule → Remote Rule (Github)** → 
 - *"Fan-out analysis for **wordpress plugin marketing** — keyword only"*
 
 **Live sample run:** [`skills/fan-out-coverage-analysis/examples/wordpress-plugin-marketing-keyword-only-2026-06-24.md`](skills/fan-out-coverage-analysis/examples/wordpress-plugin-marketing-keyword-only-2026-06-24.md)
+
+**Regression:**
+
+```bash
+cd marketing/skills/fan-out-coverage-analysis
+node scripts/verify-all.mjs
+```
 
 ---
 

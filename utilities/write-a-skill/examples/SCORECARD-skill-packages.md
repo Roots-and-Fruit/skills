@@ -8,7 +8,7 @@
 node scripts/verify-skill-package.mjs --fixture examples/skill-packages.fixture.json
 ```
 
-**Ship gate:** all M1 + M2 + M4 package checks pass (M1/M4 include child verifiers).
+**Ship gate:** all M1 + M2 + M4 + M5 package checks pass (M1/M4/M5 include child verifiers).
 
 ---
 
@@ -42,6 +42,7 @@ Applied per package by `verify-skill-package.mjs`:
 | M1 | `marketing/skills/site-content-catalog` | C | P1–P14 + P12 (handoff + scorecard scripts) |
 | M2 | `utilities/write-a-skill` | B | P1–P3, P6–P7, P13–P14 (no Tier C artifacts on meta skill) |
 | M4 | `utilities/web-scrape-to-md` | C | P1–P3, P6–P8, P10–P12, P13–P14 (handoff + Q/E scorecard) |
+| M5 | `marketing/skills/fan-out-coverage-analysis` | C | P1–P14 + P12 (S + G/R handoff verifiers) |
 
 ---
 
@@ -54,3 +55,4 @@ Applied per package by `verify-skill-package.mjs`:
 | 0.4.0 | Progressive-disclosure trigger guidance; P13–P14 description checks |
 | 0.4.1 | Trigger-first descriptions; strip internal monorepo refs from public copy; P13 requires leading `Use when/for/before` |
 | 0.4.2 | M4 fixture: `utilities/web-scrape-to-md` Tier C |
+| 0.4.3 | M5 fixture: `marketing/skills/fan-out-coverage-analysis` Tier C |

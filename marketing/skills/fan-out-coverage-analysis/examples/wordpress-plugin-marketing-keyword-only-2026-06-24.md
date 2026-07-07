@@ -117,4 +117,5 @@ Labs expansion drifts heavily into intent #2 (email/affiliate/newsletter plugins
 
 ## Handoff
 
-Structured JSON: `wordpress-plugin-marketing-keyword-only.handoff.fixture.json`
+Structured JSON (v2.1 bad run — historical): `wordpress-plugin-marketing-v2.1-bad.handoff.sample.json`  
+Golden regression fixture (v2.4): `wordpress-plugin-marketing-v2.3.handoff.fixture.json`

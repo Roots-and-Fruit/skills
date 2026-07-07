@@ -60,8 +60,35 @@ const checks = [
   {
     id: "S8",
     pass: () => get("wordpress email marketing plugin")?.relevance_tier === "facet_drift"
+  },
+  {
+    id: "S9",
+    pass: () => !get("mailpoet") && !rows.some((r) => r.keyword.toLowerCase() === "mailpoet")
   }
 ];
+
+const gtmFixture = path.join(root, "examples", "merged-gtm-seed.fixture.json");
+const gtmSeed = "wordpress product go to market";
+const gtmRaw = execFileSync(
+  process.execPath,
+  [normalizeScript, "--seed", gtmSeed, "--lane", "primary_topic", "--file", gtmFixture],
+  { encoding: "utf8" }
+);
+const gtmRows = JSON.parse(gtmRaw);
+const gtmByKeyword = new Map(gtmRows.map((row) => [row.keyword.toLowerCase(), row]));
+
+checks.push({
+  id: "S10",
+  pass: () => gtmByKeyword.has("what are the 5 pillars of gtm")
+});
+checks.push({
+  id: "S11",
+  pass: () => gtmByKeyword.has("what are common gtm mistakes")
+});
+checks.push({
+  id: "S12",
+  pass: () => !gtmByKeyword.has("mailpoet")
+});
 
 let failed = 0;
 for (const check of checks) {
@@ -77,4 +104,4 @@ if (failed > 0) {
   process.exit(1);
 }
 
-console.log("\nAll S1–S8 scorecard checks passed.");
+console.log("\nAll S1–S12 scorecard checks passed.");

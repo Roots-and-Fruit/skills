@@ -1,0 +1,209 @@
+{
+  "handoff_version": "1.1",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.8.0",
+  "mode": "keyword_only",
+  "generated_at": "2026-07-07T12:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "wordpress plugin marketing",
+    "domain": null,
+    "anchor_url": null,
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "primary_topic"
+  },
+  "serp_context": {
+    "ai_overview_present": false,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": [
+      "How to promote a WordPress plugin?",
+      "Can I earn money by making a WordPress plugin?"
+    ],
+    "related_searches": [
+      "wordpress plugin marketing strategy",
+      "free wordpress plugin marketing",
+      "best wordpress plugin marketing",
+      "wordpress email marketing plugin free",
+      "best newsletter plugin for wordpress free"
+    ],
+    "top_organic_domains": [
+      "reddit.com",
+      "freemius.com",
+      "wordpress.org",
+      "cminds.com",
+      "wpbeginner.com",
+      "blog.hubspot.com"
+    ],
+    "intent_lanes_detected": ["primary_topic", "tool_discovery"],
+    "intent_split": "mixed",
+    "lane_counts": { "primary_topic": 4, "tool_discovery": 4, "community": 1 },
+    "seed_volume": 30,
+    "serp_result_count": 123
+  },
+  "sub_queries": [
+    {
+      "keyword": "how to promote a wordpress plugin",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"]
+    },
+    {
+      "keyword": "can i earn money by making a wordpress plugin",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"]
+    },
+    {
+      "keyword": "wordpress plugin marketing strategy",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "medium",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "free wordpress plugin marketing",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "medium",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "best wordpress plugin marketing",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "medium",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "wordpress affiliate marketing plugin",
+      "search_volume": 320,
+      "dimension": "facet_drift",
+      "search_intent": "commercial",
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": false,
+      "priority": "medium",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "wordpress email marketing plugin",
+      "search_volume": 210,
+      "dimension": "facet_drift",
+      "search_intent": "commercial",
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": false,
+      "priority": "medium",
+      "source": ["suggestions"]
+    },
+    {
+      "keyword": "best newsletter plugin for wordpress free",
+      "search_volume": 20,
+      "dimension": "facet_drift",
+      "search_intent": "commercial",
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "low",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "wordpress email list plugin free",
+      "search_volume": 20,
+      "dimension": "facet_drift",
+      "search_intent": "commercial",
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "low",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "wordpress email marketing plugin free",
+      "search_volume": 10,
+      "dimension": "facet_drift",
+      "search_intent": "commercial",
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "low",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "best free email plugin for wordpress",
+      "search_volume": 10,
+      "dimension": "facet_drift",
+      "search_intent": "commercial",
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "low",
+      "source": ["serp_related"]
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "how to promote a wordpress plugin",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP; matches intent_lane primary_topic"
+    },
+    {
+      "keyword": "can i earn money by making a wordpress plugin",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP; GTM monetization overlap"
+    },
+    {
+      "keyword": "wordpress plugin marketing strategy",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "medium",
+      "rationale": "Related search on seed SERP; serp_native without primary_topic lane"
+    },
+    {
+      "keyword": "free wordpress plugin marketing",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "medium",
+      "rationale": "Related search on seed SERP; serp_native without primary_topic lane"
+    },
+    {
+      "keyword": "best wordpress plugin marketing",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "medium",
+      "rationale": "Related search on seed SERP; serp_native without primary_topic lane"
+    }
+  ],
+  "limitations": [
+    "Keyword-only mode — no domain coverage checked",
+    "Golden regression fixture — normalize-fanout.mjs + apply-priority.mjs on merged-keywords.fixture.json",
+    "Low seed volume (~30/mo) and thin SERP (~123 results) — prioritize SERP-native over Labs volume",
+    "intent_split mixed; priorities filtered to intent_lane primary_topic"
+  ]
+}

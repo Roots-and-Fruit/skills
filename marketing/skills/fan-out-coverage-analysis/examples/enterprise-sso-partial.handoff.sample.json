@@ -1,0 +1,71 @@
+{
+  "handoff_version": "1.1",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.8.0",
+  "mode": "domain_coverage",
+  "generated_at": "2026-07-07T12:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "enterprise SSO",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/sso/",
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "primary_topic"
+  },
+  "serp_context": {
+    "ai_overview_present": true,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": ["What is SSO?", "SSO vs OAuth?"],
+    "related_searches": ["sso providers", "sso implementation"],
+    "top_organic_domains": ["vendor-a.com", "vendor-b.com"],
+    "intent_lanes_detected": ["primary_topic"],
+    "intent_split": "single",
+    "lane_counts": { "primary_topic": 8 },
+    "seed_volume": 1200,
+    "serp_result_count": 45000000,
+    "anchor_serp_rank": 4
+  },
+  "sub_queries": [
+    {
+      "keyword": "sso vs oauth",
+      "search_volume": 320,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"]
+    },
+    {
+      "keyword": "sso providers",
+      "search_volume": 1200,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "core",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": false,
+      "priority": "high",
+      "source": ["suggestions"]
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "sso vs oauth",
+      "search_volume": 320,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP; matches chosen lane primary_topic"
+    },
+    {
+      "keyword": "sso providers",
+      "search_volume": 1200,
+      "relevance_tier": "core",
+      "priority": "high",
+      "rationale": "Core variant in primary_topic lane"
+    }
+  ],
+  "limitations": [
+    "Partial handoff for apply-coverage regression — status fields applied by script"
+  ]
+}

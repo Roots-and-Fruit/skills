@@ -5,7 +5,7 @@ description: >
   public release, reviewing SKILL.md quality, or choosing handoff JSON and verify
   scripts. Right-sized packaging with predictable process; regression gates only
   when needed.
-version: 0.4.1
+version: 0.4.3
 ---
 
 # Write a Skill

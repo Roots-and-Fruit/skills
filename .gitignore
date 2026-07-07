@@ -17,6 +17,7 @@ marketing/skills/information-gain-evaluator/examples/live-run-*.handoff.json
 # Generated audit reports (local runtime output)
 marketing/skills/robots-txt-audit/reports/
 marketing/skills/robots-txt-audit/reports/*-latest-snapshot.json
+marketing/skills/fan-out-coverage-analysis/reports/
 
 # Maintainer-only step handoffs and sync notes (local HITL; not published)
 marketing/skills/robots-txt-audit/_maintainer/

@@ -50,16 +50,18 @@ Sample: `examples/keyword-only.handoff.sample.json` (handoff v1.1)
 | 2.1.0 | Volume-led priorities; mailpoet medium | Historical — `wordpress-plugin-marketing-keyword-only-2026-06-24.md` |
 | 2.2.0 | Email `serp_related` in `serp_native` tier | Fixed in 2.3.0 |
 | 2.3.0 | Lane-aware facet drift on seed SERP | **Verify:** `node scripts/verify-scorecard.mjs` |
+| 2.4.0 | G/R handoff regression + required normalizer | **Verify:** both ship-bar commands |
 
-### v2.3 expected (lane `primary_topic`)
+### v2.4 expected (lane `primary_topic`)
 
 - **SERP-native:** promote (PAA), strategy / free / best (related), GTM questions — **not** email/newsletter related searches
 - **Facet drift:** `wordpress email marketing plugin free`, newsletter variants — on SERP related but tier `facet_drift`
 - **Adjacent:** mailpoet, platform-meta PAA — excluded or low tier
+- **Handoff:** passes `node scripts/verify-handoff.mjs` on `wordpress-plugin-marketing-v2.3.handoff.fixture.json`
 
-Historical handoff (v2.2 illustration): `wordpress-plugin-marketing-v2.2.handoff.sample.json`
+Historical handoffs: `wordpress-plugin-marketing-v2.2.handoff.sample.json` (v2.2) · `wordpress-plugin-marketing-v2.1-bad.handoff.sample.json` (v2.1 bad run)
 
-## What a good v2.3 run produces
+## What a good v2.4 run produces
 
 | Mode | Human report | Handoff |
 |------|--------------|---------|
@@ -77,7 +79,29 @@ node scripts/normalize-fanout.mjs \
 
 Merged input should include SERP items with `source: "serp_paa"` and `source: "serp_related"`.
 
-Fixture + regression: `examples/merged-keywords.fixture.json` · `node scripts/verify-scorecard.mjs`
+Fixture + regression: `examples/merged-keywords.fixture.json` · `examples/wordpress-plugin-marketing-v2.3.handoff.fixture.json` · `examples/enterprise-sso-domain.handoff.fixture.json`
+
+```bash
+node scripts/verify-scorecard.mjs
+node scripts/verify-handoff.mjs
+```
+
+## Layperson chat output (v2.6+)
+
+Sample shape — full contract in `LAYPERSON-OUTPUT.md`:
+
+```markdown
+## Verdict
+**Visible on the main topic, gaps on follow-up questions** — 8 high-priority content opportunities.
+
+## What's working
+- You already rank on page one (~#4) for the main topic
+
+## What to write next
+1. Answer "what is go-to-market?" — people ask this directly on Google
+```
+
+Generate with `node scripts/build-layperson-summary.mjs handoff.json` or `run-fanout.mjs --write-reports`.
 
 ## Downstream handoff
 

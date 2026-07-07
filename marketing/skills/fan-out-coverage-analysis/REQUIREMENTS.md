@@ -27,7 +27,7 @@ Pick **one** path. You do not need all three.
 
 ### Ambiguous seeds
 
-Some keywords map to **multiple SERP intents** (e.g. “market your product” vs “best tools for X”). The skill (v2.2+) classifies SERP lanes in Step 0.5 and may ask which lane to prioritize. Plan for a one-line answer, or say **report both**.
+Some keywords map to **multiple SERP intents** (e.g. “market your product” vs “best tools for X”). The skill (v2.3+) classifies SERP lanes in Step 0.5 and may ask which lane to prioritize. Plan for a one-line answer, or say **report both**.
 
 **Optional (domain mode only):**
 
@@ -36,7 +36,7 @@ Some keywords map to **multiple SERP intents** (e.g. “market your product” v
 
 **Optional (all modes):**
 
-- **Node.js 18+** — only if you use `scripts/normalize-fanout.mjs`
+- **Node.js 18+** — required for `scripts/normalize-fanout.mjs` and regression verifiers
 
 ---
 
@@ -175,6 +175,44 @@ Do you have CSV / JSON exports?
 
 Install a data source first — skill is not useful yet.
 ```
+
+---
+
+## Regression
+
+From `fan-out-coverage-analysis/`:
+
+```bash
+node scripts/verify-all.mjs
+```
+
+Pipeline (live or CSV):
+
+```bash
+node scripts/run-fanout.mjs --seed "..." --lane primary_topic --intent-split mixed --merged merged.json --output handoff.json --write-reports
+```
+
+| Verifier | Layer | Fixture |
+|----------|-------|---------|
+| `verify-scorecard.mjs` | S1–S12 | `examples/merged-keywords.fixture.json` → `normalize-fanout.mjs` |
+| `verify-handoff.mjs` | G1–G18, R1–R11 | `examples/*.handoff.fixture.json` |
+| `verify-layperson-summary.mjs` | LP1–LP10 | golden handoff → `build-layperson-summary.mjs` |
+| `verify-merge-expansion.mjs` | M1–M5 | `serp-seed.fixture.json` + `merged-keywords.fixture.json` |
+| `verify-ingest-mcp.mjs` | I1–I6 | `mcp-*-raw.fixture.json` |
+| `verify-apply-coverage.mjs` | C1–C11 | `enterprise-sso-partial.handoff.sample.json` + `branded-hub-serp-partial.handoff.sample.json` |
+
+Golden handoffs: `wordpress-plugin-marketing-v2.3.handoff.fixture.json` · `enterprise-sso-domain.handoff.fixture.json`
+
+---
+
+## Downstream use
+
+| Consumer | Mode | Fields used |
+|----------|------|-------------|
+| [Hub-Spoke Discovery Recovery](../../playbooks/hub-spoke-discovery-recovery/) | domain | `gaps[]`, `hub_spoke_map`, `serp_context` |
+| [Cornerstone Content Audit](../../playbooks/cornerstone-content-audit/) | domain | `gaps[]`, `intent_lane` |
+| [Information Gain Evaluator](../information-gain-evaluator/) | domain | `intent_lane`, weak spoke URLs |
+| Content brief / writer workflows | keyword_only | `priority_sub_queries[]`, `serp_context` |
 
 ---
 

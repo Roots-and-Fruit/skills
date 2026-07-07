@@ -1,0 +1,89 @@
+{
+  "handoff_version": "1.1",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.8.0",
+  "mode": "domain_coverage",
+  "generated_at": "2026-07-07T12:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "enterprise SSO",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/sso/",
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "primary_topic"
+  },
+  "coverage_summary": {
+    "sub_query_count": 2,
+    "covered_count": 1,
+    "hub_count": 1,
+    "spoke_count": 0,
+    "broken_spoke_count": 0,
+    "gap_count": 1,
+    "coverage_rate_pct": 50,
+    "benchmark_note": ">70% suggested for strong AI visibility breadth"
+  },
+  "serp_context": {
+    "ai_overview_present": true,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": ["What is SSO?", "SSO vs OAuth?"],
+    "related_searches": ["sso providers", "sso implementation"],
+    "top_organic_domains": ["vendor-a.com", "vendor-b.com"],
+    "intent_lanes_detected": ["primary_topic"],
+    "intent_split": "single",
+    "lane_counts": { "primary_topic": 8 },
+    "seed_volume": 1200,
+    "serp_result_count": 45000000
+  },
+  "sub_queries": [
+    {
+      "keyword": "sso vs oauth",
+      "search_volume": 320,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null,
+      "priority": "high",
+      "source": ["serp_paa"]
+    },
+    {
+      "keyword": "sso providers",
+      "search_volume": 1200,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "core",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": false,
+      "status": "hub",
+      "covering_url": "https://example.com/sso/",
+      "rank_group": 4,
+      "priority": "high",
+      "source": ["suggestions"]
+    }
+  ],
+  "gaps": [
+    {
+      "keyword": "sso vs oauth",
+      "search_volume": 320,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "PAA on seed SERP"
+    }
+  ],
+  "hub_spoke_map": [
+    {
+      "url": "https://example.com/sso/",
+      "role": "hub",
+      "keywords_served": ["sso providers"],
+      "links_to_anchor": null
+    }
+  ],
+  "limitations": [
+    "Golden regression fixture — illustrative domain_coverage subset only"
+  ]
+}

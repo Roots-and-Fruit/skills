@@ -109,7 +109,16 @@ dataforseo_labs_google_keyword_suggestions
   ...
 ```
 
-**Ideas:** same locale; apply relevance gate below.
+**Ideas:** same locale; apply relevance gate below. **Skip** when `serp_result_count` &lt; 200 (thin SERP) — related + suggestions + SERP seeds are sufficient.
+
+### Thin-seed parent-cluster fallback
+
+When Labs `related_keywords` and `keyword_suggestions` return **empty** for the exact seed and `seed_volume` &lt; 50:
+
+1. Choose a parent phrase (e.g. `go to market strategy` for `wordpress product go to market`).
+2. Run Labs expansion on parent; merge with Step 0 SERP seeds.
+3. Re-run `normalize-fanout.mjs` — unified gate still rejects zero-overlap drift.
+4. Note parent cluster + low confidence in `limitations[]`.
 
 ### Unified relevance gate (all sources)
 
@@ -125,8 +134,10 @@ Apply to **ideas, suggestions, related items, and nested related strings** — n
 
 **Reject** (do not include in `sub_queries[]`):
 
-- **Zero** salient-token overlap with seed (e.g. unrelated brand returned by related-keywords API)
+- **Zero** salient-token overlap with seed — **including** `serp_related` / `related_searches` brands (e.g. `mailpoet` on a plugin-marketing SERP)
 - Single-token overlap only when seed has **≥3** salient tokens **and** term is not on seed SERP — unless user widened scope
+
+**Acronym expansion (overlap only):** `gtm` / `gtms` → `go to market` before token overlap (so PAA like “5 pillars of GTM” survives on GTM seeds).
 
 **Tag but keep** (facet drift):
 
@@ -190,9 +201,11 @@ Regression proof: `examples/SCORECARD-wordpress-plugin-marketing.md` · `node sc
 
 When `intent_split` is **`mixed`**, apply tiers **before** raw volume:
 
-1. **High:** `serp_native` in chosen lane, or `core` matching `inputs.intent_lane`
-2. **Medium:** `core` without lane match, or `facet_drift` with high commercial volume
-3. **Low:** `adjacent`, platform-meta, wrong-lane facet drift
+1. **High:** `serp_native` with `intent_lane` matching `inputs.intent_lane`, **or** PAA `question` on seed SERP, **or** `core` matching `inputs.intent_lane`
+2. **Medium:** `serp_native` on seed without lane match; `core` without lane match; `facet_drift` with volume ≥ 50
+3. **Low:** `adjacent`; `facet_drift` with volume &lt; 50; wrong-lane facet drift on related searches
+
+**Script:** `node scripts/apply-priority.mjs --intent-split mixed --lane <lane>`
 
 When `intent_split` is **`single`**, volume and commercial intent may boost priority as before:
 
@@ -240,6 +253,14 @@ dataforseo_labs_google_ranked_keywords
   ...
 ```
 
+**MCP filter cheat sheet:** ranked_keywords filters must use **`keyword_data.keyword`** — not `keyword`. Wrong field returns empty results with no error.
+
+Example spot-check filter:
+
+```json
+[["keyword_data.keyword", "=", "sso vs oauth"]]
+```
+
 ### Spot-check gaps
 
 Exact-match filter per high-priority gap in **chosen lane**.
@@ -250,6 +271,21 @@ Exact-match filter per high-priority gap in **chosen lane**.
 
 Set `handoff_version: "1.1"`. v1.0 fields remain valid; v1.1 adds optional fields below.
 
+### Top-level fields (all modes)
+
+```json
+{
+  "handoff_version": "1.1",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.8.0",
+  "mode": "keyword_only | domain_coverage",
+  "generated_at": "ISO 8601",
+  "limitations": ["string"]
+}
+```
+
+**Regression:** `node scripts/verify-handoff.mjs` — G1–G19 schema + R1–R6 rubric on all `*.handoff.fixture.json`; profile-specific R7–R11 on golden fixtures.
+
 ### Extended `inputs`
 
 ```json
@@ -259,7 +295,8 @@ Set `handoff_version: "1.1"`. v1.0 fields remain valid; v1.1 adds optional field
   "anchor_url": "string | null",
   "location_name": "string",
   "language_code": "string",
-  "intent_lane": "primary_topic | tool_discovery | community | directory | null"
+  "intent_lane": "primary_topic | tool_discovery | community | directory | null",
+  "content_context": "string | null"
 }
 ```
 
@@ -276,9 +313,32 @@ Set `handoff_version: "1.1"`. v1.0 fields remain valid; v1.1 adds optional field
   "intent_split": "single | mixed",
   "lane_counts": {},
   "seed_volume": 30,
-  "serp_result_count": 123
+  "serp_result_count": 123,
+  "anchor_serp_rank": 4
 }
 ```
+
+`anchor_serp_rank` — optional live organic position for `inputs.anchor_url` or domain on the **seed keyword** (from Step 0 SERP, not Labs).
+
+### Extended `coverage_summary` (domain mode)
+
+```json
+{
+  "sub_query_count": 30,
+  "covered_count": 0,
+  "gap_count": 30,
+  "labs_coverage_rate_pct": 0,
+  "coverage_rate_pct": 0,
+  "anchor_serp_rank": 4,
+  "coverage_story": "Anchor ranks #4 live for seed; Labs index not yet updated for fan-out terms."
+}
+```
+
+Use `labs_coverage_rate_pct` as SSOT; mirror `coverage_rate_pct` for backward compatibility. Always pair low Labs % with `coverage_story` when live SERP rank is known.
+
+### Sub-query `status` (domain mode)
+
+`hub` | `spoke` | `broken_spoke` | `gap` | **`hub_serp_only`** — live SERP confirms rank for seed or **branded** `serp_related` term (shares distinctive seed tokens) but Labs `ranked_keywords` has no row yet. Generic GTM-only related searches stay `gap`.
 
 ### Extended `sub_queries[]` fields
 
@@ -312,7 +372,9 @@ Mode A adds: `status`, `covering_url`, `rank_group`.
 
 ### Full mode payloads
 
-See `examples/domain-coverage.handoff.sample.json` and `examples/keyword-only.handoff.sample.json` for v1.1 samples.
+See `examples/domain-coverage.handoff.sample.json` and `examples/keyword-only.handoff.sample.json` for illustrative shapes.
+
+**Golden regression fixtures:** `wordpress-plugin-marketing-v2.3.handoff.fixture.json` (keyword_only) · `enterprise-sso-domain.handoff.fixture.json` (domain_coverage)
 
 ## normalize-fanout.mjs
 
@@ -326,6 +388,72 @@ node scripts/normalize-fanout.mjs --seed "your keyword" --lane primary_topic --f
 - Sorts by priority score (SERP-native first), not volume alone
 
 Input: `{ "items": [ { "keyword", "search_volume", "source" } ] }`
+
+## apply-priority.mjs
+
+```bash
+node scripts/normalize-fanout.mjs --seed "..." --lane primary_topic --file merged.json \
+  | node scripts/apply-priority.mjs --intent-split mixed --lane primary_topic
+```
+
+After `dataforseo_labs_search_intent`, pass intents via `--intent-file` or pre-merged `search_intent` on rows. Output: `{ sub_queries[], priority_sub_queries[] }` ready to wrap in handoff v1.1.
+
+**Shortlist rule:** `priority_sub_queries[]` includes **all** `priority: high` rows first, then `medium` up to cap (default 12).
+
+## merge-expansion-input.mjs
+
+```bash
+node scripts/merge-expansion-input.mjs --serp serp.json --labs related.json --labs suggestions.json -o merged.json
+```
+
+Folds SERP PAA/related + Labs `items[]` into normalize input `{ "items": [...] }`.
+
+## ingest-mcp-export.mjs
+
+```bash
+node scripts/ingest-mcp-export.mjs \
+  --serp raw-serp.json \
+  --labs related-raw.json:related \
+  --labs suggestions-raw.json:suggestions \
+  -o merged.json \
+  --intent-out intents.json
+```
+
+Flattens raw DataForSEO MCP task JSON (`tasks[0].result[0].items`) into merge input. Reads `keyword_data.keyword`, `keyword_info.search_volume`, and optional `search_intent_info.main_intent`. Prefer this over hand-flattening MCP responses.
+
+Pass `--intent-out` to produce the JSON map for `apply-priority.mjs --intent-file`.
+
+## apply-coverage.mjs
+
+```bash
+node scripts/apply-coverage.mjs handoff-partial.json ranked.json -o handoff.json
+```
+
+Maps `ranked_keywords` export to `status`, `covering_url`, `rank_group`, `coverage_summary`, `gaps[]`, and `hub_spoke_map[]`. Sets `hub_serp_only` for seed matches and branded `on_seed_serp` + `serp_related` rows when `anchor_serp_rank` is known. `gaps[]` shortlist: all **high** rows first, then medium (cap 12).
+
+## run-fanout.mjs
+
+```bash
+node scripts/run-fanout.mjs \
+  --seed "wordpress product go to market" \
+  --lane primary_topic \
+  --intent-split mixed \
+  --merged merged.json \
+  --ranked-file ranked.json \
+  --partial handoff-partial.json \
+  --output handoff.json \
+  --write-reports
+```
+
+Chains normalize → apply-priority → apply-coverage (when `--ranked-file` + domain mode) → handoff merge → optional `writeFanoutReports()`. See `LAYPERSON-OUTPUT.md`.
+
+## build-layperson-summary.mjs
+
+```bash
+node scripts/build-layperson-summary.mjs path/to/handoff.json [output_dir]
+```
+
+Prints chat summary to stdout; writes `reports/{slug}-{date}-detail.md`. Contract: `LAYPERSON-OUTPUT.md`.
 
 ## Credit guidance
 
