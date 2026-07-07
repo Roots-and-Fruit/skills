@@ -1,0 +1,19 @@
+{
+  "page_a": {
+    "url": "https://example.com/blog/saas-pricing-guide",
+    "intent": "how_to",
+    "rank": 8,
+    "monthly_volume": 880
+  },
+  "page_b": {
+    "url": "https://example.com/pricing",
+    "intent": "product",
+    "rank": 34,
+    "monthly_volume": 320
+  },
+  "intended_hubs": ["https://example.com/pricing"],
+  "triangulation": {
+    "https://example.com/blog/saas-pricing-guide": "accidental_hub",
+    "https://example.com/pricing": "intentional_hub"
+  }
+}

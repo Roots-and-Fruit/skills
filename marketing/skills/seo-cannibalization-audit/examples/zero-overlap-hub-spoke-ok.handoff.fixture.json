@@ -1,0 +1,47 @@
+{
+  "handoff_version": "1.0",
+  "skill": "seo-cannibalization-audit",
+  "skill_version": "2.0.2",
+  "generated_at": "2026-07-07T12:30:00.000Z",
+  "mode": "targeted",
+  "inputs": {
+    "domain": "example.com",
+    "subject_pages": [
+      "https://example.com/blog/core-web-vitals-guide",
+      "https://example.com/how-we-help/performance-and-caching"
+    ],
+    "primary_keywords": {
+      "https://example.com/how-we-help/performance-and-caching": "wordpress performance"
+    },
+    "intended_hubs": [
+      "https://example.com/how-we-help/performance-and-caching"
+    ],
+    "protected_pages": [],
+    "triangulation_context": [],
+    "scope": "targeted"
+  },
+  "summary": {
+    "conflicts_total": 0,
+    "active": 0,
+    "emerging": 0,
+    "pre_publish_risk": 0,
+    "healthy": 1,
+    "protected_review": 0,
+    "needs_human_approval": 0
+  },
+  "conflicts": [],
+  "healthy_relationships": [
+    {
+      "keyword": "wordpress core web vitals",
+      "hub_url": "https://example.com/how-we-help/performance-and-caching",
+      "spoke_url": "https://example.com/blog/core-web-vitals-guide",
+      "relationship": "hub_spoke_ok"
+    }
+  ],
+  "architecture_conflicts": [],
+  "limitations": [
+    "No shared ranking keywords between the two URLs (page intersection, US/en).",
+    "Intended hub has zero ranked keywords in DataForSEO Labs — no active SERP cannibalization.",
+    "Blog ranks alone for informational CWV terms; healthy_relationships uses top thematic blog keyword as cluster label."
+  ]
+}

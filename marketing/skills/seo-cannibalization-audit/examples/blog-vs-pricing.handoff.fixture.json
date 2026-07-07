@@ -1,0 +1,87 @@
+{
+  "handoff_version": "1.0",
+  "skill": "seo-cannibalization-audit",
+  "skill_version": "2.0.2",
+  "generated_at": "2026-07-07T12:00:00.000Z",
+  "mode": "playbook_hub_recovery",
+  "inputs": {
+    "domain": "example.com",
+    "subject_pages": [
+      "https://example.com/blog/saas-pricing-guide",
+      "https://example.com/pricing"
+    ],
+    "primary_keywords": {
+      "https://example.com/pricing": "example saas pricing",
+      "https://example.com/blog/saas-pricing-guide": "example saas pricing"
+    },
+    "intended_hubs": ["https://example.com/pricing"],
+    "protected_pages": [],
+    "triangulation_context": [
+      {
+        "url": "https://example.com/blog/saas-pricing-guide",
+        "triangulated_role": "accidental_hub",
+        "cluster": "pricing"
+      },
+      {
+        "url": "https://example.com/pricing",
+        "triangulated_role": "intentional_hub",
+        "cluster": "pricing"
+      }
+    ],
+    "scope": "targeted"
+  },
+  "summary": {
+    "conflicts_total": 1,
+    "active": 0,
+    "emerging": 1,
+    "pre_publish_risk": 0,
+    "healthy": 0,
+    "protected_review": 0,
+    "needs_human_approval": 1
+  },
+  "conflicts": [
+    {
+      "id": "conflict-pricing-blog",
+      "keyword": "example saas pricing",
+      "severity": "emerging",
+      "relationship": "hub_spoke_ok",
+      "playbook_tension": "blog_vs_landing",
+      "pages": [
+        {
+          "url": "https://example.com/blog/saas-pricing-guide",
+          "rank": 8,
+          "intent": "how_to",
+          "etv": 420,
+          "monthly_volume": 880,
+          "triangulated_role": "accidental_hub"
+        },
+        {
+          "url": "https://example.com/pricing",
+          "rank": 34,
+          "intent": "product",
+          "etv": 95,
+          "monthly_volume": 320,
+          "triangulated_role": "intentional_hub"
+        }
+      ],
+      "resolution": "needs_human_approval",
+      "redirect_target": "https://example.com/pricing",
+      "recovery_phase": "5f",
+      "recommended_action": "Accidental page ranks in top 20 — do not 301 without approval. Strengthen intended hub, demote accidental page to spoke, or plan migration per Phase 5f transition tree.",
+      "title_meta_overlap": true
+    }
+  ],
+  "healthy_relationships": [],
+  "architecture_conflicts": [
+    {
+      "type": "accidental_pillar_blocks_intended",
+      "cluster": "pricing",
+      "description": "Blog guide outranks intended pricing hub for the commercial head term.",
+      "urls": [
+        "https://example.com/blog/saas-pricing-guide",
+        "https://example.com/pricing"
+      ]
+    }
+  ],
+  "limitations": []
+}

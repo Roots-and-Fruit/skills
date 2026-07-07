@@ -1,0 +1,13 @@
+{
+  "page_a": {
+    "url": "https://example.com/blog/core-web-vitals-guide",
+    "intent": "how_to"
+  },
+  "page_b": {
+    "url": "https://example.com/how-we-help/performance-and-caching",
+    "intent": "use_case_lp"
+  },
+  "intended_hubs": [
+    "https://example.com/how-we-help/performance-and-caching"
+  ]
+}
