@@ -29,6 +29,14 @@ export const GAP_REGISTRY = {
     category: "optional",
     learn_more_anchor: "sitemap-declaration"
   },
+  MD_SITEMAP_ENDPOINT: {
+    label: "Declared sitemap URL returns an error (HTTP 4xx/5xx) — robots.txt is fine, but the sitemap file itself is broken",
+    short: "Sitemap endpoint reachable",
+    downside:
+      "Search engines may struggle to discover new or updated pages even when robots.txt declares a valid sitemap URL.",
+    category: "optional",
+    learn_more_anchor: "sitemap-declaration"
+  },
   SY_SYNTAX_UNKNOWN: {
     label: "Unrecognized robots.txt directive (GSC: syntax not understood)",
     short: "Valid directive spelling",
@@ -432,17 +440,34 @@ export function collectGapsFromAssessment(assessment) {
     seen.add("OPT_AI_INPUT_SIGNAL");
   }
 
-  return { required, optional };
+  const site_health = [];
+  const sm7Issues = (assessment.sitemap_validation?.issues ?? []).filter((i) => i.id === "SM7");
+  if (sm7Issues.length > 0 && !seen.has("MD_SITEMAP_ENDPOINT")) {
+    const gap = GAP_REGISTRY.MD_SITEMAP_ENDPOINT;
+    const statusMatch = sm7Issues[0].message.match(/HTTP (\d+)/);
+    const urlMatch = sm7Issues[0].message.match(/https?:\/\/\S+/);
+    const label =
+      statusMatch && urlMatch
+        ? `Declared sitemap at ${urlMatch[0]} returns HTTP ${statusMatch[1]} — robots.txt is fine, but the sitemap file itself is broken`
+        : gap.label;
+    site_health.push({ id: "MD_SITEMAP_ENDPOINT", ...gap, label });
+    seen.add("MD_SITEMAP_ENDPOINT");
+  }
+
+  return { required, optional, site_health };
 }
 
 /**
- * @param {{ required: { id: string }[], optional: { id: string }[] }} gaps
+ * @param {{ required: { id: string }[], optional: { id: string }[], site_health?: { id: string }[] }} gaps
  */
 export function gapsToSnapshot(gaps) {
+  const siteHealth = gaps.site_health ?? [];
   return {
     required_ids: gaps.required.map((g) => g.id),
     optional_ids: gaps.optional.map((g) => g.id),
+    site_health_ids: siteHealth.map((g) => g.id),
     required_labels: gaps.required.map((g) => g.label),
-    optional_labels: gaps.optional.map((g) => g.label)
+    optional_labels: gaps.optional.map((g) => g.label),
+    site_health_labels: siteHealth.map((g) => g.label)
   };
 }

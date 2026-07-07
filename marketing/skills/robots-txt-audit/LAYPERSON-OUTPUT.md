@@ -4,9 +4,9 @@
 
 ## What the user sees in chat (only this)
 
-1. **Verdict** — One line pass/fail, then a **bullet list of exactly what is missing** (plain language). No bot names unless unavoidable; prefer outcomes (“sitemap not listed”, “admin area not blocked”).
+1. **Verdict** — One line pass/fail. When **required** gaps are zero but optional or site-health items remain, use a positive headline (“Looks good — optional improvements below”) — not “Not quite there yet.” Then bullets for what is missing (plain language). No bot names unless unavoidable; prefer outcomes (“sitemap not listed”, “admin area not blocked”).
 2. **What's working** — Short bullets, non-technical.
-3. **What still needs attention** — Same as missing list if not compliant; “Nothing flagged” if compliant.
+3. **What still needs attention** — Required gaps first (“Nothing required” when none); then `_Optional:_` policy items; then `_Worth fixing (not a robots.txt rule issue):_` for sitemap endpoint failures (HTTP 4xx/5xx) and similar site-health items outside robots.txt syntax.
 4. **What to do next** — Numbered steps: who acts (Cloudflare dashboard vs your robots.txt file vs optional enforcement) and what to do.
 5. **Changes** — Short bullet list of what to add or keep (when fixes are needed).
 6. **Copy-paste block** — **Origin-only** file for SFTP/host when Cloudflare-managed; full file when not. Preceded by **How to update (Cloudflare-managed)** (3 bullets) when CF detected.

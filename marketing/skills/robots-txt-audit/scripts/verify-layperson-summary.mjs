@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Verify layperson summary builder (LP1–LP20b).
+ * Verify layperson summary builder (LP1–LP23).
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -140,6 +140,54 @@ ok(
   "LP20b",
   blockTrainingWorking.some((line) => line.includes("block training while allowing answers")),
   blockTrainingWorking.join(" | ")
+);
+
+const wpOpenFixture = readFileSync(
+  path.join(root, "examples/example-wp-open.robots.txt.fixture.txt"),
+  "utf8"
+);
+const auditOnlyAssess = assessRobotsTxtContent(wpOpenFixture, "audit_only", "example.com", {
+  sitemap_fetch_results: [{ url: "https://www.example.com/sitemap_index.xml", status: 200 }]
+}).assessment;
+const auditOnlySummary = buildLaypersonSummaryMarkdown({
+  domain: "example.com",
+  crawlPolicy: "audit_only",
+  mode: "audit",
+  assessment: auditOnlyAssess,
+  detailRelativePath: "reports/example.com-2026-07-07-detail.md"
+});
+ok(
+  "LP21",
+  !auditOnlySummary.includes("Not quite there yet") &&
+    auditOnlySummary.includes("Looks good — optional improvements below"),
+  "audit_only with only optional gaps should not use negative verdict headline"
+);
+
+const sitemap500Assess = assessRobotsTxtContent(wpOpenFixture, "audit_only", "example.com", {
+  sitemap_fetch_results: [{ url: "https://www.example.com/sitemap_index.xml", status: 500 }]
+}).assessment;
+const sitemap500Summary = buildLaypersonSummaryMarkdown({
+  domain: "example.com",
+  crawlPolicy: "audit_only",
+  mode: "audit",
+  assessment: sitemap500Assess,
+  detailRelativePath: "reports/example.com-2026-07-07-detail.md"
+});
+ok(
+  "LP22",
+  sitemap500Summary.includes("Worth fixing (not a robots.txt rule issue)") &&
+    sitemap500Summary.includes("HTTP 500") &&
+    sitemap500Summary.includes("sitemap_index.xml"),
+  "SM7 sitemap endpoint failure should surface in layperson attention"
+);
+
+const wpOpenWorking = buildWorkingList(auditOnlyAssess, "example.com");
+ok(
+  "LP23",
+  auditOnlyAssess.layer_assessment?.origin?.sitemap_present === true &&
+    wpOpenWorking.some((line) => line.includes("Sitemap is declared")) &&
+    wpOpenWorking.some((line) => line.includes("Admin paths are restricted")),
+  wpOpenWorking.join(" | ")
 );
 
 console.log(`\n${passed} passed, ${failed} failed`);

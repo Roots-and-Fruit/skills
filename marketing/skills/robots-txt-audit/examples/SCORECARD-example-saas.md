@@ -39,19 +39,26 @@ SSOT expectations: `scripts/max-discovery-expectations.mjs`
 
 | ID | Check | Fixture |
 |----|-------|---------|
-| SX1–SX12 | GSC-like lint: SM8, SY1 unknown Host, SY2 malformed, CF Content-Signal pass | `example-schemamap-typo`, `example-syntax-unknown-host`, `example-syntax-malformed-line`, CF fixture |
+| SX1–SX12 | GSC-like lint: SM8, SY1, SY2, CF Content-Signal, assessment R2b findings | syntax fixtures |
+| SY1–SY8 | SM8 Schemamap typo via full assess path | `example-schemamap-typo.robots.txt.fixture.txt` |
+
+## BH-layer (handoff builder)
+
+| ID | Check |
+|----|-------|
+| BH1–BH7 | `buildHandoff()` matches live assess; fixtures pass G1–G33 |
+
+## RA-CLI (run-audit.mjs)
+
+| ID | Check |
+|----|-------|
+| RA-CLI1–RA-CLI8 | Primary agent CLI path |
 
 ## PR-layer (restrictive)
 
 | ID | Check | Fixture |
 |----|-------|---------|
 | PR1–PR12 | Restrictive compliant; search allowed; answer + training blocked | `example-good-restrictive.robots.txt.fixture.txt` |
-
-## SY-layer (sitemap directive typos)
-
-| ID | Check | Fixture |
-|----|-------|---------|
-| SY1–SY8 | SM8 Schemamap typo detection; SM1 message enhancement | `example-schemamap-typo.robots.txt.fixture.txt` |
 
 ## G-layer (handoff)
 
@@ -73,7 +80,7 @@ SSOT expectations: `scripts/max-discovery-expectations.mjs`
 | G29 | `recommendations_split` when CF + `max_discovery` | CF handoff |
 | G30 | `companion_module` is `CLOUDFLARE-MANAGED.md` when CF managed | CF handoff |
 | G31 | `violations[].layer` when `policy_compliance.layered` | CF handoff |
-| G32 | No `layer_assessment` on `origin_only` handoffs | non-CF handoffs |
+| G32 | `layer_assessment.origin` on `origin_only` handoffs (no CF cloudflare/effective keys) | non-CF handoffs |
 | G33 | `origin_append_template` + `content_signals.preset` when CF + discovery preset | CF handoff |
 
 ## CF-layer
@@ -94,18 +101,7 @@ SSOT expectations: `scripts/max-discovery-expectations.mjs`
 
 ```bash
 cd marketing/skills/robots-txt-audit
-node scripts/verify-robots-structure.mjs
-node scripts/verify-max-discovery.mjs
-node scripts/verify-max-discovery-contract.mjs
-node scripts/verify-schemamap.mjs
-node scripts/verify-syntax.mjs
-node scripts/verify-restrictive.mjs
-node scripts/verify-handoff.mjs
-node scripts/verify-v1_3-changes.mjs
-node scripts/verify-cloudflare-layers.mjs
-node scripts/verify-layperson-summary.mjs
-node scripts/verify-reaudit.mjs
-node scripts/verify-reference-links.mjs
+node scripts/verify-all.mjs
 ```
 
 Maintain fixtures: `node scripts/refresh-handoff-fixtures.mjs`

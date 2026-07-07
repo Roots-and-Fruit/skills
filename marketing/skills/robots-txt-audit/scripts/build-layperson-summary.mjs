@@ -8,6 +8,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { assessRobotsTxtContent, normalizeDomain } from "./assess-policy.mjs";
+import { buildHandoff, buildDiscovery } from "./build-handoff.mjs";
 import { collectGapsFromAssessment, gapFromViolation } from "./audit-gap-registry.mjs";
 import { buildRecommendedRobotsTxt, recommendedRobotsPasteText } from "./build-recommended-robots.mjs";
 import {
@@ -230,6 +231,21 @@ export function buildActionPlan(assessment, domain) {
     });
   }
 
+  const sm7Issues = (assessment.sitemap_validation?.issues ?? []).filter((i) => i.id === "SM7");
+  if (sm7Issues.length > 0) {
+    const detail = sm7Issues
+      .map((issue) => {
+        const statusMatch = issue.message.match(/HTTP (\d+): (\S+)/);
+        return statusMatch ? `${statusMatch[2]} (HTTP ${statusMatch[1]})` : issue.message;
+      })
+      .join("; ");
+    steps.push({
+      step: ++n,
+      who: "You (hosting)",
+      action: `Fix the declared sitemap endpoint — ${detail}. The robots.txt declaration is valid; the sitemap file itself is failing. Check your SEO plugin, flush permalinks, or server error logs.`
+    });
+  }
+
   steps.push({
     step: ++n,
     who: "You (verification)",
@@ -372,24 +388,30 @@ export function buildLaypersonSummaryMarkdown({
 
   const working = buildWorkingList(assessment, domain);
   const requiredGaps = buildMissingGapItems(assessment, { includeOptional: false });
-  const optionalGaps = collectGapsFromAssessment(assessment).optional;
-  const missing = requiredGaps.map((g) => g.label);
+  const { optional: optionalGaps, site_health: siteHealthGaps } = collectGapsFromAssessment(assessment);
   const plan = buildActionPlan(assessment, domain);
-  const compliant = assessment.policy_compliance?.compliant === true && optionalGaps.length === 0;
+  const hasAttentionItems =
+    requiredGaps.length > 0 || optionalGaps.length > 0 || siteHealthGaps.length > 0;
   const verdictBullets = formatGapList(requiredGaps, { includeLearnMore: true, bulletPrefix: "• " });
   const verdictLine =
     requiredGaps.length === 0
-      ? optionalGaps.length
+      ? optionalGaps.length || siteHealthGaps.length
         ? "Required items are in place. Optional improvements remain (see below)."
         : "Nothing missing for your requested policy."
       : verdictBullets.join("\n");
+  const verdictHeadline =
+    requiredGaps.length > 0
+      ? "**Not quite there yet.** Missing:"
+      : hasAttentionItems
+        ? "**Looks good — optional improvements below.**"
+        : "**Good to go** for your requested policy.";
 
   const lines = [
     `# robots.txt check — ${domain}`,
     "",
     "## Verdict",
     "",
-    compliant && missing.length === 0 ? "**Good to go** for your requested policy." : "**Not quite there yet.** Missing:",
+    verdictHeadline,
     "",
     verdictLine,
     "",
@@ -407,6 +429,13 @@ export function buildLaypersonSummaryMarkdown({
           "",
           "_Optional:_",
           ...formatGapList(optionalGaps, { includeLearnMore: true }).map((line) => `- ${line}`)
+        ]
+      : []),
+    ...(siteHealthGaps.length
+      ? [
+          "",
+          "_Worth fixing (not a robots.txt rule issue):_",
+          ...formatGapList(siteHealthGaps, { includeLearnMore: true }).map((line) => `- ${line}`)
         ]
       : []),
     "",
@@ -464,7 +493,9 @@ export function buildDetailReportMarkdown({
   result,
   fetchedUrls,
   priorSnapshot,
-  reauditDelta
+  reauditDelta,
+  keyPages = [],
+  discoveryOverride
 }) {
   const { parsed, layers, deployment_model, assessment } = result;
   const now = new Date().toISOString().slice(0, 10);
@@ -586,35 +617,29 @@ export function buildDetailReportMarkdown({
     );
   }
 
-  const handoff = {
-    handoff_version: "1.0",
-    skill: "robots-txt-audit",
-    skill_version: "1.7.0",
-    mode,
-    inputs: { domain, crawl_policy: crawlPolicy, robots_deployment: "auto" },
-    discovery: {
-      found: true,
-      urls_checked: fetchedUrls ?? [],
-      resolved_url: fetchedUrls?.[0] ?? `https://${normalizeDomain(domain)}/robots.txt`
+  const handoff = buildHandoff({
+    assessment,
+    parsed,
+    inputs: {
+      domain,
+      key_pages: keyPages,
+      crawl_policy: crawlPolicy,
+      robots_deployment: "auto"
     },
-    deployment: assessment.deployment,
-    layer_assessment: assessment.layer_assessment,
-    recommendations_split: assessment.recommendations_split,
-    origin_append_template: assessment.origin_append_template,
-    content_signals: assessment.content_signals,
-    parsed: {
-      group_count: parsed.groupCount,
-      rule_count: parsed.ruleCount,
-      user_agent_tokens: parsed.userAgentTokens,
-      sitemap_directives: parsed.sitemaps
-    },
-    crawler_matrix: assessment.crawler_matrix,
-    sitemap_validation: assessment.sitemap_validation,
-    syntax_validation: assessment.syntax_validation,
-    policy_compliance: assessment.policy_compliance,
-    audit_findings: assessment.audit_findings,
-    deployment_note: "See layperson summary for action steps. Do not deploy from this file without review."
-  };
+    discovery:
+      discoveryOverride ??
+      buildDiscovery({
+        domain,
+        found: true,
+        resolved_url:
+          fetchedUrls?.find((u) => u.includes("robots.txt")) ??
+          `https://${normalizeDomain(domain)}/robots.txt`,
+        fetch_suspect: Boolean(result.assessment.audit_findings?.some((f) => f.id === "AF_R1_HTML"))
+      }),
+    modeOverride: mode === "recheck" ? undefined : mode,
+    deployment_note:
+      "See layperson summary for action steps. Do not deploy from this file without review."
+  });
 
   sections.push(
     "## Handoff JSON (v1.0)",
@@ -632,7 +657,7 @@ export function buildDetailReportMarkdown({
  * @param {string} domain
  * @param {string} robotsContent
  * @param {string} crawlPolicy
- * @param {{ outputDir?: string, mode?: string, fetchedUrls?: string[], recheck?: boolean, priorSnapshot?: object | null }} [options]
+ * @param {{ outputDir?: string, mode?: string, fetchedUrls?: string[], recheck?: boolean, priorSnapshot?: object | null, sitemap_fetch_results?: object[], index_control_results?: object[], key_pages?: string[], discovery?: object, precomputedResult?: object }} [options]
  */
 export function writeAuditReports(domain, robotsContent, crawlPolicy, options = {}) {
   const bare = normalizeDomain(domain);
@@ -647,7 +672,14 @@ export function writeAuditReports(domain, robotsContent, crawlPolicy, options = 
   const detailFileName = `${baseName}-detail.md`;
   const detailPath = path.join(outputDir, detailFileName);
 
-  const result = assessRobotsTxtContent(robotsContent, crawlPolicy, domain);
+  const assessOptions = {
+    sitemap_fetch_results: options.sitemap_fetch_results,
+    index_control_results: options.index_control_results,
+    discovery: options.discovery
+  };
+  const result =
+    options.precomputedResult ??
+    assessRobotsTxtContent(robotsContent, crawlPolicy, domain, assessOptions);
   const mode =
     options.mode ??
     (result.assessment.policy_compliance?.compliant === false ? "recommend" : "audit");
@@ -666,7 +698,9 @@ export function writeAuditReports(domain, robotsContent, crawlPolicy, options = 
     result,
     fetchedUrls: options.fetchedUrls,
     priorSnapshot,
-    reauditDelta
+    reauditDelta,
+    keyPages: options.key_pages ?? [],
+    discoveryOverride: options.discoveryBlock
   });
 
   writeFileSync(detailPath, detailMarkdown, "utf8");

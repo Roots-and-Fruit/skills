@@ -19,45 +19,6 @@ export const EXTERNAL_CONTEXT_URLS = {
     "https://technologychecker.io/blog/robots-txt-ai-crawlers-blocking-report"
 };
 
-/** @type {Record<string, string>} */
-export const GAP_LEARN_MORE_ANCHORS = {
-  MD_SITEMAP_PRESENT: "sitemap-declaration",
-  MD_SITEMAP_VALID: "sitemap-declaration",
-  MD_SITEMAP_TYPO: "sitemap-declaration",
-  SY_SYNTAX_UNKNOWN: "syntax-validation",
-  SY_MALFORMED_LINE: "syntax-validation",
-  SY_EMPTY_DIRECTIVE: "syntax-validation",
-  MD_PATH__admin_: "path-hygiene",
-  MD_PATH__cart_: "path-hygiene",
-  MD_PATH__checkout_: "path-hygiene",
-  MD_INDEX__cart_: "path-hygiene",
-  MD_INDEX__checkout_: "path-hygiene",
-  MD_INDEX_ROBOTS_CONFLICT__cart_: "path-hygiene",
-  MD_INDEX_ROBOTS_CONFLICT__checkout_: "path-hygiene",
-  MD_INDEX_ROBOTS_ONLY__cart_: "path-hygiene",
-  MD_INDEX_ROBOTS_ONLY__checkout_: "path-hygiene",
-  MD_RESTRICT_OAI_SearchBot: "training-vs-search-and-answer-bots",
-  MD_RESTRICT_Claude_SearchBot: "anthropic-search-pairing",
-  MD_RESTRICT_PerplexityBot: "training-vs-search-and-answer-bots",
-  MD_Google_Extended: "training-vs-search-and-answer-bots",
-  MD_CCBot: "training-vs-search-and-answer-bots",
-  MD_OAI_SearchBot: "training-vs-search-and-answer-bots",
-  MD_PerplexityBot: "training-vs-search-and-answer-bots",
-  MD_Googlebot: "training-vs-search-and-answer-bots",
-  MD_bingbot: "training-vs-search-and-answer-bots",
-  MD_GOOGLE_PAIRING: "training-vs-search-and-answer-bots",
-  MD_OPENAI_PAIRING: "training-vs-search-and-answer-bots",
-  MD_ClaudeBot: "anthropic-search-pairing",
-  MD_Claude_SearchBot: "anthropic-search-pairing",
-  MD_ANTHROPIC_PAIRING: "anthropic-search-pairing",
-  OPT_ANTHROPIC_AI: "anthropic-search-pairing",
-  OPT_Bytespider: "enforcement-beyond-robots-txt",
-  OPT_Meta_ExternalAgent: "training-vs-search-and-answer-bots",
-  OPT_Amazonbot: "training-vs-search-and-answer-bots",
-  OPT_Applebot_Extended: "training-vs-search-and-answer-bots",
-  OPT_AI_INPUT_SIGNAL: "content-signal-alignment"
-};
-
 /**
  * @param {string} [anchor]
  */
@@ -73,7 +34,7 @@ export function learnMoreUrl(anchor) {
  * @param {string} gapId
  */
 export function learnMoreUrlForGap(gapId) {
-  const anchor = GAP_REGISTRY[gapId]?.learn_more_anchor ?? GAP_LEARN_MORE_ANCHORS[gapId];
+  const anchor = GAP_REGISTRY[gapId]?.learn_more_anchor;
   return learnMoreUrl(anchor);
 }
 
@@ -114,7 +75,7 @@ export function buildLearnMoreFooter() {
 export function findGapsMissingLearnMoreAnchor() {
   const missing = [];
   for (const id of Object.keys(GAP_REGISTRY)) {
-    if (!GAP_REGISTRY[id].learn_more_anchor && !GAP_LEARN_MORE_ANCHORS[id]) {
+    if (!GAP_REGISTRY[id].learn_more_anchor) {
       missing.push(id);
     }
   }

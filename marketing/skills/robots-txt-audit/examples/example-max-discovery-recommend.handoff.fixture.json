@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.7.0",
+  "skill_version": "1.7.1",
   "mode": "audit",
   "inputs": {
     "domain": "example.com",
@@ -39,10 +39,98 @@
   },
   "crawler_rules": [
     {
+      "user_agent": "GPTBot",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /wp-admin/",
+        "Disallow: /wp-login.php",
+        "Disallow: /xmlrpc.php",
+        "Disallow: /?s=*",
+        "Disallow: /*?replytocom=",
+        "Allow: /wp-admin/admin-ajax.php"
+      ]
+    },
+    {
+      "user_agent": "Google-Extended",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /wp-admin/",
+        "Disallow: /wp-login.php",
+        "Disallow: /xmlrpc.php",
+        "Disallow: /?s=*",
+        "Disallow: /*?replytocom=",
+        "Allow: /wp-admin/admin-ajax.php"
+      ]
+    },
+    {
+      "user_agent": "OAI-SearchBot",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /wp-admin/",
+        "Disallow: /wp-login.php",
+        "Disallow: /xmlrpc.php",
+        "Disallow: /?s=*",
+        "Disallow: /*?replytocom=",
+        "Allow: /wp-admin/admin-ajax.php"
+      ]
+    },
+    {
+      "user_agent": "Claude-SearchBot",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /wp-admin/",
+        "Disallow: /wp-login.php",
+        "Disallow: /xmlrpc.php",
+        "Disallow: /?s=*",
+        "Disallow: /*?replytocom=",
+        "Allow: /wp-admin/admin-ajax.php"
+      ]
+    },
+    {
+      "user_agent": "PerplexityBot",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /wp-admin/",
+        "Disallow: /wp-login.php",
+        "Disallow: /xmlrpc.php",
+        "Disallow: /?s=*",
+        "Disallow: /*?replytocom=",
+        "Allow: /wp-admin/admin-ajax.php"
+      ]
+    },
+    {
+      "user_agent": "Googlebot",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /wp-admin/",
+        "Disallow: /wp-login.php",
+        "Disallow: /xmlrpc.php",
+        "Disallow: /?s=*",
+        "Disallow: /*?replytocom=",
+        "Allow: /wp-admin/admin-ajax.php"
+      ]
+    },
+    {
+      "user_agent": "bingbot",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /wp-admin/",
+        "Disallow: /wp-login.php",
+        "Disallow: /xmlrpc.php",
+        "Disallow: /?s=*",
+        "Disallow: /*?replytocom=",
+        "Allow: /wp-admin/admin-ajax.php"
+      ]
+    },
+    {
       "user_agent": "*",
       "effective_access": "allowed",
       "rules": [
         "Disallow: /wp-admin/",
+        "Disallow: /wp-login.php",
+        "Disallow: /xmlrpc.php",
+        "Disallow: /?s=*",
+        "Disallow: /*?replytocom=",
         "Allow: /wp-admin/admin-ajax.php"
       ]
     }
@@ -64,13 +152,13 @@
       "id": "R3",
       "name": "Search crawlers",
       "status": "pass",
-      "note": ""
+      "note": "Googlebot and bingbot can reach /"
     },
     {
       "id": "R4",
       "name": "AI bot differentiation",
       "status": "pass",
-      "note": "Training bots inherit allow from User-agent: * — optional under max_discovery (use block_training_allow_answers to require blocks)"
+      "note": "Training bots blocked; answer bots allowed"
     },
     {
       "id": "R5",
@@ -82,13 +170,13 @@
       "id": "R6",
       "name": "Low-value path hygiene",
       "status": "pass",
-      "note": "WordPress /wp-admin/ satisfies admin intent under max_discovery"
+      "note": "/admin/ restricted via robots.txt Disallow (max_discovery path hygiene)"
     },
     {
       "id": "R7",
       "name": "Sitemap declaration",
       "status": "warn",
-      "note": "Declaration valid; endpoint HTTP 500"
+      "note": "Declaration valid; endpoint returned HTTP 500"
     },
     {
       "id": "R7a",
@@ -106,13 +194,13 @@
       "id": "R7c",
       "name": "Sitemap host match",
       "status": "pass",
-      "note": ""
+      "note": "https://www.example.com/sitemap_index.xml"
     },
     {
       "id": "R7d",
       "name": "Sitemap shape",
       "status": "pass",
-      "note": ""
+      "note": "sitemap_index.xml"
     },
     {
       "id": "R7e",
@@ -124,7 +212,7 @@
       "id": "R8",
       "name": "Google token hygiene",
       "status": "pass",
-      "note": ""
+      "note": "Uses Google-Extended, not Googlebot, for training restriction"
     },
     {
       "id": "R9",
@@ -136,7 +224,7 @@
       "id": "R10",
       "name": "CDN caveat",
       "status": "warn",
-      "note": ""
+      "note": "Verify live file served at public URL after deploy"
     }
   ],
   "crawler_matrix": [
@@ -426,6 +514,27 @@
     ],
     "status": "warn"
   },
+  "syntax_validation": {
+    "status": "pass",
+    "issues": [],
+    "issue_count": 0
+  },
+  "index_control_validation": {
+    "status": "pass",
+    "paths": [
+      {
+        "path": "/cart/",
+        "status": "not_probed",
+        "crawl_allowed": true
+      },
+      {
+        "path": "/checkout/",
+        "status": "not_probed",
+        "crawl_allowed": true
+      }
+    ],
+    "warnings": []
+  },
   "policy_compliance": {
     "policy": "max_discovery",
     "compliant": true,
@@ -444,5 +553,18 @@
   "limitations": [
     "max_discovery compliant for WordPress open fixture; /wp-admin/ satisfies admin path intent",
     "Sitemap URL returned HTTP 500 during fetch — fix endpoint or hosting"
-  ]
+  ],
+  "deployment": {
+    "model": "origin_only",
+    "companion_module": null,
+    "detected_markers": []
+  },
+  "layer_assessment": {
+    "origin": {
+      "sitemap_present": true,
+      "path_hygiene_ok": true,
+      "origin_group_count": 2,
+      "origin_rule_count": 6
+    }
+  }
 }

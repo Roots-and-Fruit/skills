@@ -38,6 +38,17 @@ import {
   sitemapTypoIssuesForMerge,
   validateRobotsTxtSyntax
 } from "./syntax-validation.mjs";
+import {
+  requiresDiscoveryCompliance,
+  requiresPolicyCompliance,
+  requiresTrainingBlockCompliance
+} from "./policy-presets.mjs";
+
+export {
+  requiresDiscoveryCompliance,
+  requiresPolicyCompliance,
+  requiresTrainingBlockCompliance
+} from "./policy-presets.mjs";
 
 export function normalizeDomain(domain) {
   return domain
@@ -185,18 +196,6 @@ export function hasExplicitUserAgentGroup(groups, userAgent) {
 export function isRobotsTxtFetchSuspect(content) {
   const trimmed = content.trim().toLowerCase();
   return trimmed.startsWith("<!doctype html") || trimmed.startsWith("<html");
-}
-
-export function requiresDiscoveryCompliance(crawlPolicy) {
-  return crawlPolicy === "max_discovery" || crawlPolicy === "block_training_allow_answers";
-}
-
-export function requiresPolicyCompliance(crawlPolicy) {
-  return requiresDiscoveryCompliance(crawlPolicy) || crawlPolicy === "restrictive";
-}
-
-export function requiresTrainingBlockCompliance(crawlPolicy) {
-  return crawlPolicy === "block_training_allow_answers";
 }
 
 /**
@@ -1112,42 +1111,46 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
     options.index_control_results ?? []
   );
 
-  if (isCfManaged && layers) {
-    const cloudflare = assessCloudflareLayer(layers);
+  if (layers) {
     const origin = assessOriginLayer(layers);
-    layerAssessment = {
-      cloudflare,
-      origin,
-      effective: {
-        policy_compliance: policyCompliance
-      }
-    };
-    if (requiresPolicyCompliance(crawlPolicy)) {
-      const presetId =
-        options.content_signals_preset ??
-        contentSignalsPresetForCrawlPolicy(crawlPolicy);
-      contentSignals = {
-        preset: presetId,
-        preset_label: CONTENT_SIGNALS_PRESETS[presetId].label,
-        cf_managed_star: layers.content_signals ?? null,
-        origin_target: {
-          search: CONTENT_SIGNALS_PRESETS[presetId].search,
-          ai_input: CONTENT_SIGNALS_PRESETS[presetId].ai_input,
-          ai_train: CONTENT_SIGNALS_PRESETS[presetId].ai_train
-        },
-        contentsignals_org_url: "https://contentsignals.org/",
-        limitations: CONTENT_SIGNALS_LIMITATIONS
+    if (isCfManaged) {
+      const cloudflare = assessCloudflareLayer(layers);
+      layerAssessment = {
+        cloudflare,
+        origin,
+        effective: {
+          policy_compliance: policyCompliance
+        }
       };
-      originAppendTemplate = buildCloudflareOriginAppend(domain, {
-        content_signals_preset: presetId,
-        crawl_policy: crawlPolicy,
-        sitemap_url: options.expectedSitemapUrl
-      });
-      recommendationsSplit = buildRecommendationsSplit(policyCompliance, cloudflare, {
-        domain,
-        crawl_policy: crawlPolicy,
-        sitemap_url: options.expectedSitemapUrl
-      });
+      if (requiresPolicyCompliance(crawlPolicy)) {
+        const presetId =
+          options.content_signals_preset ??
+          contentSignalsPresetForCrawlPolicy(crawlPolicy);
+        contentSignals = {
+          preset: presetId,
+          preset_label: CONTENT_SIGNALS_PRESETS[presetId].label,
+          cf_managed_star: layers.content_signals ?? null,
+          origin_target: {
+            search: CONTENT_SIGNALS_PRESETS[presetId].search,
+            ai_input: CONTENT_SIGNALS_PRESETS[presetId].ai_input,
+            ai_train: CONTENT_SIGNALS_PRESETS[presetId].ai_train
+          },
+          contentsignals_org_url: "https://contentsignals.org/",
+          limitations: CONTENT_SIGNALS_LIMITATIONS
+        };
+        originAppendTemplate = buildCloudflareOriginAppend(domain, {
+          content_signals_preset: presetId,
+          crawl_policy: crawlPolicy,
+          sitemap_url: options.expectedSitemapUrl
+        });
+        recommendationsSplit = buildRecommendationsSplit(policyCompliance, cloudflare, {
+          domain,
+          crawl_policy: crawlPolicy,
+          sitemap_url: options.expectedSitemapUrl
+        });
+      }
+    } else {
+      layerAssessment = { origin };
     }
   }
 

@@ -11,6 +11,19 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseRobotsTxt } from "./parse-robots-txt.mjs";
 import { assessRobotsTxtContent } from "./assess-policy.mjs";
+import {
+  canonicalDiscoveryUrls,
+  requiresPolicyCompliance
+} from "./policy-presets.mjs";
+
+export { canonicalDiscoveryUrls };
+
+function defaultHandoffFixtures() {
+  return readdirSync(examplesDir)
+    .filter((name) => name.endsWith(".handoff.fixture.json"))
+    .map((name) => path.join(examplesDir, name))
+    .sort();
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -25,43 +38,12 @@ const POLICIES = new Set([
   "audit_only"
 ]);
 
-/** Policies that populate `policy_compliance` and P-layer gates (G13–G24, G29, G33). */
-const POLICY_COMPLIANCE_PRESETS = new Set([
-  "max_discovery",
-  "block_training_allow_answers",
-  "restrictive"
-]);
-
-/** @param {string | undefined} crawlPolicy */
-function requiresDiscoveryCompliance(crawlPolicy) {
-  return POLICY_COMPLIANCE_PRESETS.has(crawlPolicy ?? "");
-}
-
-/** Apex + www robots.txt URLs per SKILL Step 1 */
-export function canonicalDiscoveryUrls(domain) {
-  const bare = String(domain)
-    .replace(/^https?:\/\//i, "")
-    .replace(/\/$/, "")
-    .replace(/^www\./i, "");
-  return [
-    `https://${bare}/robots.txt`,
-    `https://www.${bare}/robots.txt`
-  ];
-}
-
-function defaultHandoffFixtures() {
-  return readdirSync(examplesDir)
-    .filter((name) => name.endsWith(".handoff.fixture.json"))
-    .map((name) => path.join(examplesDir, name))
-    .sort();
-}
-
 function loadHandoff(filePath) {
   const raw = readFileSync(filePath, "utf8");
   return { filePath, data: JSON.parse(raw) };
 }
 
-function runChecks(data) {
+export function runChecks(data) {
   const checks = [];
 
   checks.push({
@@ -192,7 +174,7 @@ function runChecks(data) {
       if (parsed.groupCount < 1 || parsed.ruleCount < 1) {
         return false;
       }
-      if (requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
+      if (requiresPolicyCompliance(data.inputs?.crawl_policy)) {
         const { assessment } = assessRobotsTxtContent(
           data.draft_robots_txt,
           data.inputs.crawl_policy,
@@ -231,7 +213,7 @@ function runChecks(data) {
   checks.push({
     id: "G16",
     pass: () => {
-      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
+      if (!requiresPolicyCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       const pc = data.policy_compliance;
@@ -316,7 +298,7 @@ function runChecks(data) {
   checks.push({
     id: "G21",
     pass: () => {
-      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
+      if (!requiresPolicyCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       const pc = data.policy_compliance;
@@ -327,7 +309,7 @@ function runChecks(data) {
   checks.push({
     id: "G22",
     pass: () => {
-      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
+      if (!requiresPolicyCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       if (data.policy_compliance?.compliant === true) {
@@ -340,7 +322,7 @@ function runChecks(data) {
   checks.push({
     id: "G23",
     pass: () => {
-      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
+      if (!requiresPolicyCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       if (data.policy_compliance?.compliant !== false) {
@@ -353,7 +335,7 @@ function runChecks(data) {
   checks.push({
     id: "G24",
     pass: () => {
-      if (!requiresDiscoveryCompliance(data.inputs?.crawl_policy)) {
+      if (!requiresPolicyCompliance(data.inputs?.crawl_policy)) {
         return true;
       }
       if (data.policy_compliance?.compliant !== false) {
@@ -435,7 +417,7 @@ function runChecks(data) {
     pass: () => {
       if (
         data.deployment?.model !== "cloudflare_managed" ||
-        !requiresDiscoveryCompliance(data.inputs?.crawl_policy)
+        !requiresPolicyCompliance(data.inputs?.crawl_policy)
       ) {
         return true;
       }
@@ -476,7 +458,20 @@ function runChecks(data) {
       if (data.deployment?.model === "cloudflare_managed") {
         return true;
       }
-      return data.layer_assessment == null && data.recommendations_split == null;
+      if (data.recommendations_split != null) {
+        return false;
+      }
+      const la = data.layer_assessment;
+      if (la == null) {
+        return false;
+      }
+      return (
+        la.origin &&
+        typeof la.origin.sitemap_present === "boolean" &&
+        typeof la.origin.path_hygiene_ok === "boolean" &&
+        la.cloudflare == null &&
+        la.effective == null
+      );
     }
   });
 
@@ -485,7 +480,7 @@ function runChecks(data) {
     pass: () => {
       if (
         data.deployment?.model !== "cloudflare_managed" ||
-        !requiresDiscoveryCompliance(data.inputs?.crawl_policy)
+        !requiresPolicyCompliance(data.inputs?.crawl_policy)
       ) {
         return data.origin_append_template == null;
       }

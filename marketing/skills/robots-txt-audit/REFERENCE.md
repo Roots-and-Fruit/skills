@@ -360,7 +360,7 @@ When file not found:
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.7.0",
+  "skill_version": "1.7.1",
   "mode": "audit",
   "inputs": {
     "domain": "example.com",

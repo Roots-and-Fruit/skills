@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.7.0",
+  "skill_version": "1.7.1",
   "mode": "audit",
   "inputs": {
     "domain": "example.com",
@@ -21,13 +21,11 @@
     "resolved_url": "https://example.com/robots.txt"
   },
   "parsed": {
-    "group_count": 8,
-    "rule_count": 12,
+    "group_count": 6,
+    "rule_count": 7,
     "user_agent_tokens": [
-      "GPTBot",
-      "Google-Extended",
-      "CCBot",
       "OAI-SearchBot",
+      "Claude-SearchBot",
       "PerplexityBot",
       "Googlebot",
       "bingbot",
@@ -40,7 +38,7 @@
   "policy_summary": {
     "search_bots": "allowed",
     "ai_answer_bots": "allowed",
-    "ai_training_bots": "blocked"
+    "ai_training_bots": "allowed"
   },
   "crawlability": {
     "key_pages_provided": 3,
@@ -50,9 +48,18 @@
   "crawler_rules": [
     {
       "user_agent": "GPTBot",
-      "effective_access": "blocked",
+      "effective_access": "allowed",
       "rules": [
-        "Disallow: /"
+        "Disallow: /admin/",
+        "Allow: /"
+      ]
+    },
+    {
+      "user_agent": "Google-Extended",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /admin/",
+        "Allow: /"
       ]
     },
     {
@@ -63,9 +70,38 @@
       ]
     },
     {
+      "user_agent": "Claude-SearchBot",
+      "effective_access": "allowed",
+      "rules": [
+        "Allow: /"
+      ]
+    },
+    {
+      "user_agent": "PerplexityBot",
+      "effective_access": "allowed",
+      "rules": [
+        "Allow: /"
+      ]
+    },
+    {
       "user_agent": "Googlebot",
       "effective_access": "allowed",
       "rules": [
+        "Allow: /"
+      ]
+    },
+    {
+      "user_agent": "bingbot",
+      "effective_access": "allowed",
+      "rules": [
+        "Allow: /"
+      ]
+    },
+    {
+      "user_agent": "*",
+      "effective_access": "allowed",
+      "rules": [
+        "Disallow: /admin/",
         "Allow: /"
       ]
     }
@@ -109,15 +145,9 @@
     },
     {
       "id": "R7",
-      "name": "Sitemap directive",
+      "name": "Sitemap declaration",
       "status": "pass",
-      "note": "Absolute https URL on example.com host"
-    },
-    {
-      "id": "R7d",
-      "name": "Sitemap shape",
-      "status": "pass",
-      "note": "sitemap.xml"
+      "note": "Absolute https URL on site host"
     },
     {
       "id": "R7a",
@@ -138,6 +168,18 @@
       "note": "https://example.com/sitemap.xml"
     },
     {
+      "id": "R7d",
+      "name": "Sitemap shape",
+      "status": "pass",
+      "note": "sitemap.xml"
+    },
+    {
+      "id": "R7e",
+      "name": "Sitemap endpoint fetch",
+      "status": "pass",
+      "note": "HTTP 200"
+    },
+    {
       "id": "R8",
       "name": "Google token hygiene",
       "status": "pass",
@@ -154,42 +196,8 @@
       "name": "CDN caveat",
       "status": "warn",
       "note": "Verify live file served at public URL after deploy"
-    },
-    {
-      "id": "R7e",
-      "name": "Sitemap endpoint fetch",
-      "status": "pass",
-      "note": "HTTP 200"
     }
   ],
-  "draft_robots_txt": null,
-  "sitemap_validation": {
-    "present": true,
-    "urls": [
-      "https://example.com/sitemap.xml"
-    ],
-    "valid_urls": [
-      "https://example.com/sitemap.xml"
-    ],
-    "host_match": true,
-    "absolute_urls": true,
-    "endpoint_fetch": [
-      {
-        "url": "https://example.com/sitemap.xml",
-        "status": 200,
-        "ok": true
-      }
-    ],
-    "issues": [],
-    "status": "pass"
-  },
-  "policy_compliance": {
-    "policy": "max_discovery",
-    "compliant": true,
-    "violations": []
-  },
-  "deployment_note": "No deployment needed — file already live at https://example.com/robots.txt. Re-test after CDN or WAF changes.",
-  "limitations": [],
   "crawler_matrix": [
     {
       "token": "Googlebot",
@@ -451,5 +459,67 @@
       "note": "May not obey robots.txt like automated crawlers; document only."
     }
   ],
-  "audit_findings": []
+  "sitemap_validation": {
+    "present": true,
+    "urls": [
+      "https://example.com/sitemap.xml"
+    ],
+    "valid_urls": [
+      "https://example.com/sitemap.xml"
+    ],
+    "host_match": true,
+    "absolute_urls": true,
+    "endpoint_fetch": [
+      {
+        "url": "https://example.com/sitemap.xml",
+        "status": 200,
+        "ok": true
+      }
+    ],
+    "issues": [],
+    "status": "pass"
+  },
+  "syntax_validation": {
+    "status": "pass",
+    "issues": [],
+    "issue_count": 0
+  },
+  "index_control_validation": {
+    "status": "pass",
+    "paths": [
+      {
+        "path": "/cart/",
+        "status": "not_probed",
+        "crawl_allowed": true
+      },
+      {
+        "path": "/checkout/",
+        "status": "not_probed",
+        "crawl_allowed": true
+      }
+    ],
+    "warnings": []
+  },
+  "policy_compliance": {
+    "policy": "max_discovery",
+    "compliant": true,
+    "violations": []
+  },
+  "audit_findings": [],
+  "draft_robots_txt": null,
+  "deployment_note": "No deployment needed — file already live at https://example.com/robots.txt. Re-test after CDN or WAF changes.",
+  "limitations": [],
+  "deployment": {
+    "model": "origin_only",
+    "companion_module": null,
+    "detected_markers": []
+  },
+  "layer_assessment": {
+    "origin": {
+      "sitemap_present": true,
+      "path_hygiene_ok": true,
+      "origin_group_count": 6,
+      "origin_rule_count": 7
+    }
+  }
 }

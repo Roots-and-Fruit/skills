@@ -148,8 +148,10 @@ function main() {
   failed =
     !check(
       "CF18",
-      good.assessment.layer_assessment === null,
-      "origin_only should not populate layer_assessment"
+      good.assessment.layer_assessment?.origin?.sitemap_present === true &&
+        good.assessment.layer_assessment?.origin?.path_hygiene_ok === true &&
+        good.assessment.layer_assessment?.cloudflare == null,
+      "origin_only should populate layer_assessment.origin only"
     ) || failed;
 
   const append = buildCloudflareOriginAppend("example.com", {

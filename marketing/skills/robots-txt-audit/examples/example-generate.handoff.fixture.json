@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.7.0",
+  "skill_version": "1.7.1",
   "mode": "generate",
   "inputs": {
     "domain": "example.com",
@@ -21,10 +21,19 @@
     "resolved_url": null
   },
   "parsed": {
-    "group_count": 0,
-    "rule_count": 0,
-    "user_agent_tokens": [],
-    "sitemap_directives": []
+    "group_count": 6,
+    "rule_count": 7,
+    "user_agent_tokens": [
+      "OAI-SearchBot",
+      "Claude-SearchBot",
+      "PerplexityBot",
+      "Googlebot",
+      "bingbot",
+      "*"
+    ],
+    "sitemap_directives": [
+      "https://example.com/sitemap.xml"
+    ]
   },
   "policy_summary": {
     "search_bots": "allowed",
@@ -38,6 +47,20 @@
       {
         "url": "https://example.com/",
         "pathname": "/",
+        "blocked_by": [
+          "all crawlers — no robots.txt"
+        ]
+      },
+      {
+        "url": "https://example.com/pricing",
+        "pathname": "/pricing",
+        "blocked_by": [
+          "all crawlers — no robots.txt"
+        ]
+      },
+      {
+        "url": "https://example.com/guides/enterprise-sso",
+        "pathname": "/guides/enterprise-sso",
         "blocked_by": [
           "all crawlers — no robots.txt"
         ]
@@ -58,36 +81,6 @@
       "status": "warn",
       "note": "Cannot verify until file published"
     }
-  ],
-  "draft_robots_txt": "# Recommended robots.txt — max_discovery (search + AI answer discovery)\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: *\nDisallow: /wp-admin/\nAllow: /\n\nSitemap: https://example.com/sitemap.xml\n",
-  "sitemap_validation": {
-    "present": true,
-    "urls": [
-      "https://example.com/sitemap.xml"
-    ],
-    "valid_urls": [
-      "https://example.com/sitemap.xml"
-    ],
-    "host_match": true,
-    "absolute_urls": true,
-    "endpoint_fetch": [
-      {
-        "url": "https://example.com/sitemap.xml",
-        "status": 200,
-        "ok": true
-      }
-    ],
-    "issues": [],
-    "status": "pass"
-  },
-  "policy_compliance": {
-    "policy": "max_discovery",
-    "compliant": true,
-    "violations": []
-  },
-  "deployment_note": "Save as robots.txt at the site root so it resolves to https://example.com/robots.txt. Test with GSC URL Inspection and Bing robots tester; monitor crawler logs for 48 hours.",
-  "limitations": [
-    "Generated from policy template — verify user-agent tokens against provider docs before production"
   ],
   "crawler_matrix": [
     {
@@ -350,5 +343,69 @@
       "note": "May not obey robots.txt like automated crawlers; document only."
     }
   ],
-  "audit_findings": []
+  "sitemap_validation": {
+    "present": true,
+    "urls": [
+      "https://example.com/sitemap.xml"
+    ],
+    "valid_urls": [
+      "https://example.com/sitemap.xml"
+    ],
+    "host_match": true,
+    "absolute_urls": true,
+    "endpoint_fetch": [
+      {
+        "url": "https://example.com/sitemap.xml",
+        "status": 200,
+        "ok": true
+      }
+    ],
+    "issues": [],
+    "status": "pass"
+  },
+  "syntax_validation": {
+    "status": "pass",
+    "issues": [],
+    "issue_count": 0
+  },
+  "index_control_validation": {
+    "status": "pass",
+    "paths": [
+      {
+        "path": "/cart/",
+        "status": "not_probed",
+        "crawl_allowed": true
+      },
+      {
+        "path": "/checkout/",
+        "status": "not_probed",
+        "crawl_allowed": true
+      }
+    ],
+    "warnings": []
+  },
+  "policy_compliance": {
+    "policy": "max_discovery",
+    "compliant": true,
+    "violations": []
+  },
+  "audit_findings": [],
+  "draft_robots_txt": "# Recommended robots.txt — max_discovery (search + AI answer discovery)\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: bingbot\nAllow: /\n\nUser-agent: *\nDisallow: /wp-admin/\nAllow: /\n\nSitemap: https://example.com/sitemap.xml",
+  "deployment_note": "Save as robots.txt at the site root so it resolves to https://example.com/robots.txt. Test with GSC URL Inspection and Bing robots tester; monitor crawler logs for 48 hours.",
+  "limitations": [
+    "Generated from policy template — verify user-agent tokens against provider docs before production"
+  ],
+  "deployment": {
+    "model": "origin_only",
+    "companion_module": null,
+    "detected_markers": []
+  },
+  "layer_assessment": {
+    "origin": {
+      "sitemap_present": true,
+      "path_hygiene_ok": true,
+      "origin_group_count": 6,
+      "origin_rule_count": 7
+    }
+  }
 }

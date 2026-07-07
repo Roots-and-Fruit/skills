@@ -10,7 +10,7 @@
 
 ---
 
-## Sample layperson chat output (v1.7.0+)
+## Sample layperson chat output (v1.7.1+)
 
 **User sees only this in chat.** Bot tables, handoff JSON, and robots.txt copy go to `reports/{domain}-{date}-detail.md`. Each gap links to the [public reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/).
 

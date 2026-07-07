@@ -193,13 +193,6 @@ export function buildStandaloneBlockTrainingDraft(domain, options = {}) {
   return lines.join("\n");
 }
 
-/** @deprecated Use buildStandaloneDiscoveryDraft or buildStandaloneBlockTrainingDraft */
-export function buildStandaloneMaxDiscoveryDraft(domain, options = {}) {
-  if (options.crawl_policy === "block_training_allow_answers") {
-    return buildStandaloneBlockTrainingDraft(domain, options);
-  }
-  return buildStandaloneDiscoveryDraft(domain, options);
-}
 
 /**
  * @param {ReturnType<import("./assess-policy.mjs").assessRobotsTxtContent>["assessment"]} assessment

@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { assessRobotsTxtContent } from "./assess-policy.mjs";
 import {
   ALLOWED_ROBOTS_DIRECTIVES,
+  detectSitemapDirectiveTypos,
   validateRobotsTxtSyntax
 } from "./syntax-validation.mjs";
 
@@ -87,6 +88,43 @@ ok(
   hostAssess.assessment.audit_findings?.some(
     (f) => f.id === "AF_SY1" && f.rubric === "R2b"
   )
+);
+
+console.log("\nSchemamap / SM8 (SY1–SY8):\n");
+
+const typos = detectSitemapDirectiveTypos(schemamap);
+ok("SY1", typos.length === 1 && typos[0].directive === "Schemamap");
+ok("SY2", typos[0]?.id === "SM8");
+
+const schemamapAssess = assessRobotsTxtContent(schemamap, "audit_only", "example.com");
+ok("SY3", schemamapAssess.assessment.sitemap_validation?.status === "fail");
+ok(
+  "SY4",
+  schemamapAssess.assessment.sitemap_validation?.issues?.some((i) => i.id === "SM8")
+);
+ok(
+  "SY5",
+  schemamapAssess.assessment.sitemap_validation?.issues?.some((i) => i.id === "SM1")
+);
+ok(
+  "SY6",
+  schemamapAssess.assessment.sitemap_validation?.issues
+    ?.find((i) => i.id === "SM1")
+    ?.message?.includes("Schemamap")
+);
+ok(
+  "SY7",
+  schemamapAssess.assessment.audit_findings?.some(
+    (f) => f.id === "AF_SM8" && f.tier === "warn"
+  )
+);
+
+const goodAssess = assessRobotsTxtContent(good, "max_discovery", "example.com", {
+  sitemap_fetch_results: [{ url: "https://example.com/sitemap.xml", status: 200 }]
+});
+ok(
+  "SY8",
+  !goodAssess.assessment.sitemap_validation?.issues?.some((i) => i.id === "SM8")
 );
 
 console.log(`\n${passed} passed, ${failed} failed`);

@@ -1,323 +1,88 @@
+#!/usr/bin/env node
+/**
+ * Regenerate handoff fixtures from HANDOFF_FIXTURE_MANIFEST + buildHandoff().
+ */
 import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { assessRobotsTxtContent } from "./assess-policy.mjs";
+import { buildHandoff, buildDiscovery } from "./build-handoff.mjs";
+import { buildStandaloneDiscoveryDraft } from "./build-recommended-robots.mjs";
+import { HANDOFF_FIXTURE_MANIFEST } from "./handoff-fixture-manifest.mjs";
 import { parseRobotsTxt } from "./parse-robots-txt.mjs";
 
-const wpContent = readFileSync(
-  "examples/example-wp-open.robots.txt.fixture.txt",
-  "utf8"
-);
-const wpParsed = parseRobotsTxt(wpContent);
-const wpAssessAuditOnly = assessRobotsTxtContent(
-  wpContent,
-  "audit_only",
-  "example.com",
-  {
-    sitemap_fetch_results: [
-      { url: "https://www.example.com/sitemap_index.xml", status: 500 }
-    ]
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(__dirname, "..");
+const examplesDir = path.join(root, "examples");
+
+for (const entry of HANDOFF_FIXTURE_MANIFEST) {
+  const outPath = path.join(examplesDir, entry.handoffFile);
+
+  if (entry.generate) {
+    const draft = buildStandaloneDiscoveryDraft(entry.domain);
+    const assessOptions = {
+      sitemap_fetch_results: [
+        { url: `https://${entry.domain}/sitemap.xml`, status: 200 }
+      ]
+    };
+    const { assessment } = assessRobotsTxtContent(
+      draft,
+      entry.policy,
+      entry.domain,
+      assessOptions
+    );
+    const parsed = parseRobotsTxt(draft);
+    const handoff = buildHandoff({
+      assessment,
+      parsed,
+      inputs: {
+        domain: entry.domain,
+        key_pages: entry.keyPages,
+        crawl_policy: entry.policy
+      },
+      discovery: buildDiscovery({ domain: entry.domain, found: false }),
+      draft_robots_txt: draft,
+      deployment_note:
+        "Save as robots.txt at the site root so it resolves to https://example.com/robots.txt. Test with GSC URL Inspection and Bing robots tester; monitor crawler logs for 48 hours.",
+      limitations: [
+        "Generated from policy template — verify user-agent tokens against provider docs before production"
+      ]
+    });
+    writeFileSync(outPath, `${JSON.stringify(handoff, null, 2)}\n`);
+    continue;
   }
-);
-const wpAssessMaxDiscovery = assessRobotsTxtContent(
-  wpContent,
-  "max_discovery",
-  "example.com",
-  {
-    sitemap_fetch_results: [
-      { url: "https://www.example.com/sitemap_index.xml", status: 500 }
-    ]
-  }
-);
 
-const auditOnly = {
-  handoff_version: "1.0",
-  skill: "robots-txt-audit",
-  skill_version: "1.7.0",
-  mode: "audit",
-  inputs: {
-    domain: "example.com",
-    key_pages: [],
-    crawl_policy: "audit_only"
-  },
-  discovery: {
-    found: true,
-    urls_checked: [
-      "https://example.com/robots.txt",
-      "https://www.example.com/robots.txt"
-    ],
-    resolved_url: "https://example.com/robots.txt"
-  },
-  parsed: {
-    group_count: wpParsed.groupCount,
-    rule_count: wpParsed.ruleCount,
-    user_agent_tokens: wpParsed.userAgentTokens,
-    sitemap_directives: wpParsed.sitemaps
-  },
-  policy_summary: {
-    search_bots: "allowed",
-    ai_answer_bots: "allowed",
-    ai_training_bots: "allowed"
-  },
-  crawlability: {
-    key_pages_provided: 0,
-    fully_crawlable: null,
-    blocked_key_pages: []
-  },
-  crawler_rules: [
-    {
-      user_agent: "*",
-      effective_access: "allowed",
-      rules: ["Disallow: /wp-admin/", "Allow: /wp-admin/admin-ajax.php"]
-    }
-  ],
-  audit_checks: [
-    { id: "R1", name: "File accessible", status: "pass", note: "" },
-    {
-      id: "R4",
-      name: "AI bot differentiation",
-      status: "warn",
-      note: "Training bots inherit allow from User-agent: *"
-    },
-    {
-      id: "R5",
-      name: "Cornerstone crawlability",
-      status: "na",
-      note: "No key_pages provided"
-    },
-    {
-      id: "R7",
-      name: "Sitemap declaration",
-      status: "warn",
-      note: "Declaration valid; endpoint returned HTTP 500"
-    },
-    { id: "R7a", name: "Sitemap present", status: "pass", note: "" },
-    { id: "R7b", name: "Sitemap absolute URL", status: "pass", note: "" },
-    { id: "R7c", name: "Sitemap host match", status: "pass", note: "" },
-    {
-      id: "R7d",
-      name: "Sitemap shape",
-      status: "pass",
-      note: "sitemap_index.xml"
-    },
-    {
-      id: "R7e",
-      name: "Sitemap endpoint fetch",
-      status: "warn",
-      note: "HTTP 500 on https://www.example.com/sitemap_index.xml"
-    }
-  ],
-  crawler_matrix: wpAssessAuditOnly.assessment.crawler_matrix,
-  sitemap_validation: wpAssessAuditOnly.assessment.sitemap_validation,
-  policy_compliance: null,
-  audit_findings: wpAssessAuditOnly.assessment.audit_findings,
-  draft_robots_txt: null,
-  deployment_note:
-    "No deployment performed. Live file at https://example.com/robots.txt",
-  limitations: [
-    "Sitemap URL returned HTTP 500 during fetch — declaration valid, endpoint may be broken",
-    "No key_pages supplied for cornerstone crawlability check",
-    "max_discovery compliance not evaluated (audit_only policy)"
-  ]
-};
+  const content = entry.robotsContent
+    ? entry.robotsContent
+    : readFileSync(path.join(examplesDir, entry.robotsFile), "utf8");
 
-writeFileSync(
-  "examples/example-audit-only.handoff.fixture.json",
-  `${JSON.stringify(auditOnly, null, 2)}\n`
-);
+  const { assessment, parsed } = assessRobotsTxtContent(
+    content,
+    entry.policy,
+    entry.domain,
+    entry.assessOptions ?? {}
+  );
 
-const maxDiscoveryRecommend = {
-  handoff_version: "1.0",
-  skill: "robots-txt-audit",
-  skill_version: "1.7.0",
-  mode: "audit",
-  inputs: {
-    domain: "example.com",
-    key_pages: [],
-    crawl_policy: "max_discovery"
-  },
-  discovery: {
-    found: true,
-    urls_checked: [
-      "https://example.com/robots.txt",
-      "https://www.example.com/robots.txt"
-    ],
-    resolved_url: "https://example.com/robots.txt"
-  },
-  parsed: {
-    group_count: wpParsed.groupCount,
-    rule_count: wpParsed.ruleCount,
-    user_agent_tokens: wpParsed.userAgentTokens,
-    sitemap_directives: wpParsed.sitemaps
-  },
-  policy_summary: {
-    search_bots: "allowed",
-    ai_answer_bots: "allowed",
-    ai_training_bots: "allowed"
-  },
-  crawlability: {
-    key_pages_provided: 0,
-    fully_crawlable: null,
-    blocked_key_pages: []
-  },
-  crawler_rules: [
-    {
-      user_agent: "*",
-      effective_access: "allowed",
-      rules: ["Disallow: /wp-admin/", "Allow: /wp-admin/admin-ajax.php"]
-    }
-  ],
-  audit_checks: [
-    { id: "R1", name: "File accessible", status: "pass", note: "" },
-    { id: "R2", name: "Syntax / structure", status: "pass", note: "" },
-    { id: "R3", name: "Search crawlers", status: "pass", note: "" },
-    {
-      id: "R4",
-      name: "AI bot differentiation",
-      status: "pass",
-      note:
-        "Training bots inherit allow from User-agent: * — optional under max_discovery (use block_training_allow_answers to require blocks)"
+  const handoff = buildHandoff({
+    assessment,
+    parsed,
+    inputs: {
+      domain: entry.domain,
+      key_pages: entry.keyPages,
+      crawl_policy: entry.policy,
+      ...(entry.robots_deployment ? { robots_deployment: entry.robots_deployment } : {})
     },
-    {
-      id: "R5",
-      name: "Cornerstone crawlability",
-      status: "na",
-      note: "No key_pages provided"
-    },
-    {
-      id: "R6",
-      name: "Low-value path hygiene",
-      status: "pass",
-      note: "WordPress /wp-admin/ satisfies admin intent under max_discovery"
-    },
-    {
-      id: "R7",
-      name: "Sitemap declaration",
-      status: "warn",
-      note: "Declaration valid; endpoint HTTP 500"
-    },
-    { id: "R7a", name: "Sitemap present", status: "pass", note: "" },
-    { id: "R7b", name: "Sitemap absolute URL", status: "pass", note: "" },
-    { id: "R7c", name: "Sitemap host match", status: "pass", note: "" },
-    { id: "R7d", name: "Sitemap shape", status: "pass", note: "" },
-    {
-      id: "R7e",
-      name: "Sitemap endpoint fetch",
-      status: "warn",
-      note: "HTTP 500 on https://www.example.com/sitemap_index.xml"
-    },
-    { id: "R8", name: "Google token hygiene", status: "pass", note: "" },
-    { id: "R9", name: "Wildcard vs specific", status: "pass", note: "" },
-    { id: "R10", name: "CDN caveat", status: "warn", note: "" }
-  ],
-  crawler_matrix: wpAssessMaxDiscovery.assessment.crawler_matrix,
-  sitemap_validation: wpAssessMaxDiscovery.assessment.sitemap_validation,
-  policy_compliance: wpAssessMaxDiscovery.assessment.policy_compliance,
-  audit_findings: wpAssessMaxDiscovery.assessment.audit_findings,
-  draft_robots_txt: null,
-  deployment_note:
-    "No deployment needed for max_discovery compliance. Investigate sitemap endpoint HTTP 500; re-test after fix.",
-  limitations: [
-    "max_discovery compliant for WordPress open fixture; /wp-admin/ satisfies admin path intent",
-    "Sitemap URL returned HTTP 500 during fetch — fix endpoint or hosting"
-  ]
-};
-
-writeFileSync(
-  "examples/example-max-discovery-recommend.handoff.fixture.json",
-  `${JSON.stringify(maxDiscoveryRecommend, null, 2)}\n`
-);
-
-const good = readFileSync("examples/example-good.robots.txt.fixture.txt", "utf8");
-const goodAssess = assessRobotsTxtContent(good, "max_discovery", "example.com", {
-  sitemap_fetch_results: [
-    { url: "https://example.com/sitemap.xml", status: 200 }
-  ]
-});
-
-const audit = JSON.parse(
-  readFileSync("examples/example-audit.handoff.fixture.json", "utf8")
-);
-audit.skill_version = "1.7.0";
-audit.crawler_matrix = goodAssess.assessment.crawler_matrix;
-audit.sitemap_validation = goodAssess.assessment.sitemap_validation;
-audit.audit_findings = goodAssess.assessment.audit_findings;
-if (!audit.audit_checks.some((row) => row.id === "R7d")) {
-  audit.audit_checks.splice(7, 0, {
-    id: "R7d",
-    name: "Sitemap shape",
-    status: "pass",
-    note: "sitemap.xml"
+    discovery: buildDiscovery({
+      domain: entry.domain,
+      found: true,
+      resolved_url: entry.resolvedUrl
+    }),
+    modeOverride: entry.modeOverride,
+    deployment_note: entry.deployment_note,
+    limitations: entry.limitations ?? []
   });
-}
-if (!audit.audit_checks.some((row) => row.id === "R7e")) {
-  audit.audit_checks.push({
-    id: "R7e",
-    name: "Sitemap endpoint fetch",
-    status: "pass",
-    note: "HTTP 200"
-  });
-}
-writeFileSync(
-  "examples/example-audit.handoff.fixture.json",
-  `${JSON.stringify(audit, null, 2)}\n`
-);
 
-const generate = JSON.parse(
-  readFileSync("examples/example-generate.handoff.fixture.json", "utf8")
-);
-generate.skill_version = "1.7.0";
-const draftAssess = assessRobotsTxtContent(
-  generate.draft_robots_txt,
-  "max_discovery",
-  generate.inputs.domain,
-  {
-    sitemap_fetch_results: [
-      { url: "https://example.com/sitemap.xml", status: 200 }
-    ]
-  }
-);
-generate.crawler_matrix = draftAssess.assessment.crawler_matrix;
-generate.sitemap_validation = draftAssess.assessment.sitemap_validation;
-generate.policy_compliance = draftAssess.assessment.policy_compliance;
-generate.audit_findings = draftAssess.assessment.audit_findings;
-writeFileSync(
-  "examples/example-generate.handoff.fixture.json",
-  `${JSON.stringify(generate, null, 2)}\n`
-);
-
-const recommend = JSON.parse(
-  readFileSync("examples/example-recommend.handoff.fixture.json", "utf8")
-);
-recommend.skill_version = "1.7.0";
-const recContent = `User-agent: GPTBot\nDisallow: /\n\nUser-agent: *\nAllow: /`;
-const recAssess = assessRobotsTxtContent(
-  recContent,
-  "block_training_allow_answers",
-  recommend.inputs.domain
-);
-recommend.crawler_matrix = recAssess.assessment.crawler_matrix;
-recommend.policy_compliance = recAssess.assessment.policy_compliance;
-recommend.audit_findings = recAssess.assessment.audit_findings;
-recommend.index_control_validation = recAssess.assessment.index_control_validation;
-const recCompliant = recAssess.assessment.policy_compliance?.compliant === true;
-const recR4 = recommend.audit_checks.find((row) => row.id === "R4");
-const recR4Note = recCompliant
-  ? "Training bots blocked; answer bots allowed"
-  : "Training blocks or pairings incomplete under block_training_allow_answers";
-if (recR4) {
-  recR4.status = recCompliant ? "pass" : "fail";
-  recR4.note = recR4Note;
-} else {
-  recommend.audit_checks.push({
-    id: "R4",
-    name: "AI bot differentiation",
-    status: recCompliant ? "pass" : "fail",
-    note: recR4Note
-  });
+  writeFileSync(outPath, `${JSON.stringify(handoff, null, 2)}\n`);
 }
-recommend.sitemap_validation = recAssess.assessment.sitemap_validation;
-writeFileSync(
-  "examples/example-recommend.handoff.fixture.json",
-  `${JSON.stringify(recommend, null, 2)}\n`
-);
 
 console.log("Handoff fixtures updated.");
