@@ -1,0 +1,177 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.11.0",
+  "mode": "domain_coverage",
+  "generated_at": "2026-07-14T16:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "type 2 diabetes",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/health/type-2-diabetes/",
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "primary_topic"
+  },
+  "serp_context": {
+    "ai_overview_present": true,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": ["What are the first warning signs of type 2 diabetes?"],
+    "related_searches": ["type 2 diabetes symptoms", "type 1 diabetes"],
+    "intent_lanes_detected": ["primary_topic"],
+    "intent_split": "single",
+    "lane_counts": { "primary_topic": 8 },
+    "anchor_serp_rank": null
+  },
+  "limitations": ["Fixture: broken_spoke canonical rows rank page 2+."],
+  "sub_queries": [
+    {
+      "keyword": "type 2 diabetes",
+      "search_volume": 201000,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "core",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": false,
+      "priority": "high",
+      "source": ["related"],
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "broken_spoke",
+      "covering_url": "https://example.com/health/type-2-diabetes/",
+      "rank_group": 23
+    },
+    {
+      "keyword": "type 2 diabetes symptoms",
+      "search_volume": 40500,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:symptoms",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "broken_spoke",
+      "covering_url": "https://example.com/health/diabetes-symptoms/",
+      "rank_group": 30
+    },
+    {
+      "keyword": "What are the first warning signs of type 2 diabetes?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"],
+      "intent_cluster_id": "serp_paa:warning_signs",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "type 1 diabetes",
+      "search_volume": 165000,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:1",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "What are the first warning signs of type 2 diabetes?",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP"
+    },
+    {
+      "keyword": "type 2 diabetes symptoms",
+      "search_volume": 40500,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    },
+    {
+      "keyword": "type 2 diabetes",
+      "search_volume": 201000,
+      "relevance_tier": "core",
+      "priority": "high",
+      "rationale": "Labs expansion aligned with seed"
+    },
+    {
+      "keyword": "type 1 diabetes",
+      "search_volume": 165000,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    }
+  ],
+  "coverage_summary": {
+    "sub_query_count": 4,
+    "covered_count": 2,
+    "hub_count": 0,
+    "spoke_count": 0,
+    "broken_spoke_count": 2,
+    "gap_count": 2,
+    "labs_coverage_rate_pct": 50,
+    "coverage_rate_pct": 50,
+    "cluster_count": 4,
+    "cluster_covered_count": 2,
+    "cluster_gap_count": 2,
+    "cluster_coverage_rate_pct": 50,
+    "gaps_shortlist_count": 2,
+    "gaps_row_total": 3,
+    "coverage_story": "50% of intent clusters covered (2/4); Labs row index 50% on fan-out terms."
+  },
+  "gaps": [
+    {
+      "keyword": "What are the first warning signs of type 2 diabetes?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    },
+    {
+      "keyword": "type 1 diabetes",
+      "search_volume": 165000,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    }
+  ],
+  "hub_spoke_map": [
+    {
+      "url": "https://example.com/health/type-2-diabetes/",
+      "role": "hub",
+      "keywords_served": ["type 2 diabetes"],
+      "links_to_anchor": null
+    },
+    {
+      "url": "https://example.com/health/diabetes-symptoms/",
+      "role": "spoke",
+      "keywords_served": ["type 2 diabetes symptoms"],
+      "links_to_anchor": "https://example.com/health/type-2-diabetes/"
+    }
+  ]
+}

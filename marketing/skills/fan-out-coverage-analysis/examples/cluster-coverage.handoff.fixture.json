@@ -1,0 +1,280 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.9.0",
+  "mode": "domain_coverage",
+  "generated_at": "2026-07-14T12:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "team chat software",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/",
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "tool_discovery"
+  },
+  "serp_context": {
+    "ai_overview_present": true,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": [
+      "What is the best team chat software?",
+      "How to choose team chat software?"
+    ],
+    "related_searches": [
+      "best team chat software"
+    ],
+    "intent_lanes_detected": [
+      "tool_discovery"
+    ],
+    "intent_split": "single",
+    "lane_counts": {
+      "tool_discovery": 10
+    },
+    "anchor_serp_rank": 8
+  },
+  "limitations": [
+    "Hand-computed cluster math: 4 clusters (seed_synonym covered via anchor, best_related hub_serp_only, 2 PAA gaps) → 50% cluster; row Labs index ~10%"
+  ],
+  "sub_queries": [
+    {
+      "keyword": "team chat software",
+      "search_volume": 2400,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": [
+        "related"
+      ],
+      "status": "hub",
+      "covering_url": "https://example.com/",
+      "rank_group": 8,
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    },
+    {
+      "keyword": "software team chat",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "core",
+      "on_seed_serp": false,
+      "priority": "medium",
+      "source": [
+        "suggestions"
+      ],
+      "status": "gap",
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": false,
+      "cluster_role": "alias",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "chat software team",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "core",
+      "on_seed_serp": false,
+      "priority": "medium",
+      "source": [
+        "suggestions"
+      ],
+      "status": "gap",
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": false,
+      "cluster_role": "alias",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "team software chat",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "core",
+      "on_seed_serp": false,
+      "priority": "medium",
+      "source": [
+        "suggestions"
+      ],
+      "status": "gap",
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": false,
+      "cluster_role": "alias",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "software chat team",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "core",
+      "on_seed_serp": false,
+      "priority": "medium",
+      "source": [
+        "suggestions"
+      ],
+      "status": "gap",
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": false,
+      "cluster_role": "alias",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "chat team software",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "core",
+      "on_seed_serp": false,
+      "priority": "medium",
+      "source": [
+        "suggestions"
+      ],
+      "status": "gap",
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": false,
+      "cluster_role": "alias",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "best team chat software",
+      "search_volume": 1200,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": [
+        "serp_related"
+      ],
+      "status": "hub_serp_only",
+      "covering_url": "https://example.com/",
+      "rank_group": 8,
+      "intent_cluster_id": "seed_adjacent:best",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    },
+    {
+      "keyword": "What is the best team chat software?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": [
+        "serp_paa"
+      ],
+      "status": "gap",
+      "intent_cluster_id": "serp_paa:what_is_the_best_team_chat_software",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "How to choose team chat software?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": [
+        "serp_paa"
+      ],
+      "status": "gap",
+      "intent_cluster_id": "serp_paa:how_to_choose_team_chat_software",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "covering_url": null,
+      "rank_group": null
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "What is the best team chat software?",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP"
+    },
+    {
+      "keyword": "How to choose team chat software?",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP"
+    },
+    {
+      "keyword": "best team chat software",
+      "search_volume": 1200,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    },
+    {
+      "keyword": "team chat software",
+      "search_volume": 2400,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Seed keyword on anchor URL"
+    }
+  ],
+  "coverage_summary": {
+    "sub_query_count": 9,
+    "covered_count": 1,
+    "hub_count": 1,
+    "spoke_count": 0,
+    "broken_spoke_count": 0,
+    "gap_count": 7,
+    "labs_coverage_rate_pct": 11,
+    "coverage_rate_pct": 50,
+    "cluster_count": 4,
+    "cluster_covered_count": 2,
+    "cluster_gap_count": 2,
+    "cluster_coverage_rate_pct": 50,
+    "anchor_serp_rank": 8,
+    "gaps_shortlist_count": 2,
+    "gaps_row_total": 7,
+    "coverage_story": "50% of intent clusters covered (2/4); Labs row index 11% on fan-out terms."
+  },
+  "gaps": [
+    {
+      "keyword": "What is the best team chat software?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    },
+    {
+      "keyword": "How to choose team chat software?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    }
+  ],
+  "hub_spoke_map": [
+    {
+      "url": "https://example.com/",
+      "role": "hub",
+      "keywords_served": [
+        "team chat software",
+        "best team chat software"
+      ],
+      "links_to_anchor": null
+    }
+  ]
+}

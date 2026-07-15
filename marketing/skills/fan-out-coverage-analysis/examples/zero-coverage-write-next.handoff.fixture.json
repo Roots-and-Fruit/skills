@@ -1,0 +1,202 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.11.0",
+  "mode": "domain_coverage",
+  "generated_at": "2026-07-14T16:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "best project management software",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/blog/example-pm-guide/",
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "primary_topic",
+    "content_context": "example publisher"
+  },
+  "serp_context": {
+    "ai_overview_present": true,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": [
+      "What's the most popular project management software?",
+      "What is a PMP salary?"
+    ],
+    "related_searches": [
+      "best project management software for construction",
+      "best project management software free"
+    ],
+    "intent_lanes_detected": ["tool_discovery", "community"],
+    "intent_split": "single",
+    "lane_counts": {
+      "tool_discovery": 6,
+      "community": 1
+    },
+    "anchor_serp_rank": null
+  },
+  "limitations": [
+    "Fixture: 0% cluster coverage; tool_discovery-dominant SERP with primary_topic lane."
+  ],
+  "sub_queries": [
+    {
+      "keyword": "What's the most popular project management software?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"],
+      "intent_cluster_id": "serp_paa:popular",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "What is a PMP salary?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "medium",
+      "source": ["serp_paa"],
+      "intent_cluster_id": "serp_paa:salary",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "best project management software for construction",
+      "search_volume": 880,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:construction",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "best project management software free",
+      "search_volume": 320,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:free",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "best project management software reddit",
+      "search_volume": 10,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "core",
+      "intent_lane": "community",
+      "on_seed_serp": false,
+      "priority": "low",
+      "source": ["related"],
+      "intent_cluster_id": "seed_adjacent:reddit",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "What's the most popular project management software?",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP"
+    },
+    {
+      "keyword": "best project management software for construction",
+      "search_volume": 880,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    },
+    {
+      "keyword": "best project management software free",
+      "search_volume": 320,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    },
+    {
+      "keyword": "What is a PMP salary?",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "medium",
+      "rationale": "PAA on seed SERP"
+    }
+  ],
+  "coverage_summary": {
+    "sub_query_count": 5,
+    "covered_count": 0,
+    "hub_count": 0,
+    "spoke_count": 0,
+    "broken_spoke_count": 0,
+    "gap_count": 5,
+    "labs_coverage_rate_pct": 0,
+    "coverage_rate_pct": 0,
+    "cluster_count": 5,
+    "cluster_covered_count": 0,
+    "cluster_gap_count": 5,
+    "cluster_coverage_rate_pct": 0,
+    "gaps_shortlist_count": 3,
+    "gaps_row_total": 5,
+    "coverage_story": "0% of intent clusters covered — prioritize PAA and SERP-native gaps."
+  },
+  "gaps": [
+    {
+      "keyword": "What's the most popular project management software?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    },
+    {
+      "keyword": "best project management software for construction",
+      "search_volume": 880,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    },
+    {
+      "keyword": "best project management software free",
+      "search_volume": 320,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    }
+  ],
+  "hub_spoke_map": []
+}

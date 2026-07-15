@@ -13,6 +13,11 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { sortGapsForHandoff, buildActionableGaps } from "./actionable-gaps.mjs";
+import { computeClusterCoverage, refreshClusterCanonicals } from "./intent-clusters.mjs";
+import { normalizeKeyword } from "./fanout-shared.mjs";
+import { salientTokens } from "./normalize-fanout.mjs";
+import { YEAR_TOKEN_PATTERN } from "./fanout-modifiers.mjs";
 
 function parseArgs(argv) {
   const opts = { handoff: null, ranked: null, output: null };
@@ -31,13 +36,6 @@ function parseArgs(argv) {
 
 function loadJson(filePath) {
   return JSON.parse(readFileSync(path.resolve(filePath), "utf8"));
-}
-
-function normalizeKeyword(value) {
-  return String(value ?? "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 function normalizeUrl(value) {
@@ -181,18 +179,98 @@ export function isBrandedSeedRelated(row, seed) {
   return tokens.some((token) => kw.includes(token));
 }
 
-const PRIORITY_RANK = { high: 2, medium: 1, low: 0 };
+export function isEncyclopediaProfile(handoff) {
+  if (handoff.inputs?.site_profile === "encyclopedia") {
+    return true;
+  }
+  const domain = String(handoff.inputs?.domain ?? "").toLowerCase();
+  return domain.includes("wikipedia") || domain.includes("example-wiki");
+}
 
-export function buildGapsFromSubQueries(subQueries) {
-  return subQueries
-    .filter((row) => row.status === "gap")
-    .filter((row) => row.priority === "high" || row.priority === "medium")
-    .filter((row) => row.relevance_tier !== "facet_drift" || row.priority === "high")
-    .sort(
-      (a, b) =>
-        (PRIORITY_RANK[b.priority] ?? 0) - (PRIORITY_RANK[a.priority] ?? 0) ||
-        (b.search_volume ?? 0) - (a.search_volume ?? 0)
+function isYearSiblingVariant(keyword, seed) {
+  const kwTokens = salientTokens(keyword);
+  const seedSet = new Set(salientTokens(seed));
+  const extras = kwTokens.filter((token) => !seedSet.has(token));
+  return extras.some((token) => YEAR_TOKEN_PATTERN.test(token));
+}
+
+function findSiblingRankMatch(keyword, rankIndex) {
+  const kwTokens = new Set(salientTokens(keyword));
+  if (kwTokens.size < 2) {
+    return null;
+  }
+  let best = null;
+  let bestOverlap = 0;
+  for (const match of rankIndex.values()) {
+    const rankedTokens = salientTokens(match.keyword);
+    const overlap = rankedTokens.filter((token) => kwTokens.has(token)).length;
+    if (overlap >= 2 && overlap > bestOverlap && match.url) {
+      best = match;
+      bestOverlap = overlap;
+    }
+  }
+  return best;
+}
+
+function reconcileEncyclopediaRows(subQueries, rankIndex, anchorUrl, anchorNorm, encyclopedia, seed) {
+  if (!encyclopedia) {
+    return subQueries;
+  }
+
+  return subQueries.map((row) => {
+    const next = { ...row };
+    if (next.status === "gap") {
+      const sibling = findSiblingRankMatch(row.keyword, rankIndex);
+      if (sibling?.url) {
+        const urlNorm = normalizeUrl(sibling.url);
+        next.status = urlNorm === anchorNorm ? "hub" : "spoke";
+        next.covering_url = sibling.url;
+        next.rank_group = sibling.rank_group;
+        return next;
+      }
+    }
+
+    if (next.status === "hub_serp_only" && isYearSiblingVariant(row.keyword, seed)) {
+      next.status = "gap";
+      next.covering_url = null;
+      next.rank_group = null;
+    }
+
+    return next;
+  });
+}
+
+export function buildGapsFromSubQueries(subQueriesOrHandoff) {
+  if (subQueriesOrHandoff && !Array.isArray(subQueriesOrHandoff) && subQueriesOrHandoff.sub_queries) {
+    const handoff = subQueriesOrHandoff;
+    const actionable = buildActionableGaps(handoff).filter(
+      (row) =>
+        row.is_canonical !== false &&
+        row.cluster_role !== "alias" &&
+        (row.status === "gap" || row.status === "broken_spoke")
+    );
+    return sortGapsForHandoff(actionable)
+      .slice(0, 12)
+      .map((row) => ({
+        keyword: row.keyword,
+        search_volume: row.search_volume ?? null,
+        dimension: row.dimension,
+        search_intent: row.search_intent,
+        relevance_tier: row.relevance_tier,
+        priority: row.priority,
+        notes: row.on_seed_serp ? "On seed SERP" : "Labs expansion"
+      }));
+  }
+
+  const subQueries = subQueriesOrHandoff;
+  return sortGapsForHandoff(
+    subQueries.filter(
+      (row) =>
+        row.status === "gap" &&
+        (row.priority === "high" || row.priority === "medium") &&
+        (row.relevance_tier !== "facet_drift" || row.priority === "high")
     )
+  )
     .slice(0, 12)
     .map((row) => ({
       keyword: row.keyword,
@@ -237,16 +315,24 @@ export function buildHubSpokeMap(subQueries, anchorUrl) {
 }
 
 function buildCoverageStory(summary, serpContext, seed) {
-  const anchorRank = serpContext?.anchor_serp_rank ?? summary?.anchor_serp_rank;
+  const clusterPct = summary?.cluster_coverage_rate_pct;
   const labsPct = summary?.labs_coverage_rate_pct ?? summary?.coverage_rate_pct ?? 0;
+  const clusterCount = summary?.cluster_count;
+  const clusterCovered = summary?.cluster_covered_count;
 
-  if (anchorRank != null && labsPct < 70) {
-    return `Anchor ranks #${anchorRank} live for "${seed}"; Labs index not yet updated for fan-out terms.`;
+  if (clusterPct != null && labsPct !== clusterPct) {
+    return `${clusterPct}% of intent clusters covered (${clusterCovered ?? 0}/${clusterCount ?? 0}); Labs row index ${labsPct}% on fan-out terms.`;
   }
-  if (labsPct >= 70) {
-    return "Strong breadth — most fan-out terms have indexed rankings.";
+  if (clusterPct != null && clusterPct < 70) {
+    return `${clusterPct}% of intent clusters covered — prioritize PAA and SERP-native gaps for "${seed}".`;
   }
-  if (labsPct > 0) {
+  if (labsPct < 70 && labsPct > 0) {
+    return "Partial Labs index on fan-out terms — use live SERP context when cluster coverage is higher.";
+  }
+  if ((clusterPct ?? labsPct) >= 70) {
+    return "Strong breadth — most fan-out intent clusters have coverage.";
+  }
+  if ((clusterPct ?? labsPct) > 0) {
     return "Partial coverage — prioritize high-priority gaps in the chosen lane.";
   }
   return "No Labs rankings for fan-out terms yet — use live SERP context when available.";
@@ -267,6 +353,7 @@ export function applyCoverageToHandoff(handoff, rankedData) {
   const anchorNorm = normalizeUrl(anchorUrl);
   const anchorRank = handoff.serp_context?.anchor_serp_rank ?? null;
   const rankIndex = buildRankIndex(parseRankedRows(rankedData));
+  const encyclopedia = isEncyclopediaProfile(handoff);
 
   let hubCount = 0;
   let spokeCount = 0;
@@ -301,6 +388,13 @@ export function applyCoverageToHandoff(handoff, rankedData) {
     }
 
     if (anchorRank != null && anchorUrl && isSeedMatch(row.keyword, seed)) {
+      if (encyclopedia && isYearSiblingVariant(row.keyword, seed)) {
+        next.status = "gap";
+        next.covering_url = null;
+        next.rank_group = null;
+        gapCount += 1;
+        return next;
+      }
       next.status = "hub_serp_only";
       next.covering_url = anchorUrl;
       next.rank_group = anchorRank;
@@ -308,6 +402,13 @@ export function applyCoverageToHandoff(handoff, rankedData) {
     }
 
     if (anchorRank != null && anchorUrl && isBrandedSeedRelated(row, seed)) {
+      if (encyclopedia && isYearSiblingVariant(row.keyword, seed)) {
+        next.status = "gap";
+        next.covering_url = null;
+        next.rank_group = null;
+        gapCount += 1;
+        return next;
+      }
       next.status = "hub_serp_only";
       next.covering_url = anchorUrl;
       next.rank_group = anchorRank;
@@ -321,13 +422,29 @@ export function applyCoverageToHandoff(handoff, rankedData) {
     return next;
   });
 
-  const subQueryCount = subQueries.length;
-  const labsCovered = subQueries.filter((row) =>
+  const reconciled = reconcileEncyclopediaRows(
+    subQueries,
+    rankIndex,
+    anchorUrl,
+    anchorNorm,
+    encyclopedia,
+    seed
+  );
+
+  const canonicalized = refreshClusterCanonicals(reconciled, seed);
+
+  const subQueryCount = canonicalized.length;
+  const labsCovered = canonicalized.filter((row) =>
     ["hub", "spoke", "broken_spoke"].includes(row.status)
   ).length;
-  const gapCountFinal = subQueries.filter((row) => row.status === "gap").length;
+  const gapCountFinal = canonicalized.filter((row) => row.status === "gap").length;
   const labsCoverageRatePct =
     subQueryCount > 0 ? Math.round((labsCovered / subQueryCount) * 100) : 0;
+
+  const clusterStats = computeClusterCoverage(canonicalized, { anchorSerpRank: anchorRank });
+
+  const gapsList = buildGapsFromSubQueries({ ...handoff, sub_queries: canonicalized });
+  const gapsRowTotal = canonicalized.filter((row) => row.status === "gap").length;
 
   const coverageSummary = {
     sub_query_count: subQueryCount,
@@ -337,7 +454,11 @@ export function applyCoverageToHandoff(handoff, rankedData) {
     broken_spoke_count: brokenSpokeCount,
     gap_count: gapCountFinal,
     labs_coverage_rate_pct: labsCoverageRatePct,
-    coverage_rate_pct: labsCoverageRatePct,
+    coverage_rate_pct: clusterStats.cluster_coverage_rate_pct,
+    cluster_count: clusterStats.cluster_count,
+    cluster_covered_count: clusterStats.cluster_covered_count,
+    cluster_gap_count: clusterStats.cluster_gap_count,
+    cluster_coverage_rate_pct: clusterStats.cluster_coverage_rate_pct,
     benchmark_note: ">70% suggested for strong AI visibility breadth"
   };
 
@@ -351,12 +472,21 @@ export function applyCoverageToHandoff(handoff, rankedData) {
     seed
   );
 
+  coverageSummary.gaps_shortlist_count = gapsList.length;
+  coverageSummary.gaps_row_total = gapsRowTotal;
+
   return {
     ...handoff,
-    sub_queries: subQueries,
+    sub_queries: canonicalized,
     coverage_summary: coverageSummary,
-    gaps: buildGapsFromSubQueries(subQueries),
-    hub_spoke_map: buildHubSpokeMap(subQueries, anchorUrl)
+    gaps: gapsList,
+    hub_spoke_map: buildHubSpokeMap(canonicalized, anchorUrl),
+    limitations: encyclopedia
+      ? [
+          ...(handoff.limitations ?? []),
+          "Encyclopedia profile: strengthen/link existing articles — not a net-new content plan."
+        ].filter((value, index, arr) => arr.indexOf(value) === index)
+      : handoff.limitations
   };
 }
 

@@ -1,0 +1,80 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.10.0",
+  "mode": "domain_coverage",
+  "generated_at": "2026-07-14T15:10:00.000Z",
+  "inputs": {
+    "primary_keyword": "example product guide",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/blog/example-product-guide/",
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "tool_discovery"
+  },
+  "serp_context": {
+    "ai_overview_present": false,
+    "people_also_ask": [],
+    "related_searches": ["best example product guide"],
+    "intent_lanes_detected": ["tool_discovery"],
+    "intent_split": "single",
+    "lane_counts": { "tool_discovery": 1 },
+    "anchor_serp_rank": 4
+  },
+  "limitations": [
+    "Hand-computed: anchor is a blog path, not domain root — weak-coverage copy must use hub page phrasing, not homepage."
+  ],
+  "sub_queries": [
+    {
+      "keyword": "best example product guide",
+      "search_volume": 70,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:best",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "hub_serp_only",
+      "covering_url": "https://example.com/blog/example-product-guide/",
+      "rank_group": 4
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "best example product guide",
+      "search_volume": 70,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    }
+  ],
+  "coverage_summary": {
+    "sub_query_count": 1,
+    "covered_count": 0,
+    "hub_count": 0,
+    "spoke_count": 0,
+    "broken_spoke_count": 0,
+    "gap_count": 0,
+    "labs_coverage_rate_pct": 0,
+    "coverage_rate_pct": 100,
+    "cluster_count": 1,
+    "cluster_covered_count": 1,
+    "cluster_gap_count": 0,
+    "cluster_coverage_rate_pct": 100,
+    "anchor_serp_rank": 4,
+    "coverage_story": "100% of intent clusters covered (1/1); Labs row index 0% on fan-out terms."
+  },
+  "gaps": [],
+  "hub_spoke_map": [
+    {
+      "url": "https://example.com/blog/example-product-guide/",
+      "role": "hub",
+      "keywords_served": ["best example product guide"],
+      "links_to_anchor": null
+    }
+  ]
+}

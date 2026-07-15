@@ -8,6 +8,20 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+  buildActionableGaps,
+  brokenSpokeRows,
+  buildWriteNextGaps,
+  coreVariantPermutationRows,
+  isQuestionRow,
+  rowSources
+} from "./actionable-gaps.mjs";
+import { buildDetailReportMarkdown, syncSerpContextFanout } from "./detail-report.mjs";
+import { isRootAnchorUrl } from "./fanout-shared.mjs";
+import { detectLaneMismatch } from "./serp-context.mjs";
+import { isEncyclopediaProfile } from "./apply-coverage.mjs";
+import { isOffTopicDemotablePaa } from "./fanout-modifiers.mjs";
+import { salientTokens } from "./normalize-fanout.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, "..");
@@ -25,30 +39,37 @@ function slugFromHandoff(handoff) {
   return kw.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48);
 }
 
-function highGaps(handoff) {
-  const gapHighs = (handoff.sub_queries ?? []).filter(
-    (row) => row.priority === "high" && row.status === "gap"
+function detectDualLaneReport(handoff) {
+  return (handoff.limitations ?? []).some((line) =>
+    /report both|dual.lane|tool_discovery and primary_topic/i.test(line)
   );
-  if (gapHighs.length > 0) {
-    return gapHighs;
-  }
-
-  const fromGaps = (handoff.gaps ?? []).filter((row) => row.priority === "high");
-  if (fromGaps.length > 0) {
-    return fromGaps;
-  }
-
-  return (handoff.priority_sub_queries ?? []).filter((row) => row.priority === "high");
 }
 
 function facetDriftRows(handoff) {
   return (handoff.sub_queries ?? []).filter((row) => row.relevance_tier === "facet_drift");
 }
 
+function shouldAppendCoverageStory(anchorRank, clusterPct, labsPct, story) {
+  if (!story) {
+    return false;
+  }
+  if (anchorRank != null && clusterPct != null) {
+    return false;
+  }
+  if (anchorRank != null && /anchor ranks #\d+/i.test(story)) {
+    return false;
+  }
+  if (clusterPct != null && labsPct != null && /labs row index/i.test(story)) {
+    return false;
+  }
+  return true;
+}
+
 function coverageStory(handoff) {
   const summary = handoff.coverage_summary ?? {};
   const serp = handoff.serp_context ?? {};
   const labsPct = summary.labs_coverage_rate_pct ?? summary.coverage_rate_pct ?? 0;
+  const clusterPct = summary.cluster_coverage_rate_pct ?? null;
   const anchorRank = serp.anchor_serp_rank ?? summary.anchor_serp_rank ?? null;
   const lines = [];
 
@@ -63,17 +84,28 @@ function coverageStory(handoff) {
     );
   }
 
-  if (labsPct === 0 && anchorRank != null) {
+  if (labsPct === 0 && anchorRank != null && clusterPct == null) {
     lines.push(
       `Our ranking database has not linked your site to these follow-up questions yet — that is common right after publishing. Focus on the content gaps below, not the "0%" headline alone.`
     );
+  } else if (clusterPct != null && clusterPct > 0) {
+    lines.push(
+      `Intent cluster coverage: **${clusterPct}%** (${summary.cluster_covered_count ?? 0}/${summary.cluster_count ?? 0} fan-out intents).`
+    );
+    if (labsPct > 0 && labsPct !== clusterPct) {
+      lines.push(`Labs row index (lagging): **${labsPct}%** (${summary.covered_count ?? 0}/${summary.sub_query_count ?? 0}).`);
+    } else if (labsPct === 0 && anchorRank != null) {
+      lines.push(
+        `Labs row index has not caught up yet — focus on the content gaps below, not the low Labs % alone.`
+      );
+    }
   } else if (labsPct > 0) {
     lines.push(`Indexed coverage on fan-out questions: **${labsPct}%** (${summary.covered_count ?? 0}/${summary.sub_query_count ?? 0}).`);
   } else {
     lines.push(`Indexed coverage on fan-out questions: **${labsPct}%**.`);
   }
 
-  if (summary.coverage_story) {
+  if (shouldAppendCoverageStory(anchorRank, clusterPct, labsPct, summary.coverage_story)) {
     lines.push(summary.coverage_story);
   }
 
@@ -89,17 +121,12 @@ export function buildWorkingList(handoff) {
     items.push("Google shows an AI Overview for this search — fan-out questions matter for visibility");
   }
 
-  if (summary.anchor_serp_rank != null || serp.anchor_serp_rank != null) {
-    const rank = summary.anchor_serp_rank ?? serp.anchor_serp_rank;
-    items.push(`You already rank on page one (~#${rank}) for the main topic`);
-  }
-
   if (handoff.inputs?.intent_lane) {
     items.push(`Analysis focused on your chosen angle (${handoff.inputs.intent_lane.replace(/_/g, " ")})`);
   }
 
-  const highs = highGaps(handoff);
-  if (highs.length > 0 && handoff.mode === "domain_coverage") {
+  const actionable = buildActionableGaps(handoff);
+  if (actionable.length > 0) {
     items.push(`We mapped ${handoff.sub_queries?.length ?? 0} related questions searchers ask`);
   }
 
@@ -110,10 +137,32 @@ export function buildWorkingList(handoff) {
   return items;
 }
 
-function gapToPlainLanguage(row) {
+export function resolveHubRankLabel(handoff) {
+  const anchor = handoff?.inputs?.anchor_url;
+  if (anchor && !isRootAnchorUrl(anchor)) {
+    return "your hub page";
+  }
+  return "homepage";
+}
+
+export function gapToPlainLanguage(row, handoff = null) {
   const kw = row.keyword;
-  if (row.source?.includes?.("serp_paa") || /^(what|how|why|can|does)\b/i.test(kw)) {
+  if (isQuestionRow(row) || rowSources(row).includes("serp_paa")) {
     return `Answer "${kw}" — people ask this directly on Google`;
+  }
+  if (row.coverage_weak || row.status === "hub_serp_only") {
+    const rank = row.rank_group;
+    const hubLabel = handoff ? resolveHubRankLabel(handoff) : "homepage";
+    const rankNote = rank != null ? ` (${hubLabel} ranks ~#${rank} today)` : "";
+    return `Strengthen dedicated content for "${kw}"${rankNote}`;
+  }
+  if (row.status === "broken_spoke") {
+    const rank = row.rank_group;
+    const rankNote = rank != null ? ` (ranks ~#${rank} — page 2+)` : " (page 2+)";
+    return `Strengthen "${kw}"${rankNote} — you have coverage but need a stronger page`;
+  }
+  if (row.on_seed_serp || row.relevance_tier === "serp_native") {
+    return `Cover "${kw}" — searchers use this related query on Google`;
   }
   if (row.relevance_tier === "core" && /how to/i.test(kw)) {
     return `Add a how-to piece or section for "${kw}"`;
@@ -122,24 +171,71 @@ function gapToPlainLanguage(row) {
 }
 
 function buildActionPlan(handoff) {
-  const highs = highGaps(handoff);
-  const fromPriority = handoff.priority_sub_queries ?? [];
-  const seen = new Set();
-  const ordered = [];
+  const chosenLane = handoff.inputs?.intent_lane ?? null;
+  const paaCtx = {
+    chosenLane,
+    seedTokens: salientTokens(handoff.inputs?.primary_keyword ?? "")
+  };
+  return buildWriteNextGaps(handoff, 6)
+    .filter((row) => {
+      if (chosenLane === "tool_discovery" && isOffTopicDemotablePaa(row.keyword, paaCtx)) {
+        return false;
+      }
+      return true;
+    })
+    .map((row, index) => ({
+      step: index + 1,
+      action: gapToPlainLanguage(row, handoff)
+    }));
+}
 
-  for (const row of [...highs, ...fromPriority]) {
-    const key = row.keyword?.toLowerCase();
-    if (!key || seen.has(key) || row.priority === "low") {
-      continue;
-    }
-    seen.add(key);
-    ordered.push(row);
+function hubSpokeDigestLine(handoff) {
+  const map = handoff.hub_spoke_map ?? [];
+  const anchor = handoff.inputs?.anchor_url ?? null;
+  if (map.length <= 1) {
+    return null;
   }
 
-  return ordered.slice(0, 6).map((row, index) => ({
-    step: index + 1,
-    action: gapToPlainLanguage(row)
-  }));
+  const anchorNorm = anchor ? anchor.replace(/\/+$/, "").toLowerCase() : null;
+  const spokes = map.filter((entry) => {
+    const urlNorm = String(entry.url ?? "").replace(/\/+$/, "").toLowerCase();
+    return anchorNorm && urlNorm !== anchorNorm;
+  });
+
+  if (spokes.length === 0) {
+    return null;
+  }
+
+  return `**${spokes.length}** fan-out intents rank on dedicated spoke pages — not on your overview anchor. See the detail report hub/spoke map.`;
+}
+
+function formatVerdictGapHeadline(handoff, actionableCount) {
+  const keyword = handoff.inputs?.primary_keyword ?? "your keyword";
+  const clusterGapCount = handoff.coverage_summary?.cluster_gap_count;
+  const shortlistCount =
+    handoff.coverage_summary?.gaps_shortlist_count ?? handoff.gaps?.length ?? null;
+
+  if (clusterGapCount == null) {
+    return `**${actionableCount} high-priority content gap${actionableCount === 1 ? "" : "s"}** around "${keyword}".`;
+  }
+
+  if (shortlistCount != null && shortlistCount !== clusterGapCount) {
+    return `**${clusterGapCount} intent cluster gap${clusterGapCount === 1 ? "" : "s"}** (${shortlistCount} in shortlist) around "${keyword}".`;
+  }
+
+  return `**${clusterGapCount} intent cluster gap${clusterGapCount === 1 ? "" : "s"}** around "${keyword}".`;
+}
+
+function formatPermutationNote(rows) {
+  if (rows.length === 0) {
+    return [];
+  }
+  const labels = rows.map((row) => row.keyword);
+  if (labels.length <= 3) {
+    return labels.map((label) => `- ${label}`);
+  }
+  const preview = labels.slice(0, 2).join(", ");
+  return [`- ${preview}, and ${labels.length - 2} similar word-order variants`];
 }
 
 /**
@@ -150,21 +246,32 @@ export function buildLaypersonSummaryMarkdown(handoff, options) {
   const keyword = handoff.inputs?.primary_keyword ?? "your keyword";
   const domain = handoff.inputs?.domain;
   const titleDomain = domain ?? "keyword-only";
-  const highs = highGaps(handoff);
+  const actionable = buildActionableGaps(handoff);
+  const brokenSpokes = brokenSpokeRows(handoff);
+  const clusterGapCount = handoff.coverage_summary?.cluster_gap_count;
+  const gapCountForVerdict = clusterGapCount ?? actionable.length;
   const drift = facetDriftRows(handoff);
+  const permutations = coreVariantPermutationRows(handoff);
   const working = buildWorkingList(handoff);
   const coverageLines = coverageStory(handoff);
   const plan = buildActionPlan(handoff);
+  const laneMismatch = detectLaneMismatch(handoff.serp_context ?? {}, handoff.inputs?.intent_lane);
+  const dualLane = detectDualLaneReport(handoff);
+  const encyclopedia = isEncyclopediaProfile(handoff);
+  const hubDigest = hubSpokeDigestLine(handoff);
 
   let verdictHeadline;
   if (handoff.mode === "keyword_only") {
     verdictHeadline = `**Fan-out map ready** for "${keyword}" — no site coverage checked.`;
-  } else if (highs.length === 0) {
+  } else if (encyclopedia && (handoff.coverage_summary?.cluster_coverage_rate_pct ?? 0) >= 50) {
+    verdictHeadline =
+      "**Strong internal coverage** on related topics — strengthen or link existing articles, not net-new pages.";
+  } else if (actionable.length === 0) {
     verdictHeadline = "**Strong coverage** on high-priority follow-up questions for your chosen lane.";
   } else if (coverageLines.some((l) => l.includes("#"))) {
-    verdictHeadline = `**Visible on the main topic, gaps on follow-up questions** — ${highs.length} high-priority content opportunities.`;
+    verdictHeadline = `**Visible on the main topic, gaps on follow-up questions** — ${gapCountForVerdict} intent cluster${gapCountForVerdict === 1 ? "" : "s"} need content.`;
   } else {
-    verdictHeadline = `**${highs.length} high-priority content gaps** around "${keyword}".`;
+    verdictHeadline = formatVerdictGapHeadline(handoff, actionable.length);
   }
 
   const lines = [
@@ -175,6 +282,16 @@ export function buildLaypersonSummaryMarkdown(handoff, options) {
     verdictHeadline,
     "",
     ...coverageLines.map((l) => `- ${l}`),
+    ...(laneMismatch
+      ? [
+          `- **Lane note:** This SERP is mostly **${laneMismatch.dominant.replace(/_/g, " ")}** (${laneMismatch.pct}%) but analysis used **${laneMismatch.chosenLane.replace(/_/g, " ")}** — write-next may not match listicle/commercial intent.`
+        ]
+      : dualLane
+        ? [
+            "- **Lane note:** Mixed SERP — user requested both **tool discovery** and **primary topic** lanes; see detail report for lane attribution on gaps."
+          ]
+        : []),
+    ...(hubDigest ? [`- ${hubDigest}`] : []),
     "",
     "## What's working",
     "",
@@ -184,12 +301,35 @@ export function buildLaypersonSummaryMarkdown(handoff, options) {
     ""
   ];
 
-  if (highs.length === 0) {
+  if (actionable.length === 0) {
     lines.push("- Nothing urgent in your chosen lane");
   } else {
-    for (const row of highs.slice(0, 8)) {
-      lines.push(`- ${gapToPlainLanguage(row)}`);
+    for (const row of actionable.slice(0, 8)) {
+      if (row.status === "broken_spoke") {
+        continue;
+      }
+      lines.push(`- ${gapToPlainLanguage(row, handoff)}`);
     }
+  }
+
+  if (brokenSpokes.length > 0) {
+    lines.push(
+      "",
+      "_Ranks page 2+ — strengthen existing pages, not new URLs:_",
+      ""
+    );
+    for (const row of brokenSpokes.slice(0, 6)) {
+      lines.push(`- ${gapToPlainLanguage(row, handoff)}`);
+    }
+  }
+
+  if (permutations.length > 0) {
+    lines.push(
+      "",
+      "_Not priority (same search intent as the main topic — word-order variants, not separate content jobs):_",
+      ""
+    );
+    lines.push(...formatPermutationNote(permutations));
   }
 
   if (drift.length > 0) {
@@ -220,72 +360,6 @@ export function buildLaypersonSummaryMarkdown(handoff, options) {
   );
 
   return lines.join("\n");
-}
-
-export function buildDetailReportMarkdown(handoff) {
-  const sections = [
-    `# Fan-out detail report — ${handoff.inputs?.primary_keyword ?? "keyword"}`,
-    "",
-    `**Mode:** ${handoff.mode}`,
-    `**Generated:** ${handoff.generated_at ?? ""}`,
-    "",
-    "## Layperson summary inputs",
-    "",
-    `- Domain: ${handoff.inputs?.domain ?? "—"}`,
-    `- Intent lane: ${handoff.inputs?.intent_lane ?? "—"}`,
-    `- Sub-queries: ${handoff.sub_queries?.length ?? 0}`,
-    "",
-    "## SERP context",
-    "",
-    "```json",
-    JSON.stringify(handoff.serp_context ?? {}, null, 2),
-    "```",
-    "",
-    "## Coverage summary",
-    "",
-    "```json",
-    JSON.stringify(handoff.coverage_summary ?? {}, null, 2),
-    "```",
-    "",
-    "## Sub-queries",
-    "",
-    "| Keyword | Tier | Priority | Status |",
-    "|---------|------|----------|--------|"
-  ];
-
-  for (const row of handoff.sub_queries ?? []) {
-    sections.push(
-      `| ${row.keyword} | ${row.relevance_tier} | ${row.priority} | ${row.status ?? "—"} |`
-    );
-  }
-
-  sections.push(
-    "",
-    "## Priority sub-queries",
-    "",
-    "```json",
-    JSON.stringify(handoff.priority_sub_queries ?? [], null, 2),
-    "```",
-    "",
-    "## Gaps",
-    "",
-    "```json",
-    JSON.stringify(handoff.gaps ?? [], null, 2),
-    "```",
-    "",
-    "## Limitations",
-    "",
-    ...(handoff.limitations ?? []).map((l) => `- ${l}`),
-    "",
-    "## Handoff JSON",
-    "",
-    "```json",
-    JSON.stringify(handoff, null, 2),
-    "```",
-    ""
-  );
-
-  return sections.join("\n");
 }
 
 /**
@@ -323,7 +397,8 @@ function main() {
   }
 
   const handoff = loadHandoff(path.resolve(handoffPath));
-  const { summaryMarkdown, detailPath } = writeFanoutReports(handoff, {
+  const synced = normalizeHandoffSerpContext(syncSerpContextFanout(handoff));
+  const { summaryMarkdown, detailPath } = writeFanoutReports(synced, {
     outputDir: outputDir ? path.resolve(outputDir) : undefined
   });
 

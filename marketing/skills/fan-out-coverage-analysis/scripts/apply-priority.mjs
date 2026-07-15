@@ -13,14 +13,22 @@
  */
 import fs from "node:fs";
 import process from "node:process";
-
-const TIER_RANK = { serp_native: 4, core: 3, facet_drift: 2, adjacent: 1 };
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { salientTokens } from "./normalize-fanout.mjs";
+import {
+  isCompetitorShapedExtras,
+  isOffTopicDemotablePaa,
+  isMarketplaceListicleKeyword,
+  isModifierNoiseExtras
+} from "./fanout-modifiers.mjs";
+import { TIER_RANK, isSuggestionOnlyPermutation, rowSources } from "./fanout-shared.mjs";
 
 function parseArgs(argv) {
   let file = null;
   let intentFile = null;
   let intentSplit = "single";
   let lane = null;
+  let seed = "";
 
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -42,10 +50,15 @@ function parseArgs(argv) {
     if (arg === "--lane") {
       lane = argv[i + 1] ?? null;
       i += 1;
+      continue;
+    }
+    if (arg === "--seed") {
+      seed = argv[i + 1] ?? "";
+      i += 1;
     }
   }
 
-  return { file, intentFile, intentSplit, lane };
+  return { file, intentFile, intentSplit, lane, seed };
 }
 
 function readStdin() {
@@ -92,11 +105,21 @@ function laneMatches(row, chosenLane) {
   return Boolean(chosenLane && row.intent_lane === chosenLane);
 }
 
-function assignPriorityMixed(row, chosenLane) {
+/** Labs suggestion reorderings of the seed — not fan-out; cap priority in single-intent mode. */
+function rowExtras(row, seed) {
+  const seedTokenSet = new Set(salientTokens(seed));
+  return salientTokens(row.keyword).filter((token) => !seedTokenSet.has(token));
+}
+
+function assignPriorityMixed(row, chosenLane, seed = "") {
   const volume = Number(row.search_volume ?? 0);
   const tier = row.relevance_tier;
   const onSerp = Boolean(row.on_seed_serp);
-  const isQuestion = row.dimension === "question" || row.sources?.includes("serp_paa");
+  const isQuestion = row.dimension === "question" || rowSources(row).includes("serp_paa");
+
+  if (isQuestion && isOffTopicDemotablePaa(row.keyword, { chosenLane, seedTokens: salientTokens(seed) })) {
+    return "medium";
+  }
 
   if (tier === "adjacent") {
     return "low";
@@ -114,6 +137,14 @@ function assignPriorityMixed(row, chosenLane) {
   }
 
   if (tier === "core") {
+    const extras = rowExtras(row, seed);
+    if (
+      chosenLane === "tool_discovery" &&
+      extras.includes("theme") &&
+      !extras.includes("plugin")
+    ) {
+      return "medium";
+    }
     if (laneMatches(row, chosenLane)) {
       return "high";
     }
@@ -127,6 +158,10 @@ function assignPrioritySingle(row) {
   const volume = Number(row.search_volume ?? 0);
   const tier = row.relevance_tier;
 
+  if (isSuggestionOnlyPermutation(row)) {
+    return "medium";
+  }
+
   if (tier === "serp_native" || volume >= 50) {
     return "high";
   }
@@ -136,14 +171,71 @@ function assignPrioritySingle(row) {
   return "low";
 }
 
-function assignPriority(row, intentSplit, chosenLane) {
+function assignPriority(row, intentSplit, chosenLane, seed = "") {
   if (intentSplit === "mixed") {
-    return assignPriorityMixed(row, chosenLane);
+    return assignPriorityMixed(row, chosenLane, seed);
   }
   return assignPrioritySingle(row);
 }
 
-function buildPrioritySubQueries(rows, maxTotal = 12) {
+function noPaaPriorityRank(row, seed, lane) {
+  if (row.relevance_tier === "serp_native") {
+    return 4;
+  }
+  const extras = rowExtras(row, seed);
+  if (isCompetitorShapedExtras(extras)) {
+    return 3;
+  }
+  if (isModifierNoiseExtras(extras, lane)) {
+    return 0;
+  }
+  return 2;
+}
+
+function isCanonicalRow(row) {
+  return row.is_canonical !== false && row.cluster_role !== "alias";
+}
+
+function demotablePaaSort(a, b, chosenLane, seed) {
+  const ctx = { chosenLane, seedTokens: salientTokens(seed) };
+  const demoteDiff =
+    Number(!isOffTopicDemotablePaa(a.keyword, ctx)) -
+    Number(!isOffTopicDemotablePaa(b.keyword, ctx));
+  if (demoteDiff !== 0) {
+    return demoteDiff;
+  }
+  return 0;
+}
+
+function isUserOwnedDomain(domain, userDomain = "example.com") {
+  const d = String(domain).toLowerCase().replace(/^www\./, "");
+  const user = String(userDomain).toLowerCase().replace(/^www\./, "");
+  return d === user || d.endsWith(`.${user}`);
+}
+
+function marketplaceBoostRank(row, serpContext, intentLane) {
+  if (intentLane !== "tool_discovery") {
+    return 0;
+  }
+  const domains = serpContext?.top_organic_domains ?? [];
+  const userDomain = serpContext?.user_domain ?? "example.com";
+  const hasCompetitorDomains =
+    domains.length > 0 && domains.some((d) => !isUserOwnedDomain(d, userDomain));
+  if (!hasCompetitorDomains) {
+    return 0;
+  }
+  if (isMarketplaceListicleKeyword(row.keyword)) {
+    return 2;
+  }
+  return 0;
+}
+
+export function buildPrioritySubQueries(rows, options = {}) {
+  const maxTotal = options.maxTotal ?? 12;
+  const seed = options.seed ?? "";
+  const intentLane = options.intentLane ?? null;
+  const serpContext = options.serpContext ?? {};
+
   const tierOrder = (a, b) => {
     const tierDiff = (TIER_RANK[b.relevance_tier] ?? 0) - (TIER_RANK[a.relevance_tier] ?? 0);
     if (tierDiff !== 0) {
@@ -157,12 +249,79 @@ function buildPrioritySubQueries(rows, maxTotal = 12) {
     return Number(b.search_volume ?? 0) - Number(a.search_volume ?? 0);
   };
 
-  const eligible = rows.filter(
-    (row) => row.relevance_tier !== "adjacent" && row.priority !== "low"
+  const canonicalRows = rows.filter(isCanonicalRow);
+
+  const paaReserved = canonicalRows
+    .filter(
+      (row) =>
+        rowSources(row).includes("serp_paa") &&
+        row.relevance_tier !== "adjacent" &&
+        row.priority !== "low"
+    )
+    .sort((a, b) => {
+      const demote = demotablePaaSort(a, b, intentLane, seed);
+      if (demote !== 0) {
+        return demote;
+      }
+      return tierOrder(a, b);
+    });
+
+  const paaCtx = { chosenLane: intentLane, seedTokens: salientTokens(seed) };
+  const paaCommercial = paaReserved.filter((row) => !isOffTopicDemotablePaa(row.keyword, paaCtx));
+  const paaDemoted = paaReserved.filter((row) => isOffTopicDemotablePaa(row.keyword, paaCtx));
+  const paaKeys = new Set(paaReserved.map((row) => row.keyword.toLowerCase()));
+
+  const eligible = canonicalRows.filter(
+    (row) =>
+      row.relevance_tier !== "adjacent" &&
+      row.priority !== "low" &&
+      !paaKeys.has(row.keyword.toLowerCase())
   );
-  const highs = eligible.filter((row) => row.priority === "high").sort(tierOrder);
+
+  const noPaaSort = (a, b) => {
+    const marketDiff =
+      marketplaceBoostRank(b, serpContext, intentLane) -
+      marketplaceBoostRank(a, serpContext, intentLane);
+    if (marketDiff !== 0) {
+      return marketDiff;
+    }
+    const rankDiff = noPaaPriorityRank(b, seed, intentLane) - noPaaPriorityRank(a, seed, intentLane);
+    if (rankDiff !== 0) {
+      return rankDiff;
+    }
+    return tierOrder(a, b);
+  };
+
+  const toolDiscoveryWithPaa =
+    paaReserved.length > 0 && (intentLane === "tool_discovery" || paaCommercial.length > 0);
+  const highSort = paaReserved.length === 0 && seed ? noPaaSort : tierOrder;
+  const highs = eligible.filter((row) => row.priority === "high").sort(highSort);
+
+  let paaCommercialCapped = paaCommercial;
+  if (toolDiscoveryWithPaa && intentLane === "tool_discovery" && highs.length > 0) {
+    paaCommercialCapped = paaCommercial.slice(0, 2);
+  }
+
   const mediums = eligible.filter((row) => row.priority === "medium").sort(tierOrder);
-  const combined = [...highs, ...mediums].slice(0, maxTotal);
+  const boostedMarketplace = eligible
+    .filter((row) => marketplaceBoostRank(row, serpContext, intentLane) > 0)
+    .sort(noPaaSort);
+  const boostedKeys = new Set(boostedMarketplace.map((row) => row.keyword.toLowerCase()));
+  const highsFiltered = highs.filter((row) => !boostedKeys.has(row.keyword.toLowerCase()));
+  const mediumsFiltered = mediums.filter((row) => !boostedKeys.has(row.keyword.toLowerCase()));
+  const marketplaceFirst =
+    intentLane === "tool_discovery" && boostedMarketplace.length > 0;
+  const combined = (
+    marketplaceFirst
+      ? [
+          ...boostedMarketplace,
+          ...paaCommercialCapped,
+          ...highsFiltered,
+          ...mediumsFiltered,
+          ...paaDemoted
+        ]
+      : [...paaCommercialCapped, ...highs, ...mediums, ...paaDemoted]
+  ).slice(0, maxTotal);
 
   return combined.map((row) => ({
     keyword: row.keyword,
@@ -189,7 +348,7 @@ function defaultRationale(row) {
 function toHandoffRow(row, intents) {
   const key = row.keyword.toLowerCase();
   const searchIntent = row.search_intent ?? intents[key] ?? null;
-  return {
+  const handoffRow = {
     keyword: row.keyword,
     search_volume: row.search_volume ?? null,
     dimension: row.dimension,
@@ -200,25 +359,65 @@ function toHandoffRow(row, intents) {
     priority: row.priority,
     source: row.sources ?? row.source ?? ["unknown"]
   };
+
+  if (row.intent_cluster_id) {
+    handoffRow.intent_cluster_id = row.intent_cluster_id;
+    handoffRow.is_canonical = row.is_canonical;
+    handoffRow.cluster_role = row.cluster_role;
+  }
+
+  return handoffRow;
+}
+
+export { assignPriority };
+
+export function applyPriorityPipeline(rows, options = {}) {
+  const {
+    intentSplit = "single",
+    lane = null,
+    seed = "",
+    intents = {},
+    serpContext = {}
+  } = options;
+
+  const enriched = rows.map((row) => ({
+    ...row,
+    priority: assignPriority(row, intentSplit, lane, seed)
+  }));
+
+  const sub_queries = enriched.map((row) => toHandoffRow(row, intents));
+  const priority_sub_queries = buildPrioritySubQueries(enriched, {
+    seed,
+    intentLane: lane,
+    serpContext
+  });
+
+  return { sub_queries, priority_sub_queries };
 }
 
 async function main() {
-  const { file, intentFile, intentSplit, lane } = parseArgs(process.argv);
+  const { file, intentFile, intentSplit, lane, seed: seedArg } = parseArgs(process.argv);
   const intents = loadIntents(intentFile);
   const rows = await readInput(file);
+  const seed =
+    seedArg ||
+    rows.find((row) => row.core_keyword)?.core_keyword ||
+    rows[0]?.seed ||
+    "";
 
-  const enriched = rows.map((row) => {
-    const priority = assignPriority(row, intentSplit, lane);
-    return { ...row, priority };
+  const result = applyPriorityPipeline(rows, {
+    intentSplit,
+    lane,
+    seed,
+    intents
   });
 
-  const sub_queries = enriched.map((row) => toHandoffRow(row, intents));
-  const priority_sub_queries = buildPrioritySubQueries(enriched);
-
-  process.stdout.write(`${JSON.stringify({ sub_queries, priority_sub_queries }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exit(1);
-});
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exit(1);
+  });
+}

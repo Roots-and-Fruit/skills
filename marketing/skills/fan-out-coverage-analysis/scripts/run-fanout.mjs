@@ -21,10 +21,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeFanoutItems } from "./normalize-fanout.mjs";
 import { writeFanoutReports } from "./build-layperson-summary.mjs";
+import { syncSerpContextFanout } from "./detail-report.mjs";
 import { applyCoverageToHandoff } from "./apply-coverage.mjs";
+import { normalizeHandoffSerpContext, normalizeIntentSplit } from "./serp-context.mjs";
+import { applyPriorityPipeline } from "./apply-priority.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SKILL_VERSION = "2.8.0";
+const SKILL_VERSION = "2.12.0";
 
 function parseArgs(argv) {
   const opts = {
@@ -72,25 +75,32 @@ function loadJson(filePath) {
   return JSON.parse(readFileSync(path.resolve(filePath), "utf8"));
 }
 
-async function runApplyPriority(rows, intentSplit, lane, intentFile) {
-  const { execFileSync } = await import("node:child_process");
-  const script = path.join(__dirname, "apply-priority.mjs");
-  const args = [
-    script,
-    "--intent-split",
-    intentSplit
-  ];
-  if (lane) {
-    args.push("--lane", lane);
-  }
+function resolveIntentFile(mergedPath, intentFile) {
   if (intentFile) {
-    args.push("--intent-file", path.resolve(intentFile));
+    return path.resolve(intentFile);
   }
-  const stdout = execFileSync(process.execPath, args, {
-    input: JSON.stringify(rows),
-    encoding: "utf8"
-  });
-  return JSON.parse(stdout);
+  if (!mergedPath) {
+    return null;
+  }
+  const base = mergedPath.replace(/-merged\.json$/i, "");
+  const candidate = `${base}-intents.json`;
+  try {
+    readFileSync(path.resolve(candidate), "utf8");
+    return path.resolve(candidate);
+  } catch {
+    return null;
+  }
+}
+
+function loadIntentsMap(intentFile) {
+  if (!intentFile) {
+    return {};
+  }
+  const data = loadJson(intentFile);
+  if (data.intents && typeof data.intents === "object") {
+    return data.intents;
+  }
+  return data;
 }
 
 async function main() {
@@ -103,24 +113,41 @@ async function main() {
     process.exit(2);
   }
 
+  let handoff = opts.partial ? loadJson(opts.partial) : {};
+  const serpContext = handoff.serp_context ?? {};
+  const intentSplit = normalizeIntentSplit(serpContext) || opts.intentSplit;
+
   const merged = loadJson(opts.merged);
   const items = Array.isArray(merged) ? merged : merged.items ?? [];
-  const normalized = await normalizeFanoutItems(items, opts.seed, opts.lane);
-  const applied = await runApplyPriority(
-    normalized,
-    opts.intentSplit,
-    opts.lane,
-    opts.intentFile
-  );
+  const normalized = await normalizeFanoutItems(items, opts.seed, opts.lane, intentSplit);
 
-  let handoff = opts.partial ? loadJson(opts.partial) : {};
+  const intentPath = resolveIntentFile(opts.merged, opts.intentFile);
+  const intents = intentPath ? loadIntentsMap(intentPath) : {};
+
+  const applied = applyPriorityPipeline(normalized, {
+    intentSplit,
+    lane: opts.lane,
+    seed: opts.seed,
+    intents,
+    serpContext
+  });
+
+  const domain = handoff.inputs?.domain ?? "";
+  const siteProfile =
+    handoff.inputs?.site_profile ??
+    (/wikipedia\.org$/i.test(domain) ? "encyclopedia" : null);
+
   handoff = {
-    handoff_version: "1.1",
+    handoff_version: "1.2",
     skill: "fan-out-coverage-analysis",
     skill_version: SKILL_VERSION,
     mode: handoff.mode ?? "keyword_only",
     generated_at: handoff.generated_at ?? new Date().toISOString(),
-    inputs: handoff.inputs ?? { primary_keyword: opts.seed },
+    inputs: {
+      ...(handoff.inputs ?? { primary_keyword: opts.seed }),
+      primary_keyword: handoff.inputs?.primary_keyword ?? opts.seed,
+      ...(siteProfile ? { site_profile: siteProfile } : {})
+    },
     serp_context: handoff.serp_context ?? {},
     limitations: handoff.limitations ?? [],
     ...handoff,
@@ -132,6 +159,9 @@ async function main() {
     const ranked = loadJson(opts.rankedFile);
     handoff = applyCoverageToHandoff(handoff, ranked);
   }
+
+  handoff = syncSerpContextFanout(handoff);
+  handoff = normalizeHandoffSerpContext(handoff);
 
   if (opts.output) {
     const outPath = path.resolve(opts.output);

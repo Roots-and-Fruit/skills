@@ -5,7 +5,7 @@ description: >
   Use when analyzing fan-out coverage, sub-query coverage, topic coverage gaps,
   or keyword-only SERP fan-out without a domain. Simulates AI query fan-out and
   optional domain coverage checks for a keyword.
-version: 2.8.0
+version: 2.12.0
 ---
 
 # Fan-Out Coverage Analysis
@@ -13,6 +13,8 @@ version: 2.8.0
 ## Purpose
 
 Approximate query fan-out from SERP + Labs data. With a **user-supplied domain**, measure which sub-queries the site covers. **Without a domain**, run **keyword-only SERP fan-out** (no coverage checks).
+
+**Public skill:** Domain-agnostic and client-agnostic. Use `example.com` and generic seeds in docs/fixtures only — real domains belong in user prompts at runtime, not committed artifacts.
 
 ## Not this skill
 
@@ -44,7 +46,7 @@ Approximate query fan-out from SERP + Labs data. With a **user-supplied domain**
 
 6. **Layperson chat summary** per `LAYPERSON-OUTPUT.md` — **paste only** the stdout block from `run-fanout.mjs --write-reports` (or `build-layperson-summary.mjs`). Do not add tier tables, verifier lines, MCP logs, or handoff JSON in chat.
 
-**Reference:** `REFERENCE.md` — API params, relevance gates, handoff schema v1.1  
+**Reference:** `REFERENCE.md` — API params, relevance gates, handoff schema v1.2  
 **Requirements:** `REQUIREMENTS.md`  
 **Examples:** `EXAMPLES.md` — mixed-SERP case study + regression scorecard  
 **Layperson contract:** `LAYPERSON-OUTPUT.md`  
@@ -97,9 +99,18 @@ Store chosen lane in `inputs.intent_lane` when provided.
 
 ### Step 1 — Expand sub-queries
 
-Parallel Labs: `related_keywords`, `keyword_suggestions`. Add `keyword_ideas` **only when** `serp_context.serp_result_count` ≥ 200 (or unknown). On thin SERPs, skip ideas — note credit savings in `limitations[]`.
+**Expansion policy (v2.9):**
 
-Merge Step 0 seeds into `{ "items": [ … ] }` via **`ingest-mcp-export.mjs`** (raw MCP JSON) or **`merge-expansion-input.mjs`** (pre-flattened):
+| Source | When |
+|--------|------|
+| SERP seed (Step 0) | Always |
+| `related_keywords` | Always |
+| `keyword_suggestions` | **Skip** when post-merge SERP + related count ≥ 15 **or** `inputs.intent_lane === tool_discovery` |
+| `keyword_ideas` | When `serp_result_count` &lt; 200 **and** related yield &lt; 10 (thin SERP category fan-out) |
+
+Note skipped suggestions or ideas path in `limitations[]`.
+
+Parallel Labs calls per policy above. Merge Step 0 seeds into `{ "items": [ … ] }` via **`ingest-mcp-export.mjs`** (raw MCP JSON) or **`merge-expansion-input.mjs`** (pre-flattened):
 
 ```bash
 node scripts/ingest-mcp-export.mjs --serp raw-serp.json --labs related-raw.json:related --labs suggestions-raw.json:suggestions -o merged.json --intent-out intents.json
@@ -149,9 +160,9 @@ Hub / spoke / broken spoke / gap. WebFetch for broken-spoke check when anchor UR
 
 ### Step 4 — Metrics
 
-Coverage rate and hub/spoke/broken/gap counts. Set `coverage_summary.labs_coverage_rate_pct` (and mirror `coverage_rate_pct` for compatibility). When live SERP shows `inputs.anchor_url` ranking for the seed but Labs has no row, set `serp_context.anchor_serp_rank` and `coverage_summary.coverage_story` in plain language — do not let **0%** stand alone without context. Use `status: hub_serp_only` when live rank exists but Labs index lags.
+Coverage rate and hub/spoke/broken/gap counts. **SSOT for user-facing %:** `coverage_summary.cluster_coverage_rate_pct` (intent clusters). Set `coverage_summary.labs_coverage_rate_pct` as row-level Labs index; mirror `coverage_rate_pct` to cluster rate for v1.2 handoffs. When live SERP shows `inputs.anchor_url` ranking for the seed but Labs has no row, set `serp_context.anchor_serp_rank` and `coverage_summary.coverage_story` in plain language — do not let **0%** stand alone without context. Use `status: hub_serp_only` when live rank exists but Labs index lags. Seed-synonym clusters count as covered when anchor ranks on seed.
 
-**Complete when:** `coverage_summary` counts match `sub_queries[]`; Labs rate is mathematically consistent; live anchor rank recorded when known.
+**Complete when:** `coverage_summary` cluster counts match canonical rollup; Labs row rate internally consistent; live anchor rank recorded when known.
 
 ### Step 5 — Report (domain)
 
@@ -159,8 +170,10 @@ Coverage rate and hub/spoke/broken/gap counts. Set `coverage_summary.labs_covera
 
 Required sections in **detail report**:
 
+- **SERP fan-out ingested** — PAA and related from accepted `sub_queries` (SSOT; supersedes shallow SERP snapshot)
 - **SERP intent note** (mandatory when `intent_split` is `mixed`)
-- **Coverage map** — include `Tier` column (`relevance_tier`)
+- **Coverage map** — tier, status, cluster, intent, source columns
+- **Intent clusters** + **weak coverage** (`hub_serp_only`) when domain mode
 - **Priority gaps** — prefer `serp_native` / `core` in chosen lane; list `facet_drift` separately if mixed
 - **Limitations** — data confidence, AIO source, lane choice, Labs vs live SERP
 
@@ -168,7 +181,7 @@ Required sections in **detail report**:
 
 ### Step 6 — Handoff (domain)
 
-Emit `mode: "domain_coverage"`, `handoff_version: "1.1"`, `skill`, `skill_version` per `REFERENCE.md`.
+Emit `mode: "domain_coverage"`, `handoff_version: "1.2"`, `skill`, `skill_version` per `REFERENCE.md`.
 
 **Complete when:** `node scripts/verify-handoff.mjs <path>` exits 0.
 
@@ -194,7 +207,7 @@ Optional: `dataforseo_labs_google_serp_competitors` for market context.
 
 ### Step 6b — Handoff (keyword-only)
 
-Emit `mode: "keyword_only"`, `handoff_version: "1.1"`, `skill`, `skill_version`. `domain` is `null`.
+Emit `mode: "keyword_only"`, `handoff_version: "1.2"`, `skill`, `skill_version`. `domain` is `null`.
 
 **Complete when:** `node scripts/verify-handoff.mjs <path>` exits 0.
 
@@ -216,7 +229,7 @@ Emit `mode: "keyword_only"`, `handoff_version: "1.1"`, `skill`, `skill_version`.
 - [ ] `apply-priority.mjs` run after search intent (no manual priority labels)
 - [ ] Each sub-query has `relevance_tier`; facet drift tagged where applicable
 - [ ] Priority follows tier rules (SERP-native &gt; volume when mixed)
-- [ ] Handoff includes `handoff_version: "1.1"`, `skill`, `skill_version`, extended `serp_context`
+- [ ] Handoff includes `handoff_version: "1.2"`, `skill`, `skill_version`, extended `serp_context`
 - [ ] Low-confidence flag when seed volume &lt; 50/mo or thin SERP
 - [ ] ≥20 accepted sub-queries on live runs (25–30 target); limitations stated if fewer
 - [ ] `node scripts/verify-handoff.mjs` passes on emitted handoff
@@ -230,4 +243,34 @@ Emit `mode: "keyword_only"`, `handoff_version: "1.1"`, `skill`, `skill_version`.
 
 - Fan-out approximates AI decomposition; not a literal trace.
 - Credits: `REFERENCE.md`.
-- **Maintainers:** after substantive changes, run `node scripts/verify-all.mjs` (S1–S12, G/R, LP1–LP10). Re-run live SERP on mixed-intent golden seeds quarterly.
+- **Maintainers:** after substantive changes, run `node scripts/verify-all.mjs` (S1–S12, G/R, LP1–LP30, CL1–CL13, SC1–SC4, NR1, EP1–EP5, C1–C22, DR1–DR9, AG1–AG4, PR1–PR7, PA1–PA8, I1–I9, XP1–XP4). Re-run live SERP on mixed-intent golden seeds quarterly.
+
+### v2.12.0 — Battle-test remediation (Shopify / Allrecipes / HubSpot / Crunchbase / Wikipedia / Notion)
+
+- **Off-topic PAA demotion (SSOT)** — health/YMYL, hustle/cost, pricing-adjacent PAAs rejected or demoted on `primary_topic` lanes; hustle PAAs capped in tool_discovery write-next.
+- **Partial-coverage write-next** — when `tool_discovery` has partial cluster coverage, commercial `serp_native` related ranks before hustle PAAs (`AG4` / `LP29`).
+- **Mixed-SERP commercial modifiers** — `free`, `jobs`, `course`, `pdf`, `download` → `facet_drift` when `intent_split: mixed` (`PA8`, `R3`, `R15`).
+- **Homograph brand leak** — e.g. `pricing page wise` rejected at normalize (`NR1`).
+- **G23 thin all-gap runs** — passes when all gap rows fit under cap 12; fails only when truncation expected but missing.
+- **Nested Labs ingest** — one-level flatten of `related_keywords` (`I9`).
+- **Marketplace competitor priority** — listicle/marketplace related before PAA when competitor domains on SERP (`PR7`).
+- **Encyclopedia profile** — `inputs.site_profile: encyclopedia`; sibling spoke reconciliation; layperson strengthen/link copy (`EP1–EP5`).
+- **Dual-lane layperson** — lane note when limitations report both lanes (`LP30`, `SC4`).
+- **Intent-file auto-wire** — `run-fanout.mjs` resolves sibling `*-intents.json` when `--merged` provided.
+
+### v2.11.0 — Battle-test hardening (Healthline / NYT)
+
+- **Numeric permutation guard** — `type 1` vs `type 2` tokens no longer collapse to `seed_synonym`.
+- **`broken_spoke` layperson section** — page 2+ ranks surfaced as strengthen, not net-new.
+- **Lane mismatch verdict** — warns when SERP-dominant lane ≠ chosen `intent_lane`; `intent_split` normalized from `lane_counts`.
+- **Career PAA demotion** — salary/PMI/big-3 PAAs rank after commercial related on tool SERPs.
+- **Zero-coverage write-next blend** — caps non-career PAAs at 3, fills with high-volume `serp_native` related.
+
+### v2.10.0 — No-PAA hardening
+
+- **Post-coverage canonical refresh** for `seed_synonym` clusters (`refreshClusterCanonicals`) — covered row wins over gap anagram alias.
+- **Actionable gaps** demote seed permutations when the cluster already has coverage.
+- **Detail report** cluster rollup status (`covered` / `weak` / `gap`); hub-path copy for non-root anchors.
+- **Modifier collapse** (`reddit`, years, redundant `download`) into parent `seed_adjacent` clusters.
+- **No-PAA priority** — SERP-native commercial terms first; competitor gaps before modifier/theme noise under `tool_discovery`.
+- **`gaps_shortlist_count` / `gaps_row_total`** in `coverage_summary`; detail gaps header labels shortlist vs totals.

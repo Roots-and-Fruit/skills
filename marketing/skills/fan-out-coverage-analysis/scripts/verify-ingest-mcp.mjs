@@ -84,6 +84,34 @@ checks.push({
   detail: "ingest returns intents map when intent export provided"
 });
 
+checks.push({
+  id: "I7",
+  pass: () => {
+    const items = extractLabsItems(loadJson("mcp-labs-related-core-keyword.fixture.json"), "related");
+    return items.every((row) => row.core_keyword === "team chat software");
+  },
+  detail: "ingest preserves core_keyword on Labs items"
+});
+
+checks.push({
+  id: "I8",
+  pass: () => {
+    const items = extractLabsItems(loadJson("mcp-labs-related-core-keyword.fixture.json"), "related");
+    const cores = new Set(items.map((row) => row.core_keyword));
+    return items.length === 2 && cores.size === 1 && cores.has("team chat software");
+  },
+  detail: "related keywords share core_keyword from Labs properties"
+});
+
+checks.push({
+  id: "I9",
+  pass: () => {
+    const items = extractLabsItems(loadJson("nested-related-labs-raw.json"), "related");
+    return items.some((row) => row.keyword === "example nested child keyword");
+  },
+  detail: "nested Labs related_keywords flattened one level into items"
+});
+
 let failed = 0;
 for (const check of checks) {
   const pass = check.pass();

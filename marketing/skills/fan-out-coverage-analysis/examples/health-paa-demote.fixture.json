@@ -1,0 +1,26 @@
+{
+  "seed": "example sourdough starter",
+  "intent_split": "mixed",
+  "intent_lane": "primary_topic",
+  "items": [
+    {
+      "keyword": "How do you make example sourdough starter?",
+      "search_volume": 0,
+      "source": "serp_paa"
+    },
+    {
+      "keyword": "Is example bread ok for high blood pressure?",
+      "search_volume": 0,
+      "source": "serp_paa"
+    },
+    {
+      "keyword": "example sourdough starter kit",
+      "search_volume": 500,
+      "source": "serp_related"
+    }
+  ],
+  "expected": {
+    "rejected_keywords": ["Is example bread ok for high blood pressure?"],
+    "accepted_paa": ["How do you make example sourdough starter?"]
+  }
+}

@@ -90,7 +90,8 @@ export function itemsFromLabs(data, defaultSource) {
     .map((row) => ({
       keyword: String(row.keyword ?? "").trim(),
       search_volume: Number(row.search_volume ?? row.volume ?? 0),
-      source: row.source ?? defaultSource
+      source: row.source ?? defaultSource,
+      core_keyword: row.core_keyword ?? null
     }))
     .filter((row) => row.keyword.length > 0);
 }

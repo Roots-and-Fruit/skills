@@ -1,0 +1,53 @@
+{
+  "seed": "wordpress membership plugin",
+  "limitations": [
+    "Hand-computed: 4 clusters — seed_adjacent:best (2 rows), seed_adjacent:free (2), seed_adjacent:simple (2), seed_adjacent:divi (1)"
+  ],
+  "rows": [
+    {
+      "keyword": "best wordpress membership plugin",
+      "search_volume": 170,
+      "sources": ["serp_related"]
+    },
+    {
+      "keyword": "best membership plugin wordpress",
+      "search_volume": 90,
+      "sources": ["related"],
+      "core_keyword": "wordpress membership plugin"
+    },
+    {
+      "keyword": "free wordpress membership plugin",
+      "search_volume": 110,
+      "sources": ["serp_related"]
+    },
+    {
+      "keyword": "wordpress membership plugin free",
+      "search_volume": 80,
+      "sources": ["suggestions"]
+    },
+    {
+      "keyword": "simple membership plugin",
+      "search_volume": 30,
+      "sources": ["serp_related"]
+    },
+    {
+      "keyword": "simple membership plugin wordpress",
+      "search_volume": 20,
+      "sources": ["related"]
+    },
+    {
+      "keyword": "divi membership plugin",
+      "search_volume": 10,
+      "sources": ["related"]
+    }
+  ],
+  "expected": {
+    "cluster_count": 4,
+    "merge_pairs": [
+      ["best wordpress membership plugin", "best membership plugin wordpress"],
+      ["free wordpress membership plugin", "wordpress membership plugin free"],
+      ["simple membership plugin", "simple membership plugin wordpress"]
+    ],
+    "serp_canonical_keyword": "best wordpress membership plugin"
+  }
+}

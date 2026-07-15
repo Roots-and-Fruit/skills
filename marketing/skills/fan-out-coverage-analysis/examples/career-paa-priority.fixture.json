@@ -1,0 +1,50 @@
+{
+  "seed": "best project management software",
+  "intent_split": "mixed",
+  "intent_lane": "primary_topic",
+  "limitations": [
+    "Hand-computed: commercial PAA + construction related before career PAA (PMP salary)."
+  ],
+  "rows": [
+    {
+      "keyword": "What's the most popular project management software?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "sources": ["serp_paa"],
+      "on_seed_serp": true,
+      "intent_cluster_id": "serp_paa:popular",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    },
+    {
+      "keyword": "What is a PMP salary?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "sources": ["serp_paa"],
+      "on_seed_serp": true,
+      "intent_cluster_id": "serp_paa:salary",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    },
+    {
+      "keyword": "best project management software for construction",
+      "search_volume": 880,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "sources": ["serp_related"],
+      "on_seed_serp": true,
+      "intent_cluster_id": "seed_adjacent:construction",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    }
+  ],
+  "expected": {
+    "priority_order": [
+      "What's the most popular project management software?",
+      "best project management software for construction",
+      "What is a PMP salary?"
+    ]
+  }
+}

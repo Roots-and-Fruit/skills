@@ -1,0 +1,141 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.10.0",
+  "mode": "domain_coverage",
+  "generated_at": "2026-07-14T15:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "example backup software",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/",
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "tool_discovery"
+  },
+  "serp_context": {
+    "ai_overview_present": false,
+    "people_also_ask": [],
+    "related_searches": ["best example backup software"],
+    "intent_lanes_detected": ["tool_discovery"],
+    "intent_split": "single",
+    "lane_counts": { "tool_discovery": 3 },
+    "anchor_serp_rank": 4
+  },
+  "limitations": [
+    "Hand-computed actionable gaps: 1 (competitor backup plugin gap). Anagram backup software example excluded — seed_synonym cluster covered.",
+    "Hand-computed clusters: 2 (seed_synonym covered, seed_adjacent:competitor gap). cluster_coverage_rate_pct = 50."
+  ],
+  "sub_queries": [
+    {
+      "keyword": "example backup software",
+      "search_volume": 390,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "core",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": false,
+      "priority": "high",
+      "source": ["related"],
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "hub_serp_only",
+      "covering_url": "https://example.com/",
+      "rank_group": 4
+    },
+    {
+      "keyword": "backup software example",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "core",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": false,
+      "priority": "high",
+      "source": ["related"],
+      "intent_cluster_id": "seed_synonym",
+      "is_canonical": false,
+      "cluster_role": "alias",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "competitor backup plugin",
+      "search_volume": 50,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "core",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": false,
+      "priority": "high",
+      "source": ["related"],
+      "intent_cluster_id": "seed_adjacent:competitor",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "backup software example",
+      "search_volume": 0,
+      "relevance_tier": "core",
+      "priority": "high",
+      "rationale": "Labs expansion aligned with seed"
+    },
+    {
+      "keyword": "competitor backup plugin",
+      "search_volume": 50,
+      "relevance_tier": "core",
+      "priority": "high",
+      "rationale": "Labs expansion aligned with seed"
+    },
+    {
+      "keyword": "best example backup software",
+      "search_volume": 70,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Related search on seed SERP"
+    }
+  ],
+  "coverage_summary": {
+    "sub_query_count": 3,
+    "covered_count": 0,
+    "hub_count": 0,
+    "spoke_count": 0,
+    "broken_spoke_count": 0,
+    "gap_count": 2,
+    "labs_coverage_rate_pct": 0,
+    "coverage_rate_pct": 50,
+    "cluster_count": 2,
+    "cluster_covered_count": 1,
+    "cluster_gap_count": 1,
+    "cluster_coverage_rate_pct": 50,
+    "anchor_serp_rank": 4,
+    "gaps_shortlist_count": 1,
+    "gaps_row_total": 2,
+    "coverage_story": "50% of intent clusters covered (1/2); Labs row index 0% on fan-out terms."
+  },
+  "gaps": [
+    {
+      "keyword": "competitor backup plugin",
+      "search_volume": 50,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "core",
+      "priority": "high",
+      "notes": "Labs expansion"
+    }
+  ],
+  "hub_spoke_map": [
+    {
+      "url": "https://example.com/",
+      "role": "hub",
+      "keywords_served": ["example backup software"],
+      "links_to_anchor": null
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "keyword": "What is the difference between ProductA and ProductB?",
+      "search_volume": 0,
+      "source": "serp_paa"
+    },
+    {
+      "keyword": "How much does the starter plan cost?",
+      "search_volume": 0,
+      "source": "serp_paa"
+    },
+    {
+      "keyword": "is team chat software outdated in 2026",
+      "search_volume": 0,
+      "source": "serp_paa"
+    },
+    {
+      "keyword": "best team chat software",
+      "search_volume": 1200,
+      "source": "serp_related"
+    }
+  ],
+  "seed": "team chat software"
+}

@@ -149,14 +149,23 @@ Apply to **ideas, suggestions, related items, and nested related strings** — n
 2. **Reject** platform-meta PAA matching patterns in `REFERENCE` platform-meta list (e.g. “outdated in 20XX”, “moving away from”, “what is replacing”, “leaving”) unless user widened scope.
 3. When seed has **≥3** salient tokens: require **≥2** token overlap **or** `serp_related` match **or** alignment with chosen `intent_lane`.
 4. When seed has **≤2** salient tokens: require **≥1** overlap.
+5. **Off-topic demotable PAA (v2.12, `isOffTopicDemotablePaa` SSOT):** on `primary_topic` lanes, reject or demote PAAs matching:
 
-### Facet drift
+| Category | Example tokens / patterns |
+|----------|---------------------------|
+| Health / YMYL | `blood pressure`, `blood sugar`, `diabetes`, `spike` (when absent from seed) |
+| Hustle / cost | `$100`, `fail`, `enough to start`, `per month` |
+| Pricing-adjacent | `how much is`, `worth`, `cost to send` |
+| Career (v2.11) | `salary`, `PMP`, `big 3` |
+
+On `tool_discovery`, demotable PAAs rank after commercial related; excluded from layperson write-next but may remain in priority shortlist after marketplace/listicle rows.
 
 A term **shares seed tokens** but changes the job — typically Labs suggestions swapping one facet for another (e.g. seed = “market your plugin”, expansion = “email marketing plugin”).
 
 Signals:
 
 - Contains facet tokens **not** in seed: `email`, `newsletter`, `affiliate`, `crm`, `seo`, `analytics`, `sms`, `referral`, etc.
+- **Commercial modifiers on mixed SERP (v2.12):** `free`, `jobs`, `course`, `pdf`, `download` when `intent_split: mixed` and row is not the seed keyword
 - Classified as `tool_discovery` lane mismatch vs user’s `intent_lane`
 - High Labs volume but absent from seed SERP related searches and PAA
 
@@ -267,7 +276,58 @@ Exact-match filter per high-priority gap in **chosen lane**.
 
 **MCP filter limit:** max 3 top-level filter elements per call.
 
-## Handoff schema v1.1
+## Handoff schema v1.2
+
+Set `handoff_version: "1.2"`. v1.1 fields remain valid; v1.2 adds intent-cluster fields below.
+
+### Top-level fields (all modes)
+
+```json
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.12.0",
+  "mode": "keyword_only | domain_coverage",
+  "generated_at": "ISO 8601",
+  "limitations": ["string"]
+}
+```
+
+**Regression:** `node scripts/verify-all.mjs` — includes G1–G23, R1–R15, PA1–PA8, CL1–CL13, NR1, EP1–EP5, SC1–SC4, C/LP/DR/AG/PR/XP/I layers.
+
+**G23 (v2.12):** `gaps_shortlist_count` must equal `gaps[]` length and be ≤ `gaps_row_total`. **Fail** only when `gaps_row_total > 12` and `gaps_shortlist_count === gaps_row_total` (truncation to 12 expected). Thin all-gap runs where every gap fits under the cap **pass**.
+
+**Encyclopedia profile (v2.12):** Set `inputs.site_profile: "encyclopedia"` (auto for `wikipedia.org` domains in `run-fanout.mjs`). Coverage reconciliation maps gap keywords to ranked sibling articles as `spoke`; year-only variants do not get `hub_serp_only` on anchor. Layperson copy favors strengthen/link existing articles.
+
+**Nested Labs ingest (v2.12):** `ingest-mcp-export.mjs` flattens one level of `keyword_properties.related_keywords`, dedupes, caps at 50 per parent.
+
+### v1.2 cluster fields (`sub_queries[]`)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `intent_cluster_id` | string | Stable cluster key (`seed_synonym`, `seed_adjacent:…`, `serp_paa:…`, `intent_sig:…`) |
+| `is_canonical` | boolean | One canonical row per cluster |
+| `cluster_role` | string | `canonical` \| `alias` |
+
+### v1.2 `coverage_summary` (domain mode)
+
+| Field | SSOT |
+|-------|------|
+| `cluster_coverage_rate_pct` | **User-facing coverage %** |
+| `cluster_count` / `cluster_covered_count` / `cluster_gap_count` | Intent cluster rollup |
+| `labs_coverage_rate_pct` | Row-level Labs index (may lag live SERP) |
+| `gaps_shortlist_count` | Length of actionable `gaps[]` shortlist (max 12) |
+| `gaps_row_total` | Count of sub-query rows with `status: gap` |
+
+**Canonical refresh (v2.10):** After `apply-coverage`, `refreshClusterCanonicals` reassigns `is_canonical` on `seed_synonym` clusters so covered rows (including `hub_serp_only`) win over gap anagram aliases.
+
+**`gaps[]` shortlist:** Actionable canonical gaps from `priority_sub_queries` — not the same as `gaps_row_total` or `cluster_gap_count`. Detail report header: `Gaps (shortlist N of M row gaps, K cluster gaps)`.
+
+**PAA ingest:** SERP `serp_paa` rows skip token-overlap gate; only platform-meta patterns reject.
+
+**Optional Step 1b enrichment:** `dataforseo_labs_google_keyword_overview` on canonical keywords post-normalize (batch ≤ 30) for volume/intent validation.
+
+## Handoff schema v1.1 (legacy)
 
 Set `handoff_version: "1.1"`. v1.0 fields remain valid; v1.1 adds optional fields below.
 
@@ -296,7 +356,8 @@ Set `handoff_version: "1.1"`. v1.0 fields remain valid; v1.1 adds optional field
   "location_name": "string",
   "language_code": "string",
   "intent_lane": "primary_topic | tool_discovery | community | directory | null",
-  "content_context": "string | null"
+  "content_context": "string | null",
+  "site_profile": "encyclopedia | null"
 }
 ```
 

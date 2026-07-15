@@ -1,0 +1,47 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.12.0",
+  "mode": "domain_coverage",
+  "inputs": {
+    "primary_keyword": "example sourdough starter",
+    "domain": "example.com",
+    "intent_lane": "primary_topic"
+  },
+  "serp_context": {
+    "intent_split": "mixed"
+  },
+  "limitations": [],
+  "sub_queries": [
+    {
+      "keyword": "How do you make example sourdough starter?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"],
+      "intent_cluster_id": "serp_paa:how",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap"
+    },
+    {
+      "keyword": "Is example bread ok for high blood pressure?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"],
+      "intent_cluster_id": "serp_paa:pressure",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap"
+    }
+  ],
+  "coverage_summary": {
+    "cluster_covered_count": 0,
+    "cluster_gap_count": 2
+  }
+}

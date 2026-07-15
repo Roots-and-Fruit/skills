@@ -1,0 +1,29 @@
+{
+  "tasks": [
+    {
+      "result": [
+        {
+          "items": [
+            {
+              "keyword_data": {
+                "keyword": "example parent pricing keyword",
+                "keyword_info": { "search_volume": 40 },
+                "keyword_properties": {
+                  "core_keyword": "example parent pricing keyword",
+                  "related_keywords": [
+                    {
+                      "keyword_data": {
+                        "keyword": "example nested child keyword",
+                        "keyword_info": { "search_volume": 10 }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

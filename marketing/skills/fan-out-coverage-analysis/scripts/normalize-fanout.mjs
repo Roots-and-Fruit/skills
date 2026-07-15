@@ -13,6 +13,13 @@
  */
 import fs from "node:fs";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
+import { assignClusters } from "./intent-clusters.mjs";
+import {
+  hasCommercialModifierDrift,
+  isHealthAdjacentPaa,
+  isHomographBrandLeak
+} from "./fanout-modifiers.mjs";
 
 const STOPWORDS = new Set([
   "a", "an", "the", "for", "to", "on", "in", "with", "and", "or", "of", "is", "at", "by"
@@ -81,11 +88,23 @@ function isPlatformMetaPaa(keyword) {
   return PLATFORM_META_PAA.test(keyword);
 }
 
-function isFacetDrift(keyword, seedTokens) {
+function isFacetDrift(keyword, seedTokens, options = {}) {
   const kwTokens = salientTokens(keyword);
   const seedSet = new Set(seedTokens);
   const extraFacets = kwTokens.filter((t) => FACET_TOKENS.has(t) && !seedSet.has(t));
-  return extraFacets.length > 0;
+  if (extraFacets.length > 0) {
+    return true;
+  }
+  if (options.intentSplit === "mixed" && hasCommercialModifierDrift(keyword, seedTokens)) {
+    const rowLane = options.rowIntentLane ?? null;
+    if (rowLane === "tool_discovery" || !options.chosenLane) {
+      return true;
+    }
+    if (options.chosenLane === "primary_topic" && rowLane === "tool_discovery") {
+      return true;
+    }
+  }
+  return false;
 }
 
 function tokenOverlapCount(keyword, seedTokens) {
@@ -94,9 +113,17 @@ function tokenOverlapCount(keyword, seedTokens) {
 }
 
 /** REFERENCE unified gate — zero overlap always rejects (incl. serp_related brands). */
-export function passesRelevanceGate(keyword, seedTokens, source) {
-  if (source === "serp_paa" && isPlatformMetaPaa(keyword)) {
-    return false;
+export function passesRelevanceGate(keyword, seedTokens, source, options = {}) {
+  const chosenLane = options.chosenLane ?? null;
+
+  if (source === "serp_paa") {
+    if (isPlatformMetaPaa(keyword)) {
+      return false;
+    }
+    if (chosenLane === "primary_topic" && isHealthAdjacentPaa(keyword, seedTokens)) {
+      return false;
+    }
+    return true;
   }
 
   const overlap = tokenOverlapCount(keyword, seedTokens);
@@ -104,11 +131,8 @@ export function passesRelevanceGate(keyword, seedTokens, source) {
     return false;
   }
 
-  if (source === "serp_paa") {
-    if (seedTokens.length >= 3 && overlap < 2) {
-      return false;
-    }
-    return true;
+  if (SERP_SOURCES.has(source) && isHomographBrandLeak(keyword, seedTokens)) {
+    return false;
   }
 
   if (SERP_SOURCES.has(source)) {
@@ -124,25 +148,25 @@ export function passesRelevanceGate(keyword, seedTokens, source) {
   return true;
 }
 
-function buildSerpSeeds(items, seedTokens) {
+function buildSerpSeeds(items, seedTokens, chosenLane = null) {
   const seeds = new Set();
   for (const item of items) {
     const source = item.source ?? "unknown";
     if (!SERP_SOURCES.has(source)) {
       continue;
     }
-    if (passesRelevanceGate(item.keyword, seedTokens, source)) {
+    if (passesRelevanceGate(item.keyword, seedTokens, source, { chosenLane })) {
       seeds.add(normalizeKeyword(item.keyword));
     }
   }
   return seeds;
 }
 
-function classifyDimension(keyword, seedTokens) {
+function classifyDimension(keyword, seedTokens, facetOptions = {}) {
   const lower = keyword.toLowerCase();
   const overlap = tokenOverlapCount(keyword, seedTokens);
 
-  if (isFacetDrift(keyword, seedTokens)) {
+  if (isFacetDrift(keyword, seedTokens, facetOptions)) {
     return "facet_drift";
   }
   if (/^(how|what|why|can|does|do|is|are)\b/.test(lower)) {
@@ -160,7 +184,16 @@ function classifyDimension(keyword, seedTokens) {
   return "detail_drill";
 }
 
-function relevanceTier(keyword, seedTokens, serpSeeds, source, dimension, intentLane, chosenLane) {
+function relevanceTier(
+  keyword,
+  seedTokens,
+  serpSeeds,
+  source,
+  dimension,
+  intentLane,
+  chosenLane,
+  facetOptions = {}
+) {
   if (source === "serp_paa" && isPlatformMetaPaa(keyword)) {
     return "adjacent";
   }
@@ -170,7 +203,7 @@ function relevanceTier(keyword, seedTokens, serpSeeds, source, dimension, intent
     source === "serp_paa" ||
     source === "serp_related" ||
     source === "related_searches";
-  const drift = dimension === "facet_drift" || isFacetDrift(keyword, seedTokens);
+  const drift = dimension === "facet_drift" || isFacetDrift(keyword, seedTokens, facetOptions);
 
   if (onSerp) {
     if (drift) {
@@ -212,6 +245,63 @@ function priorityScore(entry, seedTokens, chosenLane) {
   return score;
 }
 
+export function isSeedTokenPermutation(keyword, seedOrTokens) {
+  const seedTokens = Array.isArray(seedOrTokens)
+    ? seedOrTokens
+    : permutationTokens(seedOrTokens);
+  const kwTokens = permutationTokens(keyword);
+  if (seedTokens.length === 0 || kwTokens.length !== seedTokens.length) {
+    return false;
+  }
+  return kwTokens.slice().sort().join(" ") === seedTokens.slice().sort().join(" ");
+}
+
+/** Token bag for permutation checks — keeps numeric tokens (e.g. type 1 vs type 2). */
+export function permutationTokens(text) {
+  return expandAcronyms(text)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((t) => {
+      if (!t || STOPWORDS.has(t)) {
+        return false;
+      }
+      if (/^\d+$/.test(t)) {
+        return true;
+      }
+      return t.length > 1;
+    });
+}
+
+/** Keep one Labs suggestion reordering of the seed token set (not fan-out). */
+function collapseSuggestionPermutations(rows, seedTokens) {
+  let bestPermutation = null;
+  const rest = [];
+
+  for (const row of rows) {
+    const sources = row.sources ?? [];
+    const suggestionOnly =
+      sources.length > 0 && sources.every((s) => s === "suggestions");
+    if (
+      suggestionOnly &&
+      !row.on_seed_serp &&
+      row.dimension === "core_variant" &&
+      isSeedTokenPermutation(row.keyword, seedTokens)
+    ) {
+      if (!bestPermutation || row.priority_score > bestPermutation.priority_score) {
+        bestPermutation = row;
+      }
+      continue;
+    }
+    rest.push(row);
+  }
+
+  if (bestPermutation) {
+    rest.push(bestPermutation);
+  }
+  return rest;
+}
+
 function inferIntentLane(keyword, dimension) {
   if (dimension === "facet_drift") {
     return "tool_discovery";
@@ -249,9 +339,11 @@ function readStdin() {
   });
 }
 
-export async function normalizeFanoutItems(items, seed, lane = null) {
+export async function normalizeFanoutItems(items, seed, lane = null, intentSplit = "single") {
   const seedTokens = salientTokens(seed);
-  const serpSeeds = buildSerpSeeds(items, seedTokens);
+  const facetOptions = { chosenLane: lane, intentSplit };
+  const serpSeeds = buildSerpSeeds(items, seedTokens, lane);
+  const gateOptions = { chosenLane: lane };
   const byKeyword = new Map();
 
   for (const item of items) {
@@ -260,7 +352,7 @@ export async function normalizeFanoutItems(items, seed, lane = null) {
       continue;
     }
     const source = item.source ?? "unknown";
-    if (!passesRelevanceGate(keyword, seedTokens, source)) {
+    if (!passesRelevanceGate(keyword, seedTokens, source, gateOptions)) {
       continue;
     }
 
@@ -270,20 +362,26 @@ export async function normalizeFanoutItems(items, seed, lane = null) {
     const sources = new Set(existing?.sources ?? []);
     sources.add(source);
 
+    const coreKeyword = item.core_keyword ?? existing?.core_keyword ?? null;
+
     if (!existing || volume > existing.search_volume) {
       byKeyword.set(normalized, {
         keyword,
         search_volume: volume,
-        sources: [...sources]
+        sources: [...sources],
+        core_keyword: coreKeyword
       });
+    } else if (coreKeyword && !existing.core_keyword) {
+      existing.core_keyword = coreKeyword;
     }
   }
 
-  return [...byKeyword.values()]
+  const mapped = [...byKeyword.values()]
     .map((entry) => {
       const primarySource = entry.sources.find((s) => SERP_SOURCES.has(s)) ?? entry.sources[0];
-      const dimension = classifyDimension(entry.keyword, seedTokens);
-      const intent_lane = inferIntentLane(entry.keyword, dimension);
+      const intent_lane = inferIntentLane(entry.keyword, "detail_drill");
+      const dimensionOpts = { ...facetOptions, rowIntentLane: intent_lane };
+      const dimension = classifyDimension(entry.keyword, seedTokens, dimensionOpts);
       const tier = relevanceTier(
         entry.keyword,
         seedTokens,
@@ -291,7 +389,8 @@ export async function normalizeFanoutItems(items, seed, lane = null) {
         primarySource,
         dimension,
         intent_lane,
-        lane
+        lane,
+        dimensionOpts
       );
       const row = {
         keyword: entry.keyword,
@@ -300,13 +399,18 @@ export async function normalizeFanoutItems(items, seed, lane = null) {
         relevance_tier: tier,
         intent_lane,
         on_seed_serp: serpSeeds.has(normalizeKeyword(entry.keyword)),
-        sources: entry.sources
+        sources: entry.sources,
+        core_keyword: entry.core_keyword ?? null
       };
       row.priority_score = priorityScore(row, seedTokens, lane);
       return row;
-    })
+    });
+
+  const collapsed = collapseSuggestionPermutations(mapped, seedTokens)
     .sort((a, b) => b.priority_score - a.priority_score)
     .slice(0, 30);
+
+  return assignClusters(collapsed, seed);
 }
 
 async function main() {
@@ -323,7 +427,9 @@ async function main() {
   process.stdout.write(`${JSON.stringify(normalized, null, 2)}\n`);
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exit(1);
-});
+if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exit(1);
+  });
+}

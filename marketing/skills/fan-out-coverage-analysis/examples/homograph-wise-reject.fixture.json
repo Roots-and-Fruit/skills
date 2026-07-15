@@ -1,0 +1,20 @@
+{
+  "seed": "example saas pricing page examples",
+  "intent_lane": "primary_topic",
+  "items": [
+    {
+      "keyword": "pricing page wise",
+      "search_volume": 30,
+      "source": "serp_related"
+    },
+    {
+      "keyword": "saas pricing page design",
+      "search_volume": 20,
+      "source": "serp_related"
+    }
+  ],
+  "expected": {
+    "rejected_keywords": ["pricing page wise"],
+    "accepted_keywords": ["saas pricing page design"]
+  }
+}

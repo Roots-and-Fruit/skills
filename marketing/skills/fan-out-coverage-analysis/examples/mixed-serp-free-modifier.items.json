@@ -1,0 +1,25 @@
+{
+  "seed": "example email marketing",
+  "intent_lane": "primary_topic",
+  "intent_split": "mixed",
+  "items": [
+    {
+      "keyword": "example email marketing",
+      "search_volume": 74000,
+      "source": "serp_related"
+    },
+    {
+      "keyword": "example email marketing free",
+      "search_volume": 1200,
+      "source": "serp_related"
+    },
+    {
+      "keyword": "How do you do example email marketing?",
+      "search_volume": 0,
+      "source": "serp_paa"
+    }
+  ],
+  "expected": {
+    "free_row_tier": "facet_drift"
+  }
+}

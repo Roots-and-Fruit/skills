@@ -1,0 +1,38 @@
+{
+  "seed": "example templates",
+  "intent_split": "mixed",
+  "intent_lane": "tool_discovery",
+  "serp_context": {
+    "top_organic_domains": ["competitor-example.com", "example.com", "marketplace-example.com"]
+  },
+  "rows": [
+    {
+      "keyword": "What is an example template used for?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "sources": ["serp_paa"],
+      "on_seed_serp": true,
+      "intent_cluster_id": "serp_paa:used_for",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    },
+    {
+      "keyword": "best example templates marketplace",
+      "search_volume": 800,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "sources": ["serp_related"],
+      "on_seed_serp": true,
+      "intent_cluster_id": "seed_adjacent:marketplace",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    }
+  ],
+  "expected": {
+    "priority_order": [
+      "best example templates marketplace",
+      "What is an example template used for?"
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.12.0",
+  "mode": "domain_coverage",
+  "generated_at": "2026-07-14T12:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "example thin seed topic",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/",
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "primary_topic"
+  },
+  "serp_context": {
+    "ai_overview_present": false,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": [],
+    "related_searches": ["example thin gap one", "example thin gap two"],
+    "intent_lanes_detected": ["primary_topic"],
+    "intent_split": "single",
+    "lane_counts": { "primary_topic": 2 },
+    "anchor_serp_rank": null
+  },
+  "limitations": ["Thin all-gap fixture: gaps_row_total equals shortlist (G23 pass)."],
+  "sub_queries": [
+    {
+      "keyword": "example thin gap one",
+      "search_volume": 100,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:one",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    },
+    {
+      "keyword": "example thin gap two",
+      "search_volume": 80,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:two",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap",
+      "covering_url": null,
+      "rank_group": null
+    }
+  ],
+  "coverage_summary": {
+    "sub_query_count": 2,
+    "covered_count": 0,
+    "gap_count": 2,
+    "coverage_rate_pct": 0,
+    "cluster_count": 2,
+    "cluster_covered_count": 0,
+    "cluster_gap_count": 2,
+    "cluster_coverage_rate_pct": 0,
+    "gaps_shortlist_count": 2,
+    "gaps_row_total": 2
+  },
+  "gaps": [
+    {
+      "keyword": "example thin gap one",
+      "search_volume": 100,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    },
+    {
+      "keyword": "example thin gap two",
+      "search_volume": 80,
+      "dimension": "core_variant",
+      "search_intent": null,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "notes": "On seed SERP"
+    }
+  ],
+  "hub_spoke_map": []
+}

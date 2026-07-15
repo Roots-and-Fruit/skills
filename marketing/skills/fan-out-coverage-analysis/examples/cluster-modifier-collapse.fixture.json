@@ -1,0 +1,31 @@
+{
+  "seed": "example cms plugin",
+  "limitations": [
+    "Hand-computed: 4 clusters after modifier collapse — seed_adjacent:best (3 rows incl reddit), seed_adjacent:free (2), seed_adjacent:best_free (3 incl 2020/2021/download), seed_adjacent:competitor (1)",
+    "Unmerged would be 8+ clusters; collapse folds reddit/year/download variants into parent best/free/best_free"
+  ],
+  "rows": [
+    { "keyword": "best example cms plugin", "search_volume": 70, "sources": ["serp_related"] },
+    { "keyword": "best example cms plugin reddit", "search_volume": 0, "sources": ["related"] },
+    { "keyword": "example cms plugin free", "search_volume": 30, "sources": ["serp_related"] },
+    { "keyword": "example cms plugin free reddit", "search_volume": 0, "sources": ["related"] },
+    { "keyword": "best example cms plugin free", "search_volume": 10, "sources": ["serp_related"] },
+    { "keyword": "best example cms plugin free download", "search_volume": 0, "sources": ["related"] },
+    { "keyword": "best free example cms plugin 2020", "search_volume": 0, "sources": ["related"] },
+    { "keyword": "best free example cms plugin 2021", "search_volume": 0, "sources": ["related"] },
+    { "keyword": "competitor cms plugin", "search_volume": 20, "sources": ["related"] }
+  ],
+  "expected": {
+    "cluster_count": 4,
+    "merge_groups": [
+      ["best example cms plugin", "best example cms plugin reddit"],
+      ["example cms plugin free", "example cms plugin free reddit"],
+      [
+        "best example cms plugin free",
+        "best example cms plugin free download",
+        "best free example cms plugin 2020",
+        "best free example cms plugin 2021"
+      ]
+    ]
+  }
+}

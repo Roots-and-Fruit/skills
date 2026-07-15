@@ -1,0 +1,31 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.12.0",
+  "mode": "domain_coverage",
+  "inputs": {
+    "primary_keyword": "example email marketing",
+    "domain": "example.com",
+    "intent_lane": "primary_topic"
+  },
+  "serp_context": {
+    "intent_split": "mixed",
+    "intent_lanes_detected": ["primary_topic", "tool_discovery"],
+    "lane_counts": { "primary_topic": 5, "tool_discovery": 3 }
+  },
+  "limitations": [
+    "User requested report both tool_discovery and primary_topic lanes; top gaps attributed below."
+  ],
+  "sub_queries": [
+    {
+      "keyword": "How do you do example email marketing?",
+      "status": "gap",
+      "priority": "high",
+      "relevance_tier": "serp_native",
+      "is_canonical": true
+    }
+  ],
+  "coverage_summary": {
+    "cluster_coverage_rate_pct": 72
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "seed": "example backup software",
+  "limitations": [
+    "Hand-computed: seed_synonym cluster — example backup software gets hub_serp_only (seed surface match); backup software example stays gap until canonical refresh.",
+    "Post-refresh canonical: example backup software (covered row). Anagram must not appear in gaps[]."
+  ],
+  "expected": {
+    "canonical_keyword": "example backup software",
+    "anagram_keyword": "backup software example",
+    "seed_synonym_covered": true
+  },
+  "handoff": {
+    "handoff_version": "1.2",
+    "skill": "fan-out-coverage-analysis",
+    "skill_version": "2.10.0",
+    "mode": "domain_coverage",
+    "inputs": {
+      "primary_keyword": "example backup software",
+      "domain": "example.com",
+      "anchor_url": "https://example.com/",
+      "intent_lane": "tool_discovery"
+    },
+    "serp_context": {
+      "anchor_serp_rank": 4,
+      "people_also_ask": [],
+      "related_searches": ["best example backup software"]
+    },
+    "sub_queries": [
+      {
+        "keyword": "example backup software",
+        "search_volume": 390,
+        "dimension": "core_variant",
+        "relevance_tier": "core",
+        "priority": "high",
+        "source": ["related"],
+        "intent_cluster_id": "seed_synonym",
+        "is_canonical": false,
+        "cluster_role": "alias"
+      },
+      {
+        "keyword": "backup software example",
+        "search_volume": 0,
+        "dimension": "core_variant",
+        "relevance_tier": "core",
+        "priority": "high",
+        "source": ["related"],
+        "intent_cluster_id": "seed_synonym",
+        "is_canonical": true,
+        "cluster_role": "canonical"
+      }
+    ],
+    "priority_sub_queries": [
+      {
+        "keyword": "backup software example",
+        "priority": "high",
+        "relevance_tier": "core"
+      },
+      {
+        "keyword": "example backup software",
+        "priority": "high",
+        "relevance_tier": "core"
+      }
+    ]
+  },
+  "ranked": {
+    "items": []
+  }
+}

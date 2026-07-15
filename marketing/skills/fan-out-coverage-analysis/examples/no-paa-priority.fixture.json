@@ -1,0 +1,65 @@
+{
+  "seed": "example cms plugin",
+  "intent_lane": "tool_discovery",
+  "intent_split": "mixed",
+  "limitations": [
+    "Hand-computed priority (no PAA, mixed lane): serp_native highs by volume, then competitor core high, theme demoted to medium",
+    "5 priority rows — no alias-only rows in priority_sub_queries"
+  ],
+  "rows": [
+    {
+      "keyword": "best example cms plugin",
+      "search_volume": 70,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "sources": ["serp_related"]
+    },
+    {
+      "keyword": "example cms plugin free",
+      "search_volume": 30,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "sources": ["serp_related"]
+    },
+    {
+      "keyword": "best example cms plugin free",
+      "search_volume": 10,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "sources": ["serp_related"]
+    },
+    {
+      "keyword": "competitor cms plugin",
+      "search_volume": 20,
+      "dimension": "core_variant",
+      "relevance_tier": "core",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": false,
+      "sources": ["related"]
+    },
+    {
+      "keyword": "example cms theme free",
+      "search_volume": 0,
+      "dimension": "core_variant",
+      "relevance_tier": "core",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": false,
+      "sources": ["related"]
+    }
+  ],
+  "expected": {
+    "priority_order": [
+      "best example cms plugin",
+      "example cms plugin free",
+      "best example cms plugin free",
+      "competitor cms plugin",
+      "example cms theme free"
+    ]
+  }
+}

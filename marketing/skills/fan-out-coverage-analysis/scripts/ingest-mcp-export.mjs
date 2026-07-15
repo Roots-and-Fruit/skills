@@ -132,6 +132,16 @@ function volumeFromLabsRow(row) {
   );
 }
 
+function coreKeywordFromLabsRow(row) {
+  const value =
+    row.core_keyword ??
+    row.keyword_data?.keyword_properties?.core_keyword ??
+    row.keyword_properties?.core_keyword ??
+    "";
+  const trimmed = String(value).trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 /**
  * @param {unknown} data — raw MCP Labs export or flat { items: [...] }
  * @param {string} source
@@ -139,14 +149,49 @@ function volumeFromLabsRow(row) {
 export function extractLabsItems(data, source) {
   const rows = extractTaskItems(data);
   const list = rows.length > 0 ? rows : Array.isArray(data) ? data : data.items ?? [];
+  const flat = [];
+  const seen = new Set();
 
-  return list
-    .map((row) => ({
-      keyword: keywordFromLabsRow(row),
-      search_volume: volumeFromLabsRow(row),
-      source
-    }))
-    .filter((row) => row.keyword.length > 0);
+  const pushRow = (keyword, search_volume, core_keyword, nestedSource) => {
+    const key = keyword.toLowerCase();
+    if (!keyword || seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    flat.push({
+      keyword,
+      search_volume,
+      source: nestedSource ?? source,
+      core_keyword
+    });
+  };
+
+  for (const row of list) {
+    const keyword = keywordFromLabsRow(row);
+    const volume = volumeFromLabsRow(row);
+    const core = coreKeywordFromLabsRow(row);
+    pushRow(keyword, volume, core, source);
+
+    const nested =
+      row.related_keywords ??
+      row.keyword_data?.keyword_properties?.related_keywords ??
+      row.keyword_properties?.related_keywords ??
+      [];
+    let nestedCount = 0;
+    for (const child of nested) {
+      if (nestedCount >= 50) {
+        break;
+      }
+      const childKw = keywordFromLabsRow(child);
+      if (!childKw) {
+        continue;
+      }
+      pushRow(childKw, volumeFromLabsRow(child), coreKeywordFromLabsRow(child), source);
+      nestedCount += 1;
+    }
+  }
+
+  return flat;
 }
 
 /**

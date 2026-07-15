@@ -9,10 +9,19 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const scripts = [
   "verify-scorecard.mjs",
+  "verify-client-agnostic.mjs",
+  "verify-paa-gate.mjs",
+  "verify-normalize-gate.mjs",
+  "verify-intent-clusters.mjs",
+  "verify-detail-report.mjs",
   "verify-handoff.mjs",
   "verify-layperson-summary.mjs",
+  "verify-actionable-gaps.mjs",
+  "verify-priority-policy.mjs",
+  "verify-serp-context.mjs",
   "verify-merge-expansion.mjs",
   "verify-apply-coverage.mjs",
+  "verify-encyclopedia.mjs",
   "verify-ingest-mcp.mjs"
 ];
 

@@ -12,6 +12,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assignClusters } from "./intent-clusters.mjs";
+import { assignPriority, buildPrioritySubQueries } from "./apply-priority.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -89,12 +91,20 @@ function isDomainGolden(filePath) {
   return /enterprise-sso-domain\.handoff\.fixture\.json$/i.test(filePath);
 }
 
+function isClusterPriorityGolden(filePath) {
+  return /cluster-priority\.handoff\.fixture\.json$/i.test(filePath);
+}
+
+function isV12Handoff(data) {
+  return data.handoff_version === "1.2";
+}
+
 function runSchemaChecks(data) {
   const checks = [];
 
   checks.push({
     id: "G1",
-    pass: () => data.handoff_version === "1.1"
+    pass: () => data.handoff_version === "1.1" || data.handoff_version === "1.2"
   });
 
   checks.push({
@@ -259,7 +269,7 @@ function runSchemaChecks(data) {
   checks.push({
     id: "G18",
     pass: () => {
-      if (data.mode !== "domain_coverage") {
+      if (data.mode !== "domain_coverage" || isV12Handoff(data)) {
         return true;
       }
       const summary = data.coverage_summary;
@@ -273,10 +283,121 @@ function runSchemaChecks(data) {
   });
 
   checks.push({
+    id: "G18a",
+    pass: () => {
+      if (data.mode !== "domain_coverage" || !isV12Handoff(data)) {
+        return true;
+      }
+      const summary = data.coverage_summary;
+      if (summary.cluster_count == null) {
+        return false;
+      }
+      const expected =
+        summary.cluster_count > 0
+          ? Math.round((summary.cluster_covered_count / summary.cluster_count) * 100)
+          : 0;
+      return summary.cluster_coverage_rate_pct === expected;
+    }
+  });
+
+  checks.push({
+    id: "G18b",
+    pass: () => {
+      if (data.mode !== "domain_coverage") {
+        return true;
+      }
+      const summary = data.coverage_summary;
+      if (!isV12Handoff(data)) {
+        const expected =
+          summary.sub_query_count > 0
+            ? Math.round((summary.covered_count / summary.sub_query_count) * 100)
+            : 0;
+        const rate = summary.labs_coverage_rate_pct ?? summary.coverage_rate_pct;
+        return rate === expected;
+      }
+      if (summary.labs_coverage_rate_pct == null) {
+        return true;
+      }
+      const labsCovered = (data.sub_queries ?? []).filter((row) =>
+        ["hub", "spoke", "broken_spoke"].includes(row.status)
+      ).length;
+      const expected =
+        summary.sub_query_count > 0
+          ? Math.round((labsCovered / summary.sub_query_count) * 100)
+          : 0;
+      return summary.labs_coverage_rate_pct === expected;
+    }
+  });
+
+  checks.push({
+    id: "G20",
+    pass: () => {
+      if (!isV12Handoff(data)) {
+        return true;
+      }
+      return (data.sub_queries ?? []).every((row) => typeof row.intent_cluster_id === "string");
+    }
+  });
+
+  checks.push({
+    id: "G21",
+    pass: () => {
+      if (!isV12Handoff(data)) {
+        return true;
+      }
+      const byCluster = new Map();
+      for (const row of data.sub_queries ?? []) {
+        const clusterId = row.intent_cluster_id;
+        if (!byCluster.has(clusterId)) {
+          byCluster.set(clusterId, 0);
+        }
+        if (row.is_canonical === true) {
+          byCluster.set(clusterId, byCluster.get(clusterId) + 1);
+        }
+      }
+      return [...byCluster.values()].every((count) => count === 1);
+    }
+  });
+
+  checks.push({
     id: "G19",
     pass: () => {
       const rank = data.serp_context?.anchor_serp_rank ?? data.coverage_summary?.anchor_serp_rank;
       return rank === undefined || rank === null || (Number.isFinite(rank) && rank > 0);
+    }
+  });
+
+  checks.push({
+    id: "G22",
+    pass: () => {
+      if (data.mode !== "domain_coverage" || data.coverage_summary?.gaps_shortlist_count == null) {
+        return true;
+      }
+      const summary = data.coverage_summary;
+      return (
+        summary.gaps_shortlist_count === (data.gaps ?? []).length &&
+        summary.gaps_row_total >= summary.gaps_shortlist_count
+      );
+    }
+  });
+
+  checks.push({
+    id: "G23",
+    pass: () => {
+      if (data.mode !== "domain_coverage" || data.coverage_summary?.gaps_row_total == null) {
+        return true;
+      }
+      const summary = data.coverage_summary;
+      const rowTotal = summary.gaps_row_total;
+      const shortlist = summary.gaps_shortlist_count ?? (data.gaps ?? []).length;
+      const cap = 12;
+      if (shortlist !== (data.gaps ?? []).length || shortlist > rowTotal) {
+        return false;
+      }
+      if (rowTotal > cap && shortlist === rowTotal) {
+        return false;
+      }
+      return true;
     }
   });
 
@@ -309,16 +430,52 @@ function runRubricChecks(data, filePath) {
       if (data.serp_context?.intent_split !== "mixed") {
         return true;
       }
-      const emailRelated = (data.sub_queries ?? []).filter(
-        (row) =>
-          row.on_seed_serp &&
-          /\b(email|newsletter)\b/i.test(row.keyword) &&
-          row.relevance_tier === "serp_native"
-      );
-      return emailRelated.length === 0;
+      const primary = (data.inputs?.primary_keyword ?? "").toLowerCase();
+      const driftNative = (data.sub_queries ?? []).filter((row) => {
+        if (!row.on_seed_serp || row.relevance_tier !== "serp_native") {
+          return false;
+        }
+        if (row.dimension === "question" || row.source?.includes("serp_paa")) {
+          return false;
+        }
+        const kw = row.keyword ?? "";
+        if (kw.toLowerCase() === primary) {
+          return false;
+        }
+        if (/\b(email|newsletter)\b/i.test(kw) && /\b(free|jobs|course|pdf)\b/i.test(kw)) {
+          return true;
+        }
+        return /\b(email|newsletter)\b/i.test(kw);
+      });
+      return driftNative.length === 0;
     },
-    detail: "email/newsletter serp_related not serp_native when mixed"
+    detail: "email/newsletter commercial modifiers not serp_native when mixed"
   });
+
+  if (data.serp_context?.intent_split === "mixed") {
+    checks.push({
+      id: "R15",
+      pass: () => {
+        const primary = (data.inputs?.primary_keyword ?? "").toLowerCase();
+        const bad = (data.sub_queries ?? []).filter((row) => {
+          if (!row.on_seed_serp || row.relevance_tier !== "serp_native") {
+            return false;
+          }
+          const lane = row.intent_lane ?? data.inputs?.intent_lane;
+          if (lane === "tool_discovery") {
+            return false;
+          }
+          const kw = row.keyword ?? "";
+          if (kw.toLowerCase() === primary) {
+            return false;
+          }
+          return /\b(free|jobs|course|pdf|download)\b/i.test(kw);
+        });
+        return bad.length === 0;
+      },
+      detail: "mixed SERP: primary_topic commercial modifier rows not serp_native"
+    });
+  }
 
   checks.push({
     id: "R4",
@@ -433,6 +590,40 @@ function runRubricChecks(data, filePath) {
     });
   }
 
+  if (isClusterPriorityGolden(filePath)) {
+    checks.push({
+      id: "R12",
+      pass: () => {
+        const paaGaps = (data.sub_queries ?? []).filter(
+          (row) =>
+            row.is_canonical === true &&
+            row.source?.includes("serp_paa") &&
+            row.status === "gap"
+        );
+        const priorityKeys = new Set(
+          (data.priority_sub_queries ?? []).map((row) => row.keyword.toLowerCase())
+        );
+        return paaGaps.every((row) => priorityKeys.has(row.keyword.toLowerCase()));
+      },
+      detail: "cluster-priority: canonical PAA gaps in priority_sub_queries"
+    });
+
+    checks.push({
+      id: "R13",
+      pass: () => {
+        const aliasKeys = new Set(
+          (data.sub_queries ?? [])
+            .filter((row) => row.cluster_role === "alias")
+            .map((row) => row.keyword.toLowerCase())
+        );
+        return (data.priority_sub_queries ?? []).every(
+          (row) => !aliasKeys.has(row.keyword.toLowerCase())
+        );
+      },
+      detail: "cluster-priority: no alias rows in priority_sub_queries"
+    });
+  }
+
   return checks;
 }
 
@@ -470,6 +661,34 @@ function main() {
 
   if (totalFailed > 0) {
     console.error(`\n${totalFailed} check(s) failed.`);
+    process.exit(1);
+  }
+
+  const noPaaFixture = JSON.parse(
+    readFileSync(path.join(examplesDir, "no-paa-priority.fixture.json"), "utf8")
+  );
+  const clustered = assignClusters(noPaaFixture.rows, noPaaFixture.seed);
+  const enriched = clustered.map((row) => ({
+    ...row,
+    priority: assignPriority(
+      row,
+      noPaaFixture.intent_split,
+      noPaaFixture.intent_lane,
+      noPaaFixture.seed
+    )
+  }));
+  const priorityRows = buildPrioritySubQueries(enriched, {
+    seed: noPaaFixture.seed,
+    intentLane: noPaaFixture.intent_lane
+  });
+  const r14Pass =
+    priorityRows[0]?.relevance_tier === "serp_native" &&
+    (noPaaFixture.expected.priority_order ?? []).every(
+      (keyword, index) =>
+        priorityRows[index]?.keyword?.toLowerCase() === keyword.toLowerCase()
+    );
+  console.log(`\n${r14Pass ? "PASS" : "FAIL"} R14 — no-paa priority policy tier-ordered`);
+  if (!r14Pass) {
     process.exit(1);
   }
 

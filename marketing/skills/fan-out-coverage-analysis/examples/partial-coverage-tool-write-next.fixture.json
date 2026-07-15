@@ -1,0 +1,81 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.12.0",
+  "mode": "domain_coverage",
+  "inputs": {
+    "primary_keyword": "example dropshipping suppliers",
+    "domain": "example.com",
+    "intent_lane": "tool_discovery"
+  },
+  "serp_context": {
+    "intent_split": "mixed",
+    "intent_lanes_detected": ["tool_discovery", "community"],
+    "lane_counts": { "tool_discovery": 5, "community": 1 }
+  },
+  "limitations": [],
+  "sub_queries": [
+    {
+      "keyword": "What's the best supplier for example dropshipping?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"],
+      "intent_cluster_id": "serp_paa:best",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap"
+    },
+    {
+      "keyword": "Is $1000 enough to start example dropshipping?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"],
+      "intent_cluster_id": "serp_paa:1000",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap"
+    },
+    {
+      "keyword": "example dropshipping suppliers free",
+      "search_volume": 1900,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:free",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "gap"
+    },
+    {
+      "keyword": "best example dropshipping suppliers",
+      "search_volume": 1900,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:best",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "hub"
+    }
+  ],
+  "coverage_summary": {
+    "cluster_covered_count": 3,
+    "cluster_count": 27,
+    "cluster_gap_count": 24,
+    "cluster_coverage_rate_pct": 11
+  }
+}

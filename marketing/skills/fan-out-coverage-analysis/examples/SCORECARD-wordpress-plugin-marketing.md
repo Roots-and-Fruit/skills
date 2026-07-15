@@ -114,3 +114,12 @@ Re-run keyword-only fan-out on `wordpress plugin marketing` with `primary_topic`
 | 2.6.0 | S10–S12 | G19, R11, LP1–LP10 | GTM synonyms; all-highs shortlist; layperson contract; `run-fanout.mjs`; thin-seed fallback |
 | 2.7.0 | S10–S12 | M1–M5, C1–C8 | `merge-expansion-input.mjs`; `apply-coverage.mjs` + `--ranked-file`; strict chat stdout; `keyword_data.keyword` filter doc |
 | 2.8.0 | S10–S12 | I1–I6, C9–C11 | `ingest-mcp-export.mjs`; `mergeGaps` high-first; branded `hub_serp_only`; layperson high count fix; PowerShell notes |
+| 2.9.0 | S10–S12 | PA1–PA3, CL1–CL7, G18a–G21, R12–R13, C12–C18, LP15–LP16, XP1–XP4, I7–I8, DR1–DR6 | Intent clusters SSOT; `seed_adjacent` merges SERP + Labs variants; PAA ingest; cluster coverage %; detail report v2; `verify-client-agnostic.mjs`; handoff v1.2 |
+
+## Failure protocol (phased work)
+
+Each phase has one gate command. On first failure: one fix attempt in phase scope. On second failure: **stop** — report check IDs, root cause, options (relax spec vs change design). Do not weaken assertions to pass.
+
+**Ship bar:** `node scripts/verify-all.mjs` (exit 0).
+
+**Client-agnostic gate:** `node scripts/verify-client-agnostic.mjs` — no real client domains in tracked fixtures/docs.

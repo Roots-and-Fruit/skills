@@ -1,0 +1,38 @@
+{
+  "seed": "team chat software",
+  "limitations": [
+    "Hand-computed: 4 clusters — seed_synonym (6 token permutations, canonical=seed surface form team chat software), 2 PAA, 1 unrelated serp_related"
+  ],
+  "rows": [
+    { "keyword": "team chat software", "search_volume": 1000, "sources": ["suggestions"] },
+    { "keyword": "software team chat", "search_volume": 900, "sources": ["suggestions"] },
+    { "keyword": "chat software team", "search_volume": 50, "sources": ["serp_related"] },
+    { "keyword": "team software chat", "search_volume": 800, "sources": ["suggestions"] },
+    { "keyword": "software chat team", "search_volume": 700, "sources": ["suggestions"] },
+    { "keyword": "chat team software", "search_volume": 600, "sources": ["suggestions"] },
+    {
+      "keyword": "What is the difference between ProductA and ProductB?",
+      "search_volume": 0,
+      "sources": ["serp_paa"],
+      "dimension": "question"
+    },
+    {
+      "keyword": "How much does the starter plan cost?",
+      "search_volume": 0,
+      "sources": ["serp_paa"],
+      "dimension": "question"
+    },
+    {
+      "keyword": "best team chat software",
+      "search_volume": 1200,
+      "sources": ["serp_related"],
+      "dimension": "core_variant"
+    }
+  ],
+  "expected": {
+    "cluster_count": 4,
+    "seed_synonym_canonical_keyword": "team chat software",
+    "seed_synonym_alias_count": 5,
+    "paa_cluster_count": 2
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "seed": "example dropshipping suppliers",
+  "intent_split": "mixed",
+  "intent_lane": "tool_discovery",
+  "rows": [
+    {
+      "keyword": "What's the best supplier for example dropshipping?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "sources": ["serp_paa"],
+      "on_seed_serp": true,
+      "intent_cluster_id": "serp_paa:best_supplier",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    },
+    {
+      "keyword": "Is $1000 enough to start example dropshipping?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "sources": ["serp_paa"],
+      "on_seed_serp": true,
+      "intent_cluster_id": "serp_paa:1000",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    },
+    {
+      "keyword": "best example dropshipping suppliers",
+      "search_volume": 1900,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "sources": ["serp_related"],
+      "on_seed_serp": true,
+      "intent_cluster_id": "seed_adjacent:best",
+      "is_canonical": true,
+      "cluster_role": "canonical"
+    }
+  ],
+  "expected": {
+    "priority_order": [
+      "What's the best supplier for example dropshipping?",
+      "best example dropshipping suppliers",
+      "Is $1000 enough to start example dropshipping?"
+    ]
+  }
+}

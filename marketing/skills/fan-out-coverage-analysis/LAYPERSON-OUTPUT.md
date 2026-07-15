@@ -32,8 +32,8 @@ Script stderr (detail report path) is for the agent — not for the user.
    - Avoid leading with **0% coverage** without explaining live SERP vs database lag.
 2. **Coverage story** — 1–3 bullets: live anchor rank (if known), indexed coverage %, low-confidence notes for thin seeds.
 3. **What's working** — Short bullets (anchor ranks, lane focus, SERP signals captured).
-4. **What still needs attention** — High-priority content gaps in plain language (“Answer *What is go-to-market?* — people ask this on Google”).
-5. **Not priority (optional)** — Facet-drift / wrong-lane terms the user can ignore.
+4. **What still needs attention** — Actionable fan-out gaps from `priority_sub_queries[]` (PAA, related searches, intent shifts) — not raw volume-sorted keyword permutations. Plain language: *Answer "What is…?" — people ask this directly on Google*.
+5. **Not priority (optional)** — Word-order variant clusters (`core_variant` suggestion permutations) and facet-drift / wrong-lane terms the user can ignore.
 6. **What to write next** — Numbered content actions (not API steps).
 7. **One link** to the local detail report file.
 
@@ -49,9 +49,11 @@ node scripts/run-fanout.mjs ... --write-reports --output path/to/handoff.json
 
 The detail file contains:
 
-- SERP context JSON
-- Coverage summary (Labs + optional live anchor rank)
-- Full sub-query table with tiers and status
+- **SERP fan-out ingested (SSOT)** — PAA and related lists from accepted `sub_queries`
+- Live SERP metadata (lanes, AIO, anchor rank — without stale fan-out lists)
+- Coverage summary (cluster + Labs rates)
+- Intent cluster rollup and weak-coverage (`hub_serp_only`) callouts
+- Full sub-query table with tier, status, cluster, intent, source
 - `priority_sub_queries[]`, `gaps[]`, `hub_spoke_map`
 - Full handoff JSON for playbooks
 
@@ -71,6 +73,7 @@ node scripts/build-layperson-summary.mjs examples/wordpress-plugin-marketing-v2.
 |-----------|-------------|
 | `serp_native` / PAA | “People ask this directly on Google” |
 | `facet_drift` | “Different search intent — safe to ignore unless you pivot” |
+| `core_variant` suggestion permutations | “Same search intent — word-order variants, not separate content jobs” |
 | `coverage_rate_pct: 0` + live rank #4 | “Visible on the main topic; database hasn't linked follow-up questions yet” |
 | `intent_split: mixed` | “This search mixes plugin-builder advice and generic business guides” |
 | `hub_serp_only` | “Your page ranks live for this term; tools haven't indexed it yet” |
@@ -112,4 +115,4 @@ node scripts/verify-apply-coverage.mjs
 node scripts/verify-ingest-mcp.mjs
 ```
 
-LP1–LP10 on golden handoff fixture; M1–M5 merge; C1–C11 coverage; I1–I6 ingest.
+LP1–LP14 on golden handoff fixtures; M1–M5 merge; C1–C11 coverage; I1–I6 ingest.

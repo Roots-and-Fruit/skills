@@ -1,0 +1,83 @@
+{
+  "handoff_version": "1.1",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.12.0",
+  "mode": "keyword_only",
+  "generated_at": "2026-07-14T12:00:00.000Z",
+  "inputs": {
+    "primary_keyword": "example email marketing",
+    "domain": null,
+    "anchor_url": null,
+    "location_name": "United States",
+    "language_code": "en",
+    "intent_lane": "primary_topic"
+  },
+  "serp_context": {
+    "ai_overview_present": false,
+    "ai_overview_source": "live_serp",
+    "people_also_ask": ["How do you do example email marketing?"],
+    "related_searches": ["example email marketing", "example email marketing free"],
+    "intent_lanes_detected": ["primary_topic", "tool_discovery"],
+    "intent_split": "mixed",
+    "lane_counts": { "primary_topic": 4, "tool_discovery": 3 }
+  },
+  "limitations": ["Synthetic mixed-SERP fixture: free modifier is facet_drift, not serp_native."],
+  "sub_queries": [
+    {
+      "keyword": "example email marketing",
+      "search_volume": 74000,
+      "dimension": "core_variant",
+      "search_intent": "commercial",
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "example email marketing free",
+      "search_volume": 1200,
+      "dimension": "facet_drift",
+      "search_intent": "commercial",
+      "relevance_tier": "facet_drift",
+      "intent_lane": "tool_discovery",
+      "on_seed_serp": true,
+      "priority": "medium",
+      "source": ["serp_related"]
+    },
+    {
+      "keyword": "How do you do example email marketing?",
+      "search_volume": 0,
+      "dimension": "question",
+      "search_intent": "informational",
+      "relevance_tier": "serp_native",
+      "intent_lane": "primary_topic",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"]
+    }
+  ],
+  "priority_sub_queries": [
+    {
+      "keyword": "How do you do example email marketing?",
+      "search_volume": 0,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "PAA on seed SERP; matches primary_topic lane"
+    },
+    {
+      "keyword": "example email marketing",
+      "search_volume": 74000,
+      "relevance_tier": "serp_native",
+      "priority": "high",
+      "rationale": "Seed-related search on SERP; core primary_topic surface"
+    },
+    {
+      "keyword": "example email marketing free",
+      "search_volume": 1200,
+      "relevance_tier": "facet_drift",
+      "priority": "medium",
+      "rationale": "Commercial free modifier on mixed SERP; facet_drift not serp_native"
+    }
+  ]
+}

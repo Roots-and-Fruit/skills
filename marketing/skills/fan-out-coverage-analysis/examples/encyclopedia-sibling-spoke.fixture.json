@@ -1,0 +1,56 @@
+{
+  "handoff_version": "1.2",
+  "skill": "fan-out-coverage-analysis",
+  "skill_version": "2.12.0",
+  "mode": "domain_coverage",
+  "inputs": {
+    "primary_keyword": "example revolution",
+    "domain": "example.com",
+    "anchor_url": "https://example.com/wiki/Example_Revolution",
+    "site_profile": "encyclopedia"
+  },
+  "serp_context": {
+    "anchor_serp_rank": 1,
+    "intent_split": "single"
+  },
+  "limitations": [
+    "Encyclopedia profile: coverage reflects sibling articles, not net-new content jobs."
+  ],
+  "sub_queries": [
+    {
+      "keyword": "Why did they execute Example Figure?",
+      "search_volume": 0,
+      "dimension": "question",
+      "relevance_tier": "serp_native",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_paa"],
+      "intent_cluster_id": "serp_paa:execute",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "spoke",
+      "covering_url": "https://example.com/wiki/Example_Figure",
+      "rank_group": 1
+    },
+    {
+      "keyword": "example revolution timeline",
+      "search_volume": 9900,
+      "dimension": "core_variant",
+      "relevance_tier": "serp_native",
+      "on_seed_serp": true,
+      "priority": "high",
+      "source": ["serp_related"],
+      "intent_cluster_id": "seed_adjacent:timeline",
+      "is_canonical": true,
+      "cluster_role": "canonical",
+      "status": "spoke",
+      "covering_url": "https://example.com/wiki/Example_Revolution_timeline",
+      "rank_group": 2
+    }
+  ],
+  "coverage_summary": {
+    "cluster_coverage_rate_pct": 86,
+    "cluster_covered_count": 2,
+    "cluster_count": 2
+  }
+}
