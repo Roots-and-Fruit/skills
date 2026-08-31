@@ -25,7 +25,8 @@ function parseArgs(argv) {
     handoffJson: false,
     keyPages: [],
     sitemapFetch: null,
-    indexControl: null
+    indexControl: null,
+    llmsFetch: null
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -48,6 +49,8 @@ function parseArgs(argv) {
       opts.sitemapFetch = JSON.parse(readFileSync(argv[++i], "utf8"));
     } else if (arg === "--index-control") {
       opts.indexControl = JSON.parse(readFileSync(argv[++i], "utf8"));
+    } else if (arg === "--llms-fetch") {
+      opts.llmsFetch = JSON.parse(readFileSync(argv[++i], "utf8"));
     }
   }
 
@@ -59,7 +62,7 @@ function main() {
 
   if (!opts.robots || !opts.domain) {
     console.error(
-      "Usage: node scripts/run-audit.mjs --robots <file> --domain <domain> [--policy crawl_policy] [--recheck] [--sitemap-fetch fetches.json] [--index-control probes.json] [--key-pages pages.json] [--output-dir dir] [--handoff-json]"
+      "Usage: node scripts/run-audit.mjs --robots <file> --domain <domain> [--policy crawl_policy] [--recheck] [--sitemap-fetch fetches.json] [--llms-fetch fetches.json] [--index-control probes.json] [--key-pages pages.json] [--output-dir dir] [--handoff-json]"
     );
     process.exit(2);
   }
@@ -78,7 +81,8 @@ function main() {
       fetchedUrls,
       key_pages: opts.keyPages,
       sitemap_fetch_results: opts.sitemapFetch,
-      index_control_results: opts.indexControl
+      index_control_results: opts.indexControl,
+      llms_txt_results: opts.llmsFetch
     }
   );
 

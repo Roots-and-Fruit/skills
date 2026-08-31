@@ -28,6 +28,7 @@ Workflow for an AI agent. Does not deploy files or fetch data on its own.
 - **`robots_deployment`** — `auto`, `origin_only`, or `cloudflare_managed` (default `auto` — detects Cloudflare managed markers)
 - **`content_signals_preset`** — `search_only` | `search_and_ai_input` | `most_restrictive` | `all_permitted` (default: derived from `crawl_policy` when CF managed)
 - **Site Content Catalog handoff** — sitemap cross-check in R7
+- **`llms_txt_results`** — `[{ url, status }]` from fetching `/llms.txt` (404 is fine). Path-block check still runs from robots.txt alone.
 
 ---
 
@@ -41,12 +42,7 @@ Workflow for an AI agent. Does not deploy files or fetch data on its own.
 Regression (maintainers):
 
 ```bash
-node scripts/verify-robots-structure.mjs
-node scripts/verify-max-discovery.mjs
-node scripts/verify-max-discovery-contract.mjs
-node scripts/verify-handoff.mjs
-node scripts/verify-cloudflare-layers.mjs
-node scripts/verify-reference-links.mjs
+node scripts/verify-all.mjs
 ```
 
 **Practitioner guide (public):** [robots.txt audit reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/)

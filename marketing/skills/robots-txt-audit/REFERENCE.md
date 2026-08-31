@@ -10,12 +10,39 @@ Plain text at the domain root (e.g. `https://example.com/robots.txt`) that tells
 |-----------------|---------------------|
 | Allow or block **crawling** per user-agent | Guarantee **indexing** (use `noindex` meta/header on cart/checkout) |
 | Separate **training** vs **discovery** bots | Secure private content |
-| Point crawlers to sitemaps via `Sitemap:` | Remove content already collected |
-| Restrict admin paths (crawl hygiene) | Guarantee AI citations |
+| Point crawlers to **XML** sitemaps via `Sitemap:` | Replace or be replaced by `llms.txt` |
+| Restrict admin paths (crawl hygiene) | Remove content already collected |
+| Decide whether `/llms.txt` may be **fetched** | Author or quality-audit `llms.txt` content; guarantee AI citations |
 
 **Crawl ≠ index:** A crawler must be allowed to fetch a URL to read a `noindex` tag. Blocking cart/checkout in robots.txt can prevent deindexing signals from being seen ([Google: Block Search indexing with noindex](https://developers.google.com/search/docs/crawling-indexing/block-indexing)).
 
 Also check `https://www.{domain}/robots.txt` when bare domain fails.
+
+## robots.txt vs llms.txt (companion)
+
+[llmstxt.org](https://llmstxt.org/) **v2** (August 2026): `/llms.txt` is a curated Markdown **guide** for agents at inference time. It is not an Allow/Disallow file. Google Search does not use it for rankings.
+
+| File | Job |
+|------|-----|
+| `robots.txt` | Crawl permission for compliant bots (RFC 9309) |
+| `sitemap.xml` | Exhaustive URL list for search crawlers |
+| `llms.txt` | Curated links + notes for agents that already may fetch |
+
+**Skill check (not a content audit):** `assessLlmsTxtCompanion()` in `scripts/assess-llms-txt.mjs`.
+
+| Check | When | Severity |
+|-------|------|----------|
+| Discovery crawlers allowed at `/` cannot fetch `/llms.txt` or `/llms-full.txt` | `max_discovery`, `block_training_allow_answers`, `audit_only` | optional gap `MD_LLMS_BLOCKED` |
+| `Sitemap:` URL path is `/llms.txt` or `/llms-full.txt` | any policy | optional gap `MD_LLMS_AS_SITEMAP` |
+| `/llms.txt` missing or 404 | fetch ran | **not a gap** — do not nag |
+| Training-bot `Disallow: /` covering llms.txt | always | ignore — training blocks are site-wide by design |
+| `restrictive` | answer bots blocked on purpose | companion path check skipped |
+
+Dedicated `User-agent` groups **replace** `*` (they do not merge). A `Disallow: /llms.txt` on `*` does not apply to `OAI-SearchBot` if that token has its own group. The check uses `isPathAllowedForAgent()` so group replacement is respected.
+
+**Do not:** treat llms.txt as crawl control; add `Sitemap: https://example.com/llms.txt`; fail max_discovery when llms.txt is absent; author llms.txt in this skill.
+
+Optional comment on origin robots.txt (not a directive): `# See also: https://example.com/llms.txt`.
 
 **SSOT parser:** `scripts/parse-robots-txt.mjs`  
 **SSOT registry:** `scripts/crawler-registry.mjs`  
@@ -360,7 +387,7 @@ When file not found:
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.7.1",
+  "skill_version": "1.8.0",
   "mode": "audit",
   "inputs": {
     "domain": "example.com",
@@ -439,6 +466,7 @@ When file not found:
 | `crawler_matrix` | Required when `discovery.found` and mode is `audit` or `recommend` — full JSON array from `buildCrawlerMatrix()` / `assessRobotsTxtContent()`. **Never** a string pointer to the human table (fails G26). |
 | `crawlability.fully_crawlable` | `null` when `key_pages_provided` is 0; otherwise non-negative integer |
 | `sitemap_validation` | Required when `discovery.found`; include `endpoint_fetch[]` after WebFetch |
+| `llms_txt_validation` | Additive (v1.8): `{ applicable, present, blocked_for[], sitemap_misuse[], fetch_ran }` from `assessLlmsTxtCompanion()` — missing file is not a policy fail |
 | `policy_compliance` | Required when `crawl_policy` is `max_discovery` or `block_training_allow_answers` — from `assessMaxDiscovery()` |
 | `index_control_validation` | Recommended when cart/checkout probed — from `assessIndexControlPaths()` |
 | `audit_findings` | Recommended on all modes — from `buildAuditFindings()` / `assessment.audit_findings` (`tier`: `fail` · `warn` · `info`) |

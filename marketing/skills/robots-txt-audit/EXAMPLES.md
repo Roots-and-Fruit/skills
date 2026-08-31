@@ -5,12 +5,13 @@
 - *"Audit **robots.txt** for **example.com** — max discovery"*
 - *"Check Cloudflare managed **robots.txt** for **example.com**"*
 - *"Can AI crawlers reach our cornerstone pages on **example.com**?"*
+- *"Does **robots.txt** block **llms.txt** on **example.com**?"*
 - *"Check if we're blocking **GPTBot** but allowing **OAI-SearchBot** on **example.com**"*
 - *"Generate **robots.txt** for **example.com** — max discovery policy, key pages: [urls]"*
 
 ---
 
-## Sample layperson chat output (v1.7.1+)
+## Sample layperson chat output (v1.8.0+)
 
 **User sees only this in chat.** Bot tables, handoff JSON, and robots.txt copy go to `reports/{domain}-{date}-detail.md`. Each gap links to the [public reference guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/).
 
@@ -108,6 +109,8 @@ See `examples/SCORECARD-example-saas.md` for regression IDs (S, P, G layers).
 | `example-max-discovery-recommend.handoff.fixture.json` | WP open + `max_discovery` + `audit` when compliant — canonical `crawler_matrix` shape; SM7 warn drives hygiene note |
 | `example-cloudflare-managed-origin-append.robots.txt.fixture.txt` | CF managed prepend + origin append (fictional `example.com`) |
 | `example-cloudflare-managed-origin-append.handoff.fixture.json` | CF `recommend` handoff with `layer_assessment`, `origin_append_template`, `content_signals` |
+| `example-llms-blocked.robots.txt.fixture.txt` | `*` Disallow `/llms.txt` while discovery crawlers remain allowed at `/` |
+| `example-llms-as-sitemap.robots.txt.fixture.txt` | `Sitemap:` points at `/llms.txt` instead of XML |
 
 ## Handoff anti-patterns
 

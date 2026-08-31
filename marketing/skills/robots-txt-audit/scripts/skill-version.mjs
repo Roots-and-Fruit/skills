@@ -1,2 +1,2 @@
 /** Single source for robots-txt-audit skill version in handoffs and reports. */
-export const SKILL_VERSION = "1.7.1";
+export const SKILL_VERSION = "1.8.0";

@@ -141,6 +141,11 @@ export function buildWorkingList(assessment, domain) {
     items.push("Crawler rules match your requested policy");
   }
 
+  const llms = assessment.llms_txt_validation;
+  if (llms?.applicable && llms.present === true && !llms.blocked_for?.length) {
+    items.push("AI site-guide file (/llms.txt) is reachable for answer crawlers");
+  }
+
   return [...new Set(items)];
 }
 
@@ -540,6 +545,12 @@ export function buildDetailReportMarkdown({
     JSON.stringify(assessment.sitemap_validation ?? null, null, 2),
     "```",
     "",
+    "## llms.txt companion",
+    "",
+    "```json",
+    JSON.stringify(assessment.llms_txt_validation ?? null, null, 2),
+    "```",
+    "",
     "## Audit findings",
     "",
     "```json",
@@ -657,7 +668,7 @@ export function buildDetailReportMarkdown({
  * @param {string} domain
  * @param {string} robotsContent
  * @param {string} crawlPolicy
- * @param {{ outputDir?: string, mode?: string, fetchedUrls?: string[], recheck?: boolean, priorSnapshot?: object | null, sitemap_fetch_results?: object[], index_control_results?: object[], key_pages?: string[], discovery?: object, precomputedResult?: object }} [options]
+ * @param {{ outputDir?: string, mode?: string, fetchedUrls?: string[], recheck?: boolean, priorSnapshot?: object | null, sitemap_fetch_results?: object[], index_control_results?: object[], llms_txt_results?: object[], key_pages?: string[], discovery?: object, precomputedResult?: object }} [options]
  */
 export function writeAuditReports(domain, robotsContent, crawlPolicy, options = {}) {
   const bare = normalizeDomain(domain);
@@ -675,6 +686,7 @@ export function writeAuditReports(domain, robotsContent, crawlPolicy, options = 
   const assessOptions = {
     sitemap_fetch_results: options.sitemap_fetch_results,
     index_control_results: options.index_control_results,
+    llms_txt_results: options.llms_txt_results,
     discovery: options.discovery
   };
   const result =

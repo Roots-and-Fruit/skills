@@ -300,6 +300,24 @@ export const GAP_REGISTRY = {
       "You miss a clear declaration that AI answer tools may use your content — mostly a GEO alignment gap, not a hard crawl block.",
     category: "optional",
     learn_more_anchor: "content-signal-alignment"
+  },
+  MD_LLMS_BLOCKED: {
+    label:
+      "AI answer crawlers are blocked from /llms.txt (the AI site-guide file, not a crawl-control file)",
+    short: "llms.txt crawlable",
+    downside:
+      "If you publish an llms.txt, answer and search crawlers cannot read it. That file is a navigation aid for agents. It cannot grant or deny crawl access — robots.txt already decided that.",
+    category: "optional",
+    learn_more_anchor: "llms-txt-companion"
+  },
+  MD_LLMS_AS_SITEMAP: {
+    label:
+      "robots.txt lists llms.txt as a Sitemap (that line is for XML sitemaps, not the AI guide file)",
+    short: "llms.txt is not a sitemap",
+    downside:
+      "Search engines expect XML sitemaps on Sitemap: lines. A markdown llms.txt there is ignored or confusing. Keep Sitemap: pointed at sitemap.xml, and keep /llms.txt as its own root file.",
+    category: "optional",
+    learn_more_anchor: "llms-txt-companion"
   }
 };
 
@@ -438,6 +456,16 @@ export function collectGapsFromAssessment(assessment) {
   ) {
     optional.push({ id: "OPT_AI_INPUT_SIGNAL", ...GAP_REGISTRY.OPT_AI_INPUT_SIGNAL });
     seen.add("OPT_AI_INPUT_SIGNAL");
+  }
+
+  const llms = assessment.llms_txt_validation;
+  if (llms?.blocked_for?.length && !seen.has("MD_LLMS_BLOCKED")) {
+    optional.push({ id: "MD_LLMS_BLOCKED", ...GAP_REGISTRY.MD_LLMS_BLOCKED });
+    seen.add("MD_LLMS_BLOCKED");
+  }
+  if (llms?.sitemap_misuse?.length && !seen.has("MD_LLMS_AS_SITEMAP")) {
+    optional.push({ id: "MD_LLMS_AS_SITEMAP", ...GAP_REGISTRY.MD_LLMS_AS_SITEMAP });
+    seen.add("MD_LLMS_AS_SITEMAP");
   }
 
   const site_health = [];

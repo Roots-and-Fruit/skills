@@ -1,0 +1,11 @@
+# Discovery plus accidental llms.txt block (example fixture)
+# Policy: max_discovery-shaped, but * Disallow /llms.txt
+# Dedicated User-agent groups replace * — this file uses * only so the block applies.
+
+User-agent: *
+Disallow: /llms.txt
+Disallow: /llms-full.txt
+Disallow: /admin/
+Allow: /
+
+Sitemap: https://example.com/sitemap.xml

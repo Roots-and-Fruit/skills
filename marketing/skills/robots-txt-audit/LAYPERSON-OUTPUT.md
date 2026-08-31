@@ -68,6 +68,8 @@ Detail report may include the **merged edge preview** for verification; do not p
 | MD_GPTBot / training violations | Do **not** list as required missing under `max_discovery` — optional only | `max_discovery` vs `block_training_allow_answers` |
 | origin layer | The part of robots.txt you edit on your server (below Cloudflare’s section) | `cloudflare_managed` |
 | Content-Signal ai-input=yes | Declared permission for AI answer tools to use your content | Optional GEO alignment (`OPT_AI_INPUT_SIGNAL`) |
+| MD_LLMS_BLOCKED | AI answer crawlers cannot read /llms.txt | Optional — not a ranking file; do not treat as crawl control |
+| MD_LLMS_AS_SITEMAP | llms.txt listed as a Sitemap | Optional — Sitemap: is for XML sitemaps |
 | policy_compliance.compliant false | Doesn’t fully match your requested policy yet | Use `policyLabel(crawl_policy)` in copy |
 | inherits_user_agent_star | Uses the general “all crawlers” rule | Informational under `audit_only` / `max_discovery` |
 

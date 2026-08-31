@@ -83,6 +83,12 @@ SSOT expectations: `scripts/max-discovery-expectations.mjs`
 | G32 | `layer_assessment.origin` on `origin_only` handoffs (no CF cloudflare/effective keys) | non-CF handoffs |
 | G33 | `origin_append_template` + `content_signals.preset` when CF + discovery preset | CF handoff |
 
+## LL-layer (llms.txt companion)
+
+| ID | Check | Fixture |
+|----|-------|---------|
+| LL1–LL8 | Blocked `/llms.txt` for discovery crawlers; sitemap misuse; missing file is not a fail; restrictive skips path check | `example-llms-blocked.robots.txt.fixture.txt`, `example-llms-as-sitemap.robots.txt.fixture.txt`, `example-good.robots.txt.fixture.txt`, `example-good-restrictive.robots.txt.fixture.txt` |
+
 ## CF-layer
 
 | ID | Check | Fixture |
@@ -96,6 +102,7 @@ SSOT expectations: `scripts/max-discovery-expectations.mjs`
 | `verify-reference-links.mjs` | RL1–RL6, RL-gap-* |
 | `verify-layperson-summary.mjs` | LP1–LP20b |
 | `verify-reaudit.mjs` | RA1–RA12 |
+| `verify-llms-txt.mjs` | LL1–LL8 |
 
 ## Run
 

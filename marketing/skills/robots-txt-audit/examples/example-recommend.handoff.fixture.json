@@ -1,7 +1,7 @@
 {
   "handoff_version": "1.0",
   "skill": "robots-txt-audit",
-  "skill_version": "1.7.1",
+  "skill_version": "1.8.0",
   "mode": "recommend",
   "inputs": {
     "domain": "example.com",
@@ -467,6 +467,13 @@
       }
     ],
     "warnings": []
+  },
+  "llms_txt_validation": {
+    "applicable": true,
+    "present": null,
+    "blocked_for": [],
+    "sitemap_misuse": [],
+    "fetch_ran": false
   },
   "policy_compliance": {
     "policy": "block_training_allow_answers",

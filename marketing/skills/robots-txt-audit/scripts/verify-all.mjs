@@ -22,7 +22,8 @@ const SUITES = [
   "verify-layperson-summary.mjs",
   "verify-reaudit.mjs",
   "verify-reference-links.mjs",
-  "verify-run-audit.mjs"
+  "verify-run-audit.mjs",
+  "verify-llms-txt.mjs"
 ];
 
 let failed = false;

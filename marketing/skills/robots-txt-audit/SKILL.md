@@ -3,24 +3,25 @@ name: robots.txt-Audit
 type: capability
 description: >
   Use when auditing robots.txt, AI crawler permissions, GEO crawl policy,
-  cornerstone path crawlability, or blocking/allowing GPTBot, PerplexityBot,
-  OAI-SearchBot, and Google-Extended. Audits selective crawler rules per bot
-  (training vs indexing crawl), validates Sitemap directives, and drafts
-  policy-aligned robots.txt.
-version: 1.7.1
+  whether robots.txt blocks llms.txt, cornerstone path crawlability, or
+  blocking/allowing GPTBot, PerplexityBot, OAI-SearchBot, and Google-Extended.
+  Audits selective crawler rules per bot (training vs indexing crawl),
+  validates Sitemap directives, checks llms.txt companion crawlability,
+  and drafts policy-aligned robots.txt.
+version: 1.8.0
 ---
 
 # robots.txt Audit
 
 ## Purpose
 
-Audit `/robots.txt` as the **authoritative crawl-permission file** for search and AI crawlers. Distinguish **indexing/answer crawl** from **training crawl** per bot; validate `Sitemap:`; recommend or draft policy-aligned rules.
+Audit `/robots.txt` as the **authoritative crawl-permission file** for search and AI crawlers. Distinguish **indexing/answer crawl** from **training crawl** per bot; validate `Sitemap:`; check that `/llms.txt` is not blocked for answer bots; recommend or draft policy-aligned rules.
 
-**Not this skill:** deploying files, WAF/CDN config, log analysis, or `llms.txt` as crawl control.
+**Not this skill:** deploying files, WAF/CDN config, log analysis, or **authoring / content-auditing** `llms.txt`. That file is an inference-time guide ([llmstxt.org](https://llmstxt.org/) v2) — **not crawl control**.
 
-**Docs:** [Public guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) · `REFERENCE.md` (rubric R1–R11, handoff schema, templates) · `REQUIREMENTS.md` · `EXAMPLES.md` · `LAYPERSON-OUTPUT.md` (chat contract) · `RECHECK.md` · `AGENTS.md`
+**Docs:** [Public guide](https://rootsandfruit.com/docs/marketing-skills/reference/robots-txt-audit-skill-reference-guide/) · `REFERENCE.md` (rubric R1–R11, handoff schema, templates, llms.txt companion) · `REQUIREMENTS.md` · `EXAMPLES.md` · `LAYPERSON-OUTPUT.md` (chat contract) · `RECHECK.md` · `AGENTS.md`
 
-**SSOT scripts:** `run-audit.mjs` (primary) · `assess-policy.mjs` · `build-handoff.mjs` · `build-layperson-summary.mjs` · `parse-robots-txt.mjs` · `syntax-validation.mjs` · `crawler-registry.mjs`
+**SSOT scripts:** `run-audit.mjs` (primary) · `assess-policy.mjs` · `assess-llms-txt.mjs` · `build-handoff.mjs` · `build-layperson-summary.mjs` · `parse-robots-txt.mjs` · `syntax-validation.mjs` · `crawler-registry.mjs`
 
 **Cloudflare:** `CLOUDFLARE-MANAGED.md` when managed markers detected.
 
@@ -46,8 +47,9 @@ If domain missing, ask once. Never infer domain from examples.
 
 1. WebFetch **both** `https://{domain}/robots.txt` and `https://www.{domain}/robots.txt`.
 2. WebFetch declared sitemap URLs → save as JSON `[{ "url", "status" }]`.
-3. Optionally WebFetch cart/checkout probes → `index_control_results`.
-4. Save fetched body to a temp file, then:
+3. WebFetch `https://{domain}/llms.txt` (and `/llms-full.txt` if linked) → `[{ "url", "status" }]`. Missing file is fine — still check robots.txt does not `Disallow` those paths for discovery crawlers allowed at `/`. Never list `llms.txt` on a `Sitemap:` line.
+4. Optionally WebFetch cart/checkout probes → `index_control_results`.
+5. Save fetched body to a temp file, then:
 
 ```bash
 cd marketing/skills/robots-txt-audit
@@ -55,17 +57,18 @@ node scripts/run-audit.mjs \
   --robots path/to/fetched.txt \
   --domain example.com \
   --policy max_discovery \
-  --sitemap-fetch path/to/sitemap-fetches.json
+  --sitemap-fetch path/to/sitemap-fetches.json \
+  --llms-fetch path/to/llms-fetches.json
 ```
 
 PowerShell (use `;` instead of `&&`):
 
 ```powershell
-Set-Location marketing/skills/robots-txt-audit; node scripts/run-audit.mjs --robots path/to/fetched.txt --domain example.com --policy audit_only --sitemap-fetch path/to/sitemap-fetches.json
+Set-Location marketing/skills/robots-txt-audit; node scripts/run-audit.mjs --robots path/to/fetched.txt --domain example.com --policy audit_only --sitemap-fetch path/to/sitemap-fetches.json --llms-fetch path/to/llms-fetches.json
 ```
 
-5. **Paste stdout to chat** (layperson summary). Link the detail report path from stderr.
-6. Do **not** hand-build `audit_checks` or handoff JSON — `build-handoff.mjs` produces G-valid handoff inside the detail file.
+6. **Paste stdout to chat** (layperson summary). Link the detail report path from stderr.
+7. Do **not** hand-build `audit_checks` or handoff JSON — `build-handoff.mjs` produces G-valid handoff inside the detail file.
 
 **Recheck:** add `--recheck` (reads `reports/{domain}-latest-snapshot.json`). See `RECHECK.md`.
 
@@ -87,10 +90,11 @@ Both markers present → read `CLOUDFLARE-MANAGED.md` full; `deployment.model: c
 Run `assessRobotsTxtContent(content, crawl_policy, domain, options)` with:
 
 - `sitemap_fetch_results` — required when sitemaps declared
+- `llms_txt_results` — when `/llms.txt` was fetched
 - `index_control_results` — when cart/checkout probed
 - Read `syntax_validation` from output — **do not re-lint in prose**
 
-Rubric, per-bot matrix columns, R7 sub-checks, policy presets, and `audit_findings` tiers: **`REFERENCE.md`** (not repeated here).
+Rubric, per-bot matrix columns, R7 sub-checks, llms.txt companion, policy presets, and `audit_findings` tiers: **`REFERENCE.md`** (not repeated here).
 
 ### Recommend / Generate (Steps 3–4)
 
@@ -109,6 +113,7 @@ Full schema and field rules: `REFERENCE.md`. `crawler_matrix` must be a JSON **a
 - [ ] Recheck → `RECHECK.md`; snapshot updated
 - [ ] CF managed → `CLOUDFLARE-MANAGED.md`; G28–G33 fields when applicable
 - [ ] No deployment performed
+- [ ] Did not treat `llms.txt` as crawl control; flagged `Disallow` of `/llms.txt` for answer bots when applicable
 
 **Ship bar:**
 

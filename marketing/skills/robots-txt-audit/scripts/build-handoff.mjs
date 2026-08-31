@@ -217,6 +217,7 @@ export function buildHandoff({
     sitemap_validation: assessment.sitemap_validation ?? null,
     syntax_validation: assessment.syntax_validation ?? null,
     index_control_validation: assessment.index_control_validation ?? null,
+    llms_txt_validation: assessment.llms_txt_validation ?? null,
     policy_compliance: assessment.policy_compliance ?? null,
     audit_findings: assessment.audit_findings ?? [],
     draft_robots_txt,

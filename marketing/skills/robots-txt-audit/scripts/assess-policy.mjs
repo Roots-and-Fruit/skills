@@ -43,6 +43,7 @@ import {
   requiresPolicyCompliance,
   requiresTrainingBlockCompliance
 } from "./policy-presets.mjs";
+import { assessLlmsTxtCompanion } from "./assess-llms-txt.mjs";
 
 export {
   requiresDiscoveryCompliance,
@@ -1017,6 +1018,27 @@ export function buildAuditFindings(assessment, crawlPolicy, discovery = {}) {
     });
   }
 
+  const llms = assessment.llms_txt_validation;
+  if (llms?.blocked_for?.length) {
+    const paths = [...new Set(llms.blocked_for.map((row) => row.path))].join(", ");
+    const agents = [...new Set(llms.blocked_for.map((row) => row.agent))].join(", ");
+    findings.push({
+      id: "AF_LLMS_BLOCKED",
+      tier: "warn",
+      rubric: "R4",
+      message: `Discovery crawlers allowed at / cannot fetch ${paths} (${agents}). llms.txt is an inference-time guide (llmstxt.org v2), not crawl control — do not Disallow it for answer bots.`
+    });
+  }
+  if (llms?.sitemap_misuse?.length) {
+    findings.push({
+      id: "AF_LLMS_AS_SITEMAP",
+      tier: "warn",
+      rubric: "R7",
+      message:
+        "Sitemap: points at llms.txt — Sitemap: is for XML sitemaps, not the LLM guide file. Keep Sitemap: on sitemap.xml; leave /llms.txt as its own root file."
+    });
+  }
+
   return findings;
 }
 
@@ -1111,6 +1133,11 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
     options.index_control_results ?? []
   );
 
+  const llmsTxtValidation = assessLlmsTxtCompanion(parsed.groups, crawlPolicy, {
+    sitemap_urls: sitemapSource,
+    llms_txt_results: options.llms_txt_results
+  });
+
   if (layers) {
     const origin = assessOriginLayer(layers);
     if (isCfManaged) {
@@ -1166,6 +1193,7 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
     crawler_matrix: matrix,
     policy_compliance: policyCompliance,
     index_control_validation: indexControlValidation,
+    llms_txt_validation: llmsTxtValidation,
     audit_findings: buildAuditFindings(
       {
         sitemap_validation: sitemap,
@@ -1173,6 +1201,7 @@ export function assessPolicyCompliance(parsed, crawlPolicy, domain, options = {}
         crawler_matrix: matrix,
         policy_compliance: policyCompliance,
         index_control_validation: indexControlValidation,
+        llms_txt_validation: llmsTxtValidation,
         deployment,
         layer_assessment: layerAssessment,
         content_signals: contentSignals
