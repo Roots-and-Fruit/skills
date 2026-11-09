@@ -35,6 +35,7 @@ Skills are built for **Cursor** (or any agent runtime that supports the [Agent S
 |----------|-------------|
 | [Hub & Spoke Discovery & Recovery](marketing/playbooks/hub-spoke-discovery-recovery/) | Bottom-up discovery — GSC/GA4 performance matrix + DataForSEO triangulation + recovery plan (v0.3.0) |
 | [Cornerstone Content Audit](marketing/playbooks/cornerstone-content-audit/) | Top-down cornerstone health audit when pillars are already known |
+| [Competitor Research → Positioning](marketing/playbooks/competitor-research/) | Evidence-backed competitor set, battlecards, dual-primary positioning statement (v1.0.0) |
 
 See [`marketing/README.md`](marketing/README.md) for skill-specific setup and data requirements.
 
@@ -151,6 +152,7 @@ skills/
 │   ├── playbooks/
 │   │   ├── cornerstone-content-audit/
 │   │   ├── cornerstone-discovery-audit/   # redirect stub → hub-spoke-discovery-recovery
+│   │   ├── competitor-research/
 │   │   └── hub-spoke-discovery-recovery/
 │   └── skills/
 │       ├── analytics-and-searchconsole-performance-audit/

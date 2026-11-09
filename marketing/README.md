@@ -203,6 +203,7 @@ Multi-phase orchestrators live under [`playbooks/`](playbooks/). Not yet in the 
 |----------|------|------|
 | Cornerstone Content Audit | [`playbooks/cornerstone-content-audit/`](playbooks/cornerstone-content-audit/) | Top-down — known cornerstones, health check |
 | Hub & Spoke Discovery & Recovery | [`playbooks/hub-spoke-discovery-recovery/`](playbooks/hub-spoke-discovery-recovery/) | Bottom-up — accidental hubs, GSC/GA4 triangulation, new client onboarding (v0.3.0) |
+| Competitor Research → Positioning | [`playbooks/competitor-research/`](playbooks/competitor-research/) | Evidence-backed competitor set + positioning statement (v1.0.0) |
 
 See [`playbooks/README.md`](playbooks/README.md) for the full decision table.
 

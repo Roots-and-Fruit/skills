@@ -27,5 +27,6 @@ Playbooks **call** capability and composite skills (catalog, fan-out, informatio
 |----------|--------|
 | [Cornerstone Content Audit](cornerstone-content-audit/) | v0.1.0 — top-down audit; in progress |
 | [Hub & Spoke Discovery & Recovery](hub-spoke-discovery-recovery/) | v0.3.0 — triangulation playbook (Phase 1a–1c + recovery mapping) · [future work](hub-spoke-discovery-recovery/FUTURE-WORK.md) |
+| [Competitor Research → Positioning](competitor-research/) | v1.0.0 — frame → set → evidence → lenses → statement (inline phases) |
 
 **Legacy path:** [cornerstone-discovery-audit/](cornerstone-discovery-audit/) redirects to Hub & Spoke Discovery & Recovery.
